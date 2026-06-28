@@ -14,8 +14,8 @@
       <p><%= current_site_setting.profile_bio %></p>
       <% if current_site_setting.sns_visible? %>
         <div class="social-icons">
-          <%= link_to "GitHub", current_site_setting.github_url.presence || "#", aria: { label: "GitHub" } %>
-          <%= link_to "𝕏", current_site_setting.x_url.presence || "#", aria: { label: "X" } %>
+          <%= social_link "GitHub", current_site_setting.github_url, aria: { label: "GitHub" } %>
+          <%= social_link "𝕏", current_site_setting.x_url, aria: { label: "X" } %>
           <%= link_to "RSS", current_site_setting.rss_url.presence || feed_path(format: :xml), aria: { label: "RSS" } %>
         </div>
       <% end %>
@@ -96,7 +96,7 @@
     <section class="sidebar-section">
       <h2>シェア</h2>
       <div class="share-icons">
-        <%= link_to "GitHub", current_site_setting.github_url.presence || "#", aria: { label: "GitHub" } %>
+        <%= social_link "GitHub", current_site_setting.github_url, aria: { label: "GitHub" } %>
         <%= link_to "𝕏", "https://x.com/intent/tweet?url=#{ERB::Util.url_encode(request.original_url)}&text=#{ERB::Util.url_encode(@post&.title || current_site_setting.blog_title)}", aria: { label: "Xでシェア" } %>
         <%= link_to "RSS", feed_path(format: :xml), aria: { label: "RSS" } %>
       </div>

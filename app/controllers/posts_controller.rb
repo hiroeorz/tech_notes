@@ -5,14 +5,16 @@ class PostsController < ApplicationController
     @posts = @posts.where(kind: Post.kinds[@kind]) if Post.kinds.key?(@kind)
     @posts = @posts.joins(:category).where(categories: { slug: params[:category] }) if params[:category].present?
     @posts = @posts.joins(:tags).where(tags: { slug: params[:tag] }) if params[:tag].present?
-    @posts = @posts.where("posts.title LIKE ?", "%#{params[:q]}%") if params[:q].present?
+    @posts = @posts.where("LOWER(posts.title) LIKE ?", "%#{ActiveRecord::Base.sanitize_sql_like(params[:q].downcase)}%") if params[:q].present?
     if (month = parsed_month)
       @posts = @posts.where(published_at: month.beginning_of_month..month.end_of_month)
     end
+    @posts = ordered_posts(@posts)
     @page = [ params[:page].to_i, 1 ].max
     @per_page = current_site_setting.posts_per_page
     @total_count = @posts.count
     @total_pages = [ (@total_count / @per_page.to_f).ceil, 1 ].max
+    @page = [ @page, @total_pages ].min
     @posts = @posts.limit(@per_page).offset((@page - 1) * @per_page)
     @categories = Category.ordered
     @tags = Tag.ordered
@@ -65,8 +67,21 @@ class PostsController < ApplicationController
     nil
   end
 
+  def ordered_posts(posts)
+    case params[:sort]
+    when "oldest"
+      posts.reorder(published_at: :asc, updated_at: :asc)
+    when "updated"
+      posts.reorder(updated_at: :desc)
+    else
+      posts
+    end
+  end
+
   def set_post_meta(post)
     @page_title = "#{post.title} | #{current_site_setting.blog_title}"
     @page_description = post.excerpt
+    @page_type = "article"
+    @page_url = post_url(post.slug)
   end
 end

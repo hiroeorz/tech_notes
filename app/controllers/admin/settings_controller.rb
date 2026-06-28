@@ -7,19 +7,39 @@ module Admin
     def update
       @setting = current_site_setting
 
-      if @setting.update(setting_params)
-        if password_params_present? && !update_password
-          flash.now[:alert] = "パスワードを更新できませんでした。入力内容を確認してください。"
-          render :show, status: :unprocessable_entity
-        else
-          redirect_to admin_settings_path, notice: "設定を保存しました。"
-        end
-      else
+      unless password_change_valid?
+        flash.now[:alert] = "パスワードを更新できませんでした。入力内容を確認してください。"
         render :show, status: :unprocessable_entity
+        return
       end
+
+      ActiveRecord::Base.transaction do
+        @setting.update!(setting_params)
+        apply_password_change! if password_params_present?
+      end
+
+      redirect_to admin_settings_path, notice: "設定を保存しました。"
+    rescue ActiveRecord::RecordInvalid
+      render :show, status: :unprocessable_entity
     end
 
     private
+
+    def password_change_valid?
+      return true unless password_params_present?
+
+      current_admin_user.authenticate(params[:current_password].to_s) &&
+        params[:new_password].present? &&
+        params[:new_password] == params[:new_password_confirmation] &&
+        params[:new_password].length >= 8 &&
+        params[:new_password].match?(/[a-zA-Z]/) &&
+        params[:new_password].match?(/\d/)
+    end
+
+    def apply_password_change!
+      current_admin_user.password = params[:new_password]
+      current_admin_user.save!
+    end
 
     def setting_params
       params.require(:site_setting).permit(
@@ -33,16 +53,6 @@ module Admin
 
     def password_params_present?
       params[:current_password].present? || params[:new_password].present? || params[:new_password_confirmation].present?
-    end
-
-    def update_password
-      return false unless current_admin_user.authenticate(params[:current_password].to_s)
-      return false unless params[:new_password].present? && params[:new_password] == params[:new_password_confirmation]
-      return false unless params[:new_password].length >= 8 && params[:new_password].match?(/[a-zA-Z]/) && params[:new_password].match?(/\d/)
-
-      current_admin_user.password = params[:new_password]
-      current_admin_user.save!
-      true
     end
   end
 end

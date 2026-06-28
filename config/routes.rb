@@ -21,6 +21,9 @@ Rails.application.routes.draw do
       member do
         get :preview
       end
+      collection do
+        post :markdown_preview
+      end
     end
     resource :settings, only: [ :show, :update ]
     root "posts#index"

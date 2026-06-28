@@ -4,7 +4,7 @@ module Admin
 
     def index
       @posts = Post.includes(:category, :tags).recent
-      @posts = @posts.where("posts.title LIKE ?", "%#{params[:q]}%") if params[:q].present?
+      @posts = @posts.where("LOWER(posts.title) LIKE ?", "%#{ActiveRecord::Base.sanitize_sql_like(params[:q].downcase)}%") if params[:q].present?
       @posts = @posts.where(category_id: params[:category_id]) if params[:category_id].present?
       @posts = @posts.where(status: params[:status]) if params[:status].present? && Post.statuses.key?(params[:status])
       @posts = @posts.reorder(updated_at: :asc) if params[:sort] == "oldest"
@@ -12,6 +12,7 @@ module Admin
       @per_page = current_site_setting.posts_per_page
       @filtered_count = @posts.count
       @total_pages = [ (@filtered_count / @per_page.to_f).ceil, 1 ].max
+      @page = [ @page, @total_pages ].min
       @posts = @posts.limit(@per_page).offset((@page - 1) * @per_page)
       @categories = Category.ordered
       @total_count = Post.count
@@ -27,9 +28,15 @@ module Admin
     def preview
       @page_title = "プレビュー: #{@post.title} | #{current_site_setting.blog_title}"
       @page_description = @post.excerpt
+      @page_type = "article"
+      @page_url = preview_admin_post_url(@post.slug)
       @toc = helpers.extract_headings(@post.body)
       @related_posts = Post.where(category: @post.category).where.not(id: @post.id).recent.limit(3)
       render "posts/show"
+    end
+
+    def markdown_preview
+      render html: MarkdownRenderer.new(params[:body].to_s).render.html_safe, layout: false
     end
 
     def new
@@ -77,7 +84,9 @@ module Admin
     end
 
     def post_params
-      params.require(:post).permit(:title, :slug, :excerpt, :body, :category_id, :status, :kind, :published_at)
+      permitted = params.require(:post).permit(:title, :slug, :excerpt, :body, :category_id, :status, :kind, :published_at)
+      permitted[:status] = params[:commit_status] if Post.statuses.key?(params[:commit_status])
+      permitted
     end
 
     def assign_tag_names

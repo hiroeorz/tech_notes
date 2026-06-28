@@ -32,7 +32,7 @@
       </label>
       <div class="login-options">
         <label><%= form.check_box :remember_me %> ログイン状態を保持する</label>
-        <a href="#">パスワードを忘れた場合</a>
+        <%= mail_to current_site_setting.profile_email, "パスワードを忘れた場合", subject: "Hiroe Tech Notes パスワード再設定依頼" %>
       </div>
       <%= form.submit "ログイン", class: "primary-button wide" %>
     <% end %>

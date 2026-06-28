@@ -11,6 +11,7 @@ class Post < ApplicationRecord
 
   validates :title, :slug, :excerpt, :body, presence: true
   validates :slug, uniqueness: true
+  validates :slug, format: { with: /\A[a-z0-9]+(?:-[a-z0-9]+)*\z/, message: "は半角英数字とハイフンで入力してください" }
   validates :reading_minutes, numericality: { greater_than: 0 }
 
   before_validation :set_reading_minutes

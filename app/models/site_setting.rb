@@ -1,10 +1,17 @@
+require "uri"
+
 class SiteSetting < ApplicationRecord
   has_one_attached :ogp_image
   has_one_attached :profile_image
 
   validates :blog_title, :tagline, :site_url, :description, :profile_name, :profile_title, :profile_bio, presence: true
+  validates :profile_email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP, message: "の形式が正しくありません" }
+  validates :default_theme, inclusion: { in: %w[light dark] }
+  validates :posts_per_page, numericality: { only_integer: true, greater_than_or_equal_to: 5, less_than_or_equal_to: 50 }
+  validate :validate_site_url
   validate :validate_ogp_image
   validate :validate_profile_image
+  validate :validate_external_urls
 
   def self.current
     first_or_create!(
@@ -26,6 +33,28 @@ class SiteSetting < ApplicationRecord
 
   def validate_profile_image
     validate_image_attachment(profile_image, label: "プロフィール画像", max_size: 1.megabyte)
+  end
+
+  def validate_site_url
+    return if valid_http_url?(site_url)
+
+    errors.add(:site_url, "はhttpまたはhttpsのURLを入力してください")
+  end
+
+  def validate_external_urls
+    %i[github_url x_url rss_url zenn_url note_url].each do |attribute|
+      value = public_send(attribute)
+      next if value.blank? || valid_http_url?(value)
+
+      errors.add(attribute, "はhttpまたはhttpsのURLを入力してください")
+    end
+  end
+
+  def valid_http_url?(value)
+    uri = URI.parse(value.to_s)
+    uri.is_a?(URI::HTTP) && uri.host.present? && uri.scheme.in?(%w[http https])
+  rescue URI::InvalidURIError
+    false
   end
 
   def validate_image_attachment(attachment, label:, max_size:)

@@ -1,4 +1,8 @@
 <main class="page-grid list-public-page">
+  <% list_path = ->(query = {}) { @kind == "experiment" ? experiments_path(query) : posts_path(query) } %>
+  <% preserved_filter_params = request.query_parameters.slice("q", "tag", "month", "sort") %>
+  <% search_params = request.query_parameters.slice("category", "tag", "month") %>
+
   <section class="content-area">
     <nav class="breadcrumbs">
       <%= link_to "ホーム", root_path %>
@@ -8,16 +12,21 @@
 
     <div class="page-title-row">
       <h1><%= @kind == "experiment" ? "実験ログ" : "記事一覧" %></h1>
-      <%= form_with url: (@kind == "experiment" ? experiments_path : posts_path), method: :get, class: "search-inline" do |form| %>
-        <%= form.search_field :q, value: params[:q], placeholder: "タイトルで検索" %>
+      <%= form_with url: list_path.call, method: :get, class: "search-inline" do |form| %>
+        <% search_params.each do |key, value| %>
+          <%= hidden_field_tag key, value %>
+        <% end %>
+        <%= form.search_field :q, value: params[:q], placeholder: "タイトルで検索", aria: { label: "タイトルで検索" } %>
+        <%= form.select :sort, options_for_select([ [ "新しい順", "newest" ], [ "古い順", "oldest" ], [ "更新順", "updated" ] ], params[:sort].presence || "newest"), {}, aria: { label: "並び順" }, onchange: "this.form.requestSubmit()" %>
         <%= form.submit "検索" %>
+        <%= link_to "リセット", list_path.call, class: "secondary-button" %>
       <% end %>
     </div>
 
     <div class="filter-tabs wide-tabs">
-      <%= link_to "すべて", posts_path(kind: @kind), class: ("active" if params[:category].blank?) %>
+      <%= link_to "すべて", list_path.call, class: ("active" if params[:category].blank?) %>
       <% @categories.each do |category| %>
-        <%= link_to category.name, posts_path(kind: @kind, category: category.slug), class: ("active" if params[:category] == category.slug) %>
+        <%= link_to category.name, list_path.call(preserved_filter_params.merge(category: category.slug)), class: ("active" if params[:category] == category.slug) %>
       <% end %>
     </div>
 
@@ -41,7 +50,7 @@
 
     <nav class="pagination">
       <% if @page > 1 %>
-        <%= link_to "前へ", posts_path(request.query_parameters.merge(page: @page - 1)) %>
+        <%= link_to "前へ", list_path.call(request.query_parameters.merge(page: @page - 1)) %>
       <% else %>
         <span>前へ</span>
       <% end %>
@@ -49,11 +58,11 @@
         <% if page == @page %>
           <strong><%= page %></strong>
         <% else %>
-          <%= link_to page, posts_path(request.query_parameters.merge(page: page)) %>
+          <%= link_to page, list_path.call(request.query_parameters.merge(page: page)) %>
         <% end %>
       <% end %>
       <% if @page < @total_pages %>
-        <%= link_to "次へ", posts_path(request.query_parameters.merge(page: @page + 1)) %>
+        <%= link_to "次へ", list_path.call(request.query_parameters.merge(page: @page + 1)) %>
       <% else %>
         <span>次へ</span>
       <% end %>

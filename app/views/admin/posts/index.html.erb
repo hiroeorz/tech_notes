@@ -20,10 +20,10 @@
   </section>
 
   <%= form_with url: admin_posts_path, method: :get, class: "filter-bar" do |form| %>
-    <%= form.search_field :q, value: params[:q], placeholder: "タイトルで検索" %>
-    <%= form.select :category_id, options_from_collection_for_select(@categories, :id, :name, params[:category_id]), { include_blank: "カテゴリーを選択" } %>
-    <%= form.select :status, options_for_select(Post.statuses.keys.map { |status| [ status_label(status), status ] }, params[:status]), { include_blank: "ステータスを選択" } %>
-    <%= form.select :sort, options_for_select([ [ "更新日（新しい順）", "newest" ], [ "更新日（古い順）", "oldest" ] ], params[:sort]) %>
+    <%= form.search_field :q, value: params[:q], placeholder: "タイトルで検索", aria: { label: "タイトルで検索" } %>
+    <%= form.select :category_id, options_from_collection_for_select(@categories, :id, :name, params[:category_id]), { include_blank: "カテゴリーを選択" }, aria: { label: "カテゴリーで絞り込み" } %>
+    <%= form.select :status, options_for_select(Post.statuses.keys.map { |status| [ status_label(status), status ] }, params[:status]), { include_blank: "ステータスを選択" }, aria: { label: "ステータスで絞り込み" } %>
+    <%= form.select :sort, options_for_select([ [ "更新日（新しい順）", "newest" ], [ "更新日（古い順）", "oldest" ] ], params[:sort]), {}, aria: { label: "並び順" } %>
     <%= form.submit "絞り込み" %>
     <%= link_to "↻ フィルターをリセット", admin_posts_path, class: "secondary-button" %>
   <% end %>

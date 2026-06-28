@@ -11,4 +11,10 @@ module ApplicationHelper
       "poem" => "✎"
     }.fetch(icon_key, "▢")
   end
+
+  def social_link(label, url, **options)
+    return unless url.present?
+
+    link_to label, url, **options
+  end
 end
