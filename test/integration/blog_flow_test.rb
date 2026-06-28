@@ -277,8 +277,10 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
     get edit_admin_post_path(@post.slug)
     assert_response :success
-    assert_includes response.body, "Markdown"
-    assert_includes response.body, "公開予約"
+    assert_includes response.body, "data-open-publish-modal"
+    assert_includes response.body, "data-publish-modal-backdrop"
+    assert_includes response.body, "公開設定"
+    assert_includes response.body, "投稿を公開する"
     assert_includes response.body, "name=\"commit_status\" value=\"draft\""
     assert_includes response.body, "name=\"commit_status\" value=\"published\""
     assert_includes response.body, "公開日時"

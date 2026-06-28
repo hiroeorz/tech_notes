@@ -272,13 +272,52 @@ document.addEventListener("turbo:load", () => {
     const linesOutput = document.querySelector("[data-body-stat='lines']")
     const wordsOutput = document.querySelector("[data-body-stat='words']")
     const charsOutput = document.querySelector("[data-body-stat='chars']")
+    const lineNumbers = document.querySelector(".line-numbers")
+
     const updateBodyStats = () => {
       const value = bodyStatsSource.value
-      if (linesOutput) linesOutput.textContent = `Lines: ${value.length === 0 ? 0 : value.split("\n").length}`
+      const lineCount = value.length === 0 ? 1 : value.split("\n").length
+      if (linesOutput) linesOutput.textContent = `Lines: ${lineCount}`
       if (wordsOutput) wordsOutput.textContent = `Words: ${value.trim() ? value.trim().split(/\s+/).length : 0}`
       if (charsOutput) charsOutput.textContent = `文字数: ${value.length}`
+
+      if (lineNumbers) {
+        const targetCount = Math.max(lineCount + 5, 44)
+        if (lineNumbers.children.length !== targetCount) {
+          let html = ""
+          for (let i = 1; i <= targetCount; i += 1) {
+            html += `<span>${i}</span>`
+          }
+          lineNumbers.innerHTML = html
+        }
+      }
     }
+
     bodyStatsSource.addEventListener("input", updateBodyStats)
+    bodyStatsSource.addEventListener("scroll", () => {
+      if (lineNumbers) lineNumbers.scrollTop = bodyStatsSource.scrollTop
+    })
     updateBodyStats()
+  }
+
+  const publishModalBackdrop = document.querySelector("[data-publish-modal-backdrop]")
+  if (publishModalBackdrop) {
+    document.querySelectorAll("[data-open-publish-modal]").forEach((button) => {
+      button.addEventListener("click", () => {
+        publishModalBackdrop.hidden = false
+      })
+    })
+
+    document.querySelectorAll("[data-close-publish-modal]").forEach((button) => {
+      button.addEventListener("click", () => {
+        publishModalBackdrop.hidden = true
+      })
+    })
+
+    publishModalBackdrop.addEventListener("click", (event) => {
+      if (event.target === publishModalBackdrop) {
+        publishModalBackdrop.hidden = true
+      }
+    })
   }
 })

@@ -21,7 +21,8 @@
 
   <div class="header-actions">
     <% if admin_signed_in? && controller_path.start_with?("admin/") && controller_path != "admin/sessions" %>
-      <%= link_to "管理", admin_posts_path, class: "admin-link" %>
+      <%= link_to "記事管理", admin_posts_path, class: "admin-link" %>
+      <%= link_to "設定", admin_settings_path, class: "admin-link" %>
       <%= button_to "ログアウト", admin_logout_path, method: :delete, class: "logout-link" %>
     <% end %>
     <button class="icon-button" type="button" data-theme-toggle aria-label="テーマ切り替え" aria-pressed="<%= current_site_setting.default_theme == "dark" %>">☾</button>

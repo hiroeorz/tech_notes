@@ -14,6 +14,7 @@ class Post < ApplicationRecord
   validates :slug, format: { with: /\A[a-z0-9]+(?:-[a-z0-9]+)*\z/, message: "は半角英数字とハイフンで入力してください" }
   validates :reading_minutes, numericality: { greater_than: 0 }
 
+  before_validation :set_defaults
   before_validation :set_reading_minutes
   before_save :set_published_at
 
@@ -43,6 +44,18 @@ class Post < ApplicationRecord
 
   def slug_for_tag(name)
     name.parameterize.presence || "tag-#{Digest::SHA1.hexdigest(name)[0, 10]}"
+  end
+
+  def set_defaults
+    self.category ||= Category.ordered.first || Category.first
+    if slug.blank?
+      base_slug = title.present? ? title.parameterize : ""
+      self.slug = base_slug.presence || "post-#{Time.current.to_i}"
+    end
+    if excerpt.blank? && body.present?
+      clean_text = body.to_s.gsub(/[\r\n#`*_-]/, " ").squeeze(" ").strip
+      self.excerpt = clean_text.truncate(140).presence || "要約なし"
+    end
   end
 
   def set_reading_minutes

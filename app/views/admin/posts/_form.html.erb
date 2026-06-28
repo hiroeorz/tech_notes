@@ -26,52 +26,8 @@
         <% else %>
           <button type="button" class="secondary-button" data-open-editor-preview>プレビュー</button>
         <% end %>
-        <details class="publish-menu">
-          <summary class="primary-button">公開 ▾</summary>
-          <div class="publish-menu-panel">
-            <button type="submit" name="commit_status" value="published" class="publish-menu-item">公開</button>
-            <button type="button" class="publish-menu-item" disabled>公開予約（準備中）</button>
-            <button type="button" class="publish-menu-item" disabled>レビュー依頼（準備中）</button>
-          </div>
-        </details>
+        <button type="button" class="primary-button" data-open-publish-modal>公開 ▾</button>
       </div>
-    </div>
-
-    <div class="editor-fields">
-      <label>
-        <span>スラッグ <b>*</b></span>
-        <%= form.text_field :slug, required: true, pattern: "[a-z0-9]+(-[a-z0-9]+)*", title: "半角英数字とハイフンで入力してください" %>
-      </label>
-      <label>
-        <span>カテゴリー</span>
-        <%= form.collection_select :category_id, categories, :id, :name %>
-      </label>
-      <label>
-        <span>種別</span>
-        <%= form.select :kind, options_for_select(Post.kinds.keys.map { |kind| [ kind_label(kind), kind ] }, post.kind) %>
-      </label>
-      <label class="span-3">
-        <span>タグ（カンマ区切りで入力）</span>
-        <%= form.text_field :tag_names, value: post.tag_names, placeholder: "Terraform, IaC, AWS", data: { tag_input: true } %>
-        <span class="tag-preview chip-list" data-tag-preview>
-          <% post.tag_names.split(",").map(&:strip).reject(&:blank?).each do |tag_name| %>
-            <span class="chip"><%= tag_name %></span>
-          <% end %>
-        </span>
-      </label>
-      <label class="span-3">
-        <span>記事の要約（エクサープト）</span>
-        <%= form.text_field :excerpt, maxlength: 160, data: { live_count_input: "excerpt", live_count_max: 160 } %>
-        <em data-live-count-output="excerpt"><%= post.excerpt.to_s.length %> / 160</em>
-      </label>
-      <label>
-        <span>ステータス</span>
-        <%= form.select :status, options_for_select(Post.statuses.keys.map { |status| [ status_label(status), status ] }, post.status) %>
-      </label>
-      <label>
-        <span>公開日時</span>
-        <%= form.datetime_local_field :published_at %>
-      </label>
     </div>
 
     <section class="markdown-editor" data-markdown-preview-url="<%= markdown_preview_admin_posts_path %>">
@@ -104,5 +60,56 @@
         <a href="https://www.markdownguide.org/basic-syntax/" target="_blank" rel="noreferrer">Markdown Guide ↗</a>
       </footer>
     </section>
+
+    <div class="modal-backdrop" data-publish-modal-backdrop hidden>
+      <div class="publish-modal-card" role="dialog" aria-labelledby="modal-title" aria-modal="true">
+        <div class="modal-header">
+          <h2 id="modal-title">公開設定</h2>
+          <button type="button" class="close-button" data-close-publish-modal aria-label="閉じる">✕</button>
+        </div>
+        <div class="modal-body editor-fields">
+          <label>
+            <span>スラッグ <b>*</b></span>
+            <%= form.text_field :slug, required: true, pattern: "[a-z0-9]+(-[a-z0-9]+)*", title: "半角英数字とハイフンで入力してください" %>
+          </label>
+          <label>
+            <span>カテゴリー</span>
+            <%= form.collection_select :category_id, categories, :id, :name %>
+          </label>
+          <label>
+            <span>種別</span>
+            <%= form.select :kind, options_for_select(Post.kinds.keys.map { |kind| [ kind_label(kind), kind ] }, post.kind) %>
+          </label>
+          <label class="span-full">
+            <span>タグ（カンマ区切りで入力）</span>
+            <%= form.text_field :tag_names, value: post.tag_names, placeholder: "Terraform, IaC, AWS", data: { tag_input: true } %>
+            <span class="tag-preview chip-list" data-tag-preview>
+              <% post.tag_names.split(",").map(&:strip).reject(&:blank?).each do |tag_name| %>
+                <span class="chip"><%= tag_name %></span>
+              <% end %>
+            </span>
+          </label>
+          <label class="span-full">
+            <span>記事の要約（エクサープト）</span>
+            <%= form.text_field :excerpt, maxlength: 160, data: { live_count_input: "excerpt", live_count_max: 160 } %>
+            <em data-live-count-output="excerpt"><%= post.excerpt.to_s.length %> / 160</em>
+          </label>
+          <label>
+            <span>ステータス</span>
+            <%= form.select :status, options_for_select(Post.statuses.keys.map { |status| [ status_label(status), status ] }, post.status) %>
+          </label>
+          <label>
+            <span>公開日時</span>
+            <%= form.datetime_local_field :published_at %>
+          </label>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="secondary-button" data-close-publish-modal>キャンセル</button>
+          <button type="button" class="secondary-button" disabled>公開予約（準備中）</button>
+          <button type="submit" name="commit_status" value="draft" class="secondary-button">下書き保存</button>
+          <button type="submit" name="commit_status" value="published" class="primary-button">投稿を公開する</button>
+        </div>
+      </div>
+    </div>
   <% end %>
 </main>
