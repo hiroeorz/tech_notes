@@ -191,15 +191,17 @@ textarea {
 }
 
 .icon-button {
+  display: inline-block;
   width: 36px;
   height: 36px;
   border: 0;
   background: transparent;
   color: #0f1720;
-  font-size: 26px;
+  font-size: 20px;
   line-height: 36px;
   text-align: center;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .admin-link {

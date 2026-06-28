@@ -21,6 +21,8 @@
     <% if admin_signed_in? %>
       <%= link_to "管理", admin_posts_path, class: "admin-link" %>
       <%= button_to "ログアウト", admin_logout_path, method: :delete, class: "logout-link" %>
+    <% else %>
+      <%= link_to "🔑", admin_login_path, class: "icon-button login-icon-link", title: "管理者ログイン", aria: { label: "管理者ログイン" } %>
     <% end %>
     <button class="icon-button" type="button" data-theme-toggle aria-label="テーマ切り替え">☾</button>
     <button class="icon-button" type="button" data-search-toggle aria-label="検索">⌕</button>
