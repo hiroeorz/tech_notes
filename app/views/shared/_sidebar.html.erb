@@ -1,0 +1,105 @@
+<aside class="sidebar">
+  <% if current_site_setting.profile_visible? %>
+    <section class="sidebar-section profile-card">
+      <h2>プロフィール</h2>
+      <% if current_site_setting.profile_image.attached? %>
+        <%= image_tag current_site_setting.profile_image, alt: current_site_setting.profile_name, class: "avatar-image" %>
+      <% else %>
+        <div class="avatar-drawing" aria-hidden="true">
+          <span class="face"></span>
+        </div>
+      <% end %>
+      <h3><%= current_site_setting.profile_name %></h3>
+      <p class="role"><%= current_site_setting.profile_title %></p>
+      <p><%= current_site_setting.profile_bio %></p>
+      <% if current_site_setting.sns_visible? %>
+        <div class="social-icons">
+          <%= link_to "GitHub", current_site_setting.github_url.presence || "#", aria: { label: "GitHub" } %>
+          <%= link_to "𝕏", current_site_setting.x_url.presence || "#", aria: { label: "X" } %>
+          <%= link_to "RSS", current_site_setting.rss_url.presence || feed_path(format: :xml), aria: { label: "RSS" } %>
+        </div>
+      <% end %>
+    </section>
+  <% end %>
+
+  <% if local_assigns[:toc].present? %>
+    <section class="sidebar-section">
+      <h2>目次</h2>
+      <ol class="toc-list">
+        <% toc.each do |id, title| %>
+          <li><a href="#<%= id %>"><%= title %></a></li>
+        <% end %>
+      </ol>
+    </section>
+  <% end %>
+
+  <% if local_assigns[:tags].present? %>
+    <section class="sidebar-section">
+      <h2>関連タグ</h2>
+      <div class="chip-list">
+        <% tags.each do |tag| %>
+          <%= link_to tag.name, posts_path(tag: tag.slug), class: "chip" %>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
+  <% if local_assigns[:related_posts].present? %>
+    <section class="sidebar-section">
+      <h2>関連記事</h2>
+      <div class="related-list">
+        <% related_posts.each do |post| %>
+          <%= link_to post_path(post.slug), class: "related-item" do %>
+            <span><%= post.title %></span>
+            <time><%= l(post.display_date, format: :short) %></time>
+          <% end %>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
+  <% if local_assigns[:categories].present? %>
+    <section class="sidebar-section">
+      <h2>カテゴリ</h2>
+      <ul class="metric-list">
+        <% categories.each do |category| %>
+          <li>
+            <%= link_to posts_path(category: category.slug) do %>
+              <span><%= category_icon(category.icon_key) %> <%= category.name %></span>
+              <strong><%= category.respond_to?(:posts_count) ? category.posts_count : category.posts.count %></strong>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+      <%= link_to "すべてのタグを見る →", tags_path, class: "sidebar-link" %>
+    </section>
+  <% end %>
+
+  <% if local_assigns[:archives].present? %>
+    <section class="sidebar-section">
+      <h2>アーカイブ</h2>
+      <ul class="metric-list archive-list">
+        <% archives.sort_by { |month, _| month }.reverse.each do |month, posts| %>
+          <li>
+            <a href="<%= posts_path(month: month.strftime("%Y-%m")) %>">
+              <span><%= month.strftime("%Y 年 %-m 月") %></span>
+              <strong><%= posts.size %></strong>
+            </a>
+          </li>
+        <% end %>
+      </ul>
+      <%= link_to "すべてのアーカイブを見る →", archives_path, class: "sidebar-link" %>
+    </section>
+  <% end %>
+
+  <% if local_assigns[:share] %>
+    <section class="sidebar-section">
+      <h2>シェア</h2>
+      <div class="share-icons">
+        <%= link_to "GitHub", current_site_setting.github_url.presence || "#", aria: { label: "GitHub" } %>
+        <%= link_to "𝕏", "https://x.com/intent/tweet?url=#{ERB::Util.url_encode(request.original_url)}&text=#{ERB::Util.url_encode(@post&.title || current_site_setting.blog_title)}", aria: { label: "Xでシェア" } %>
+        <%= link_to "RSS", feed_path(format: :xml), aria: { label: "RSS" } %>
+      </div>
+    </section>
+  <% end %>
+</aside>

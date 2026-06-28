@@ -1,8 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html class="<%= "theme-dark" if current_site_setting.default_theme == "dark" %>" data-default-theme="<%= current_site_setting.default_theme %>">
   <head>
-    <title><%= content_for(:title) || "Hiroe Tech Notes" %></title>
+    <title><%= @page_title || content_for(:title) || "Hiroe Tech Notes" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="<%= @page_description || content_for(:description) || current_site_setting.description %>">
+    <meta property="og:site_name" content="<%= current_site_setting.blog_title %>">
+    <meta property="og:title" content="<%= @page_title || content_for(:title) || current_site_setting.blog_title %>">
+    <meta property="og:description" content="<%= @page_description || content_for(:description) || current_site_setting.description %>">
+    <meta property="og:type" content="website">
+    <% if current_site_setting.ogp_image.attached? && current_site_setting.ogp_image.blob.persisted? %>
+      <meta property="og:image" content="<%= url_for(current_site_setting.ogp_image) %>">
+    <% end %>
+    <%= tag.link rel: "alternate", type: "application/rss+xml", title: "#{current_site_setting.blog_title} RSS", href: feed_url(format: :xml) %>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Hiroe Tech Notes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -19,11 +28,40 @@
     <link rel="apple-touch-icon" href="/icon.png">
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <%= yield %>
+  <body class="<%= controller_path.tr('/', '-') %> <%= action_name %>">
+    <div class="browser-shell">
+      <div class="browser-bar">
+        <span class="traffic red"></span>
+        <span class="traffic yellow"></span>
+        <span class="traffic green"></span>
+        <span class="browser-arrow">‹</span>
+        <span class="browser-arrow">›</span>
+        <div class="address-bar">⌘ <%= request.original_url %></div>
+        <span class="browser-icon">☆</span>
+        <span class="browser-icon">☰</span>
+      </div>
+
+      <div class="notebook-page">
+        <div class="rings" aria-hidden="true">
+          <% 22.times do %>
+            <span></span>
+          <% end %>
+        </div>
+
+        <%= render "shared/header" %>
+
+        <% if notice.present? || alert.present? %>
+          <div class="flash-wrap">
+            <p class="flash <%= alert.present? ? "alert" : "notice" %>"><%= alert || notice %></p>
+          </div>
+        <% end %>
+
+        <%= yield %>
+      </div>
+    </div>
   </body>
 </html>

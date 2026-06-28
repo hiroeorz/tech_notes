@@ -1,0 +1,9 @@
+<main class="page-grid">
+  <section class="content-area prose-panel">
+    <nav class="breadcrumbs"><%= link_to "ホーム", root_path %><span>›</span><span>About</span></nav>
+    <h1>About</h1>
+    <p>Hiroe Tech Notes は、手を動かして確かめた技術メモを残すための個人ブログです。</p>
+    <p>インフラ、クラウド、自動化、プログラミングの小さな検証を、あとから読み返せる形で言語化します。</p>
+  </section>
+  <%= render "shared/sidebar", categories: @categories, archives: @archives %>
+</main>

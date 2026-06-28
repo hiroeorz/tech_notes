@@ -1,0 +1,93 @@
+<main class="admin-page">
+  <nav class="breadcrumbs">
+    <%= link_to "ホーム", root_path %>
+    <span>›</span>
+    <span>管理画面</span>
+    <span>›</span>
+    <span>記事一覧</span>
+  </nav>
+
+  <div class="admin-title-row">
+    <h1>記事一覧</h1>
+    <%= link_to "⊕ 新規作成", new_admin_post_path, class: "primary-button" %>
+  </div>
+
+  <section class="stat-grid">
+    <div class="stat-card"><span class="stat-icon">▤</span><strong>全<%= @total_count %>件</strong><small>すべての記事</small></div>
+    <div class="stat-card"><span class="status-dot published"></span><strong>公開</strong><small><%= @published_count %>件</small></div>
+    <div class="stat-card"><span class="status-dot draft"></span><strong>下書き</strong><small><%= @draft_count %>件</small></div>
+    <div class="stat-card"><span class="status-dot reviewing"></span><strong>レビュー中</strong><small><%= @reviewing_count %>件</small></div>
+  </section>
+
+  <%= form_with url: admin_posts_path, method: :get, class: "filter-bar" do |form| %>
+    <%= form.search_field :q, value: params[:q], placeholder: "タイトルで検索" %>
+    <%= form.select :category_id, options_from_collection_for_select(@categories, :id, :name, params[:category_id]), { include_blank: "カテゴリーを選択" } %>
+    <%= form.select :status, options_for_select(Post.statuses.keys.map { |status| [ status_label(status), status ] }, params[:status]), { include_blank: "ステータスを選択" } %>
+    <%= form.select :sort, options_for_select([ [ "更新日（新しい順）", "newest" ], [ "更新日（古い順）", "oldest" ] ], params[:sort]) %>
+    <%= form.submit "絞り込み" %>
+    <%= link_to "↻ フィルターをリセット", admin_posts_path, class: "secondary-button" %>
+  <% end %>
+
+  <section class="admin-table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>タイトル</th>
+          <th>カテゴリー / タグ</th>
+          <th>ステータス</th>
+          <th>更新日 ↓</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @posts.each do |post| %>
+          <tr>
+            <td class="title-cell">
+              <span class="document-icon">▤</span>
+              <div>
+                <strong><%= post.title %></strong>
+                <small><%= truncate(post.excerpt, length: 70) %></small>
+              </div>
+            </td>
+            <td>
+              <div class="chip-list">
+                <span class="chip"><%= post.category.name %></span>
+                <% post.tags.limit(3).each do |tag| %>
+                  <span class="chip"><%= tag.name %></span>
+                <% end %>
+              </div>
+            </td>
+            <td><span class="status-badge <%= post.status %>">● <%= status_label(post.status) %></span></td>
+            <td><%= post.updated_at.strftime("%Y/%m/%d %H:%M") %></td>
+            <td class="action-cell">
+              <%= link_to "プレビュー ↗", preview_admin_post_path(post.slug), class: "small-button" %>
+              <%= link_to "編集", edit_admin_post_path(post.slug), class: "small-button" %>
+              <%= button_to "削除", admin_post_path(post.slug), method: :delete, form: { data: { turbo_confirm: "この記事を削除しますか？" } }, class: "danger-button" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </section>
+
+  <nav class="pagination">
+    <% if @page > 1 %>
+      <%= link_to "前へ", admin_posts_path(request.query_parameters.merge(page: @page - 1)) %>
+    <% else %>
+      <span>前へ</span>
+    <% end %>
+    <% 1.upto(@total_pages) do |page| %>
+      <% if page == @page %>
+        <strong><%= page %></strong>
+      <% else %>
+        <%= link_to page, admin_posts_path(request.query_parameters.merge(page: page)) %>
+      <% end %>
+    <% end %>
+    <% if @page < @total_pages %>
+      <%= link_to "次へ", admin_posts_path(request.query_parameters.merge(page: @page + 1)) %>
+    <% else %>
+      <span>次へ</span>
+    <% end %>
+  </nav>
+  <p class="page-count"><%= @page %> / <%= @total_pages %> ページ（全<%= @filtered_count %>件）</p>
+</main>

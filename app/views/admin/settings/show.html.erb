@@ -1,0 +1,105 @@
+<main class="settings-page">
+  <nav class="breadcrumbs">
+    <%= link_to "ホーム", root_path %>
+    <span>›</span>
+    <span>管理画面</span>
+    <span>›</span>
+    <span>設定</span>
+  </nav>
+
+  <%= form_with model: @setting, url: admin_settings_path, method: :patch do |form| %>
+    <% if @setting.errors.any? %>
+      <div class="error-box"><%= @setting.errors.full_messages.join(" / ") %></div>
+    <% end %>
+
+    <div class="admin-title-row">
+      <h1>管理設定</h1>
+      <div class="title-actions">
+        <%= link_to "◉ プレビュー", root_path, class: "secondary-button" %>
+        <%= form.submit "▣ 変更を保存", class: "primary-button" %>
+      </div>
+    </div>
+
+    <section class="settings-card">
+      <div class="settings-card-title"><span>▤</span><h2>ブログ設定</h2><p>ブログ全体の基本情報を設定します。</p></div>
+      <div class="settings-fields">
+        <label><span>ブログタイトル</span><%= form.text_field :blog_title %></label>
+        <label><span>サブタイトル / キャッチコピー</span><%= form.text_field :tagline %></label>
+        <label><span>サイトURL</span><%= form.url_field :site_url %></label>
+        <label class="wide"><span>ブログ説明</span><%= form.text_area :description, rows: 3 %></label>
+        <label class="upload-placeholder">
+          <span>▧</span>
+          <% if @setting.ogp_image.attached? && @setting.ogp_image.blob.persisted? %>
+            <%= image_tag @setting.ogp_image, alt: "OGP画像", class: "settings-thumb" %>
+          <% else %>
+            <p>推奨サイズ: 1200 x 630px<br>JPG / PNG</p>
+          <% end %>
+          <%= form.file_field :ogp_image, accept: "image/png,image/jpeg", id: "site_setting_ogp_image" %>
+        </label>
+        <label class="secondary-button file-label" for="site_setting_ogp_image">画像を変更</label>
+      </div>
+    </section>
+
+    <section class="settings-card">
+      <div class="settings-card-title"><span>♙</span><h2>プロフィール設定</h2><p>プロフィール情報を設定します。</p></div>
+      <div class="settings-fields">
+        <label><span>表示名</span><%= form.text_field :profile_name %></label>
+        <label><span>肩書き</span><%= form.text_field :profile_title %></label>
+        <label><span>メールアドレス</span><%= form.email_field :profile_email %></label>
+        <label class="wide"><span>自己紹介</span><%= form.text_area :profile_bio, rows: 3 %></label>
+        <label class="settings-avatar-upload">
+          <% if @setting.profile_image.attached? && @setting.profile_image.blob.persisted? %>
+            <%= image_tag @setting.profile_image, alt: "プロフィール画像", class: "settings-avatar-image" %>
+          <% else %>
+            <span class="settings-avatar avatar-drawing"><span class="face"></span></span>
+          <% end %>
+          <%= form.file_field :profile_image, accept: "image/png,image/jpeg", id: "site_setting_profile_image" %>
+        </label>
+        <label class="secondary-button file-label" for="site_setting_profile_image">プロフィール画像を変更</label>
+      </div>
+    </section>
+
+    <section class="settings-card">
+      <div class="settings-card-title"><span>🔗</span><h2>SNS / 外部リンク</h2><p>各種SNSや外部サービスのリンクを設定します。</p></div>
+      <div class="settings-fields social-settings">
+        <label><span>GitHub URL</span><%= form.url_field :github_url %></label>
+        <label><span>X URL</span><%= form.url_field :x_url %></label>
+        <label><span>RSS URL</span><%= form.url_field :rss_url %></label>
+        <label><span>Zenn URL</span><%= form.url_field :zenn_url %></label>
+        <label><span>note URL</span><%= form.url_field :note_url %></label>
+      </div>
+    </section>
+
+    <section class="settings-card compact">
+      <div class="settings-card-title"><span>◉</span><h2>表示・公開設定</h2><p>サイトの表示や公開に関する設定を行います。</p></div>
+      <div class="settings-fields">
+        <label class="toggle-label"><%= form.check_box :profile_visible %><span>プロフィールを公開</span></label>
+        <label class="toggle-label"><%= form.check_box :sns_visible %><span>SNSリンクを表示</span></label>
+        <label><span>デフォルトテーマ</span><%= form.select :default_theme, [ [ "ライト", "light" ], [ "ダーク", "dark" ] ] %></label>
+        <label><span>記事一覧の表示件数</span><%= form.select :posts_per_page, [ 5, 10, 20, 50 ] %></label>
+      </div>
+    </section>
+
+    <section class="settings-card compact">
+      <div class="settings-card-title"><span>▣</span><h2>パスワード変更</h2><p>管理画面のパスワードを変更します。</p></div>
+      <div class="settings-fields">
+        <label>
+          <span>現在のパスワード</span>
+          <span class="password-field"><%= password_field_tag :current_password, nil, placeholder: "現在のパスワードを入力" %><button type="button" data-password-toggle aria-label="現在のパスワードの表示切り替え">◎</button></span>
+        </label>
+        <label>
+          <span>新しいパスワード</span>
+          <span class="password-field"><%= password_field_tag :new_password, nil, placeholder: "新しいパスワードを入力" %><button type="button" data-password-toggle aria-label="新しいパスワードの表示切り替え">◎</button></span>
+          <small>8文字以上、英数字を含めてください</small>
+        </label>
+        <label>
+          <span>新しいパスワード（確認）</span>
+          <span class="password-field"><%= password_field_tag :new_password_confirmation, nil, placeholder: "新しいパスワードを再入力" %><button type="button" data-password-toggle aria-label="新しいパスワード確認の表示切り替え">◎</button></span>
+        </label>
+        <button type="submit" class="outline-danger">▣ パスワードを更新</button>
+      </div>
+    </section>
+
+    <p class="last-updated">最終更新: <%= @setting.updated_at&.strftime("%Y-%m-%d %H:%M") || Time.current.strftime("%Y-%m-%d %H:%M") %></p>
+  <% end %>
+</main>

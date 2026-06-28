@@ -1,0 +1,32 @@
+<main class="page-grid show-page">
+  <article class="content-area article-content">
+    <nav class="breadcrumbs">
+      <%= link_to "ホーム", root_path %>
+      <span>›</span>
+      <%= link_to "記事一覧", posts_path %>
+      <span>›</span>
+      <span><%= @post.category.name %></span>
+    </nav>
+
+    <div class="article-label"><%= @post.category.name %> / <%= @post.tags.first&.name || "Tech" %></div>
+    <h1><%= @post.title %></h1>
+    <div class="article-meta">
+      <span>▦ <%= @post.display_date.strftime("%Y-%m-%d") %></span>
+      <span>↻ 更新 <%= @post.updated_at.strftime("%Y-%m-%d") %></span>
+      <span>◷ <%= @post.reading_minutes %>分</span>
+      <span>♙ <%= current_site_setting.profile_name %></span>
+      <% @post.tags.each do |tag| %>
+        <%= link_to tag.name, posts_path(tag: tag.slug), class: "chip" %>
+      <% end %>
+    </div>
+    <p class="article-excerpt"><%= @post.excerpt %></p>
+
+    <div class="markdown-body">
+      <%= render_markdown(@post.body) %>
+    </div>
+
+    <footer class="article-footer">© 2025 Hiroe Tech Notes. All rights reserved.</footer>
+  </article>
+
+  <%= render "shared/sidebar", toc: @toc, tags: @post.tags, related_posts: @related_posts, share: true %>
+</main>

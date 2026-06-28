@@ -1,0 +1,65 @@
+<main class="page-grid list-public-page">
+  <section class="content-area">
+    <nav class="breadcrumbs">
+      <%= link_to "ホーム", root_path %>
+      <span>›</span>
+      <span><%= @kind == "experiment" ? "実験ログ" : "記事一覧" %></span>
+    </nav>
+
+    <div class="page-title-row">
+      <h1><%= @kind == "experiment" ? "実験ログ" : "記事一覧" %></h1>
+      <%= form_with url: (@kind == "experiment" ? experiments_path : posts_path), method: :get, class: "search-inline" do |form| %>
+        <%= form.search_field :q, value: params[:q], placeholder: "タイトルで検索" %>
+        <%= form.submit "検索" %>
+      <% end %>
+    </div>
+
+    <div class="filter-tabs wide-tabs">
+      <%= link_to "すべて", posts_path(kind: @kind), class: ("active" if params[:category].blank?) %>
+      <% @categories.each do |category| %>
+        <%= link_to category.name, posts_path(kind: @kind, category: category.slug), class: ("active" if params[:category] == category.slug) %>
+      <% end %>
+    </div>
+
+    <div class="post-list-cards">
+      <% @posts.each do |post| %>
+        <article class="post-list-card">
+          <div class="document-icon">▤</div>
+          <div>
+            <p class="post-meta"><%= post.display_date.strftime("%Y-%m-%d") %> / <%= post.category.name %> / <%= post.reading_minutes %>分</p>
+            <h2><%= link_to post.title, post_path(post.slug) %></h2>
+            <p><%= post.excerpt %></p>
+            <div class="chip-list">
+              <% post.tags.each do |tag| %>
+                <%= link_to tag.name, posts_path(tag: tag.slug), class: "chip" %>
+              <% end %>
+            </div>
+          </div>
+        </article>
+      <% end %>
+    </div>
+
+    <nav class="pagination">
+      <% if @page > 1 %>
+        <%= link_to "前へ", posts_path(request.query_parameters.merge(page: @page - 1)) %>
+      <% else %>
+        <span>前へ</span>
+      <% end %>
+      <% 1.upto(@total_pages) do |page| %>
+        <% if page == @page %>
+          <strong><%= page %></strong>
+        <% else %>
+          <%= link_to page, posts_path(request.query_parameters.merge(page: page)) %>
+        <% end %>
+      <% end %>
+      <% if @page < @total_pages %>
+        <%= link_to "次へ", posts_path(request.query_parameters.merge(page: @page + 1)) %>
+      <% else %>
+        <span>次へ</span>
+      <% end %>
+    </nav>
+    <p class="page-count"><%= @page %> / <%= @total_pages %> ページ（全<%= @total_count %>件）</p>
+  </section>
+
+  <%= render "shared/sidebar", categories: @categories, archives: @archives %>
+</main>

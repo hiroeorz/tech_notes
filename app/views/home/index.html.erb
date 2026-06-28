@@ -1,0 +1,87 @@
+<main class="page-grid top-page">
+  <section class="content-area">
+    <section class="hero-section">
+      <div class="hero-copy">
+        <h1>考えたことを、<br>手を動かして確かめる。</h1>
+        <p>インフラとコードのあいだで揺れながら、学んだことや試したことをノートに残しています。</p>
+        <ul class="check-list">
+          <li>クラウド / インフラ / 自動化が中心</li>
+          <li>小さな実験と、そこから得た学びを記録</li>
+          <li>誰かのヒントになればうれしいです</li>
+        </ul>
+      </div>
+
+      <article class="daily-card">
+        <div class="paperclip" aria-hidden="true"></div>
+        <p class="section-kicker"># 今日のひとことログ</p>
+        <% if @daily_log.present? %>
+          <time><%= @daily_log.display_date.strftime("%Y-%m-%d") %></time>
+          <h2><%= @daily_log.title %></h2>
+        <% else %>
+          <time><%= Date.current.strftime("%Y-%m-%d") %></time>
+          <h2>TerraformでS3バケットを作ってみる</h2>
+        <% end %>
+        <pre class="code-card"><code>resource "aws_s3_bucket" "example" {
+  bucket = "hiroe-tech-notes"
+  acl    = "private"
+  tags = {
+    Name = "hiroe-tech-notes-bucket"
+  }
+}</code></pre>
+        <p class="memo"># メモ: バージョニングも有効化しておく<br># → 実験ログに続く...</p>
+        <%= link_to "実験ログに続く →", experiments_path, class: "daily-link" %>
+      </article>
+    </section>
+
+    <section class="note-section latest-posts">
+      <div class="section-heading">
+        <h2>最新の記事</h2>
+        <div class="filter-tabs">
+          <%= link_to "すべて", posts_path, class: "active" %>
+          <% %w[infrastructure aws automation programming security].each do |slug| %>
+            <% if (category = @top_filter_categories[slug]) %>
+              <%= link_to category.name, posts_path(category: category.slug) %>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="article-lines">
+        <% @latest_posts.each do |post| %>
+          <%= link_to post_path(post.slug), class: "article-line" do %>
+            <time><%= post.display_date.strftime("%Y-%m-%d") %></time>
+            <strong><%= post.title %></strong>
+            <span class="line-tags">
+              <% post.tags.limit(2).each do |tag| %>
+                <span class="chip"><%= tag.name %></span>
+              <% end %>
+            </span>
+          <% end %>
+        <% end %>
+      </div>
+      <%= link_to "記事一覧へ →", posts_path, class: "text-link align-right" %>
+    </section>
+
+    <section class="note-section experiments-section">
+      <div class="section-heading">
+        <h2>実験ログ <span>（ミニ実験と検証の記事）</span></h2>
+      </div>
+      <div class="experiment-cards">
+        <% @experiments.each do |post| %>
+          <%= link_to post_path(post.slug), class: "experiment-card" do %>
+            <time><%= post.display_date.strftime("%Y-%m-%d") %></time>
+            <h3><%= post.title %></h3>
+            <p><%= post.excerpt %></p>
+            <footer>
+              <span>#<%= post.tags.first&.name || post.category.name %></span>
+              <span>◷ <%= post.reading_minutes * 15 %>分</span>
+            </footer>
+          <% end %>
+        <% end %>
+      </div>
+      <%= link_to "実験ログ一覧へ →", experiments_path, class: "text-link align-right" %>
+    </section>
+  </section>
+
+  <%= render "shared/sidebar", categories: @categories, archives: @archives %>
+</main>

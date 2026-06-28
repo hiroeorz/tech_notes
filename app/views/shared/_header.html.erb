@@ -1,0 +1,35 @@
+<header class="site-header <%= "login-header" if controller_path == "admin/sessions" %>">
+  <div class="brand">
+    <%= link_to root_path, class: "brand-link" do %>
+      <span class="brand-title"><%= current_site_setting.blog_title %></span>
+      <span class="brand-tagline"><%= current_site_setting.tagline %></span>
+    <% end %>
+  </div>
+
+  <% unless controller_path == "admin/sessions" %>
+    <nav class="global-nav" aria-label="グローバルナビゲーション">
+      <%= link_to "ホーム", root_path, class: ("active" if current_page?(root_path)) %>
+      <%= link_to "記事一覧", posts_path, class: ("active" if controller_name == "posts" && action_name != "tags" && request.path != experiments_path) %>
+      <%= link_to "実験ログ", experiments_path, class: ("active" if request.path == experiments_path) %>
+      <%= link_to "タグ一覧", tags_path, class: ("active" if current_page?(tags_path)) %>
+      <%= link_to "プロフィール", profile_path, class: ("active" if current_page?(profile_path)) %>
+      <%= link_to "About", about_path, class: ("active" if current_page?(about_path)) %>
+    </nav>
+  <% end %>
+
+  <div class="header-actions">
+    <% if admin_signed_in? %>
+      <%= link_to "管理", admin_posts_path, class: "admin-link" %>
+      <%= button_to "ログアウト", admin_logout_path, method: :delete, class: "logout-link" %>
+    <% end %>
+    <button class="icon-button" type="button" data-theme-toggle aria-label="テーマ切り替え">☾</button>
+    <button class="icon-button" type="button" data-search-toggle aria-label="検索">⌕</button>
+  </div>
+</header>
+
+<div class="search-panel" data-search-panel hidden>
+  <%= form_with url: posts_path, method: :get, class: "search-panel-form" do |form| %>
+    <%= form.search_field :q, placeholder: "記事タイトルで検索", aria: { label: "記事タイトルで検索" } %>
+    <%= form.submit "検索", class: "primary-button" %>
+  <% end %>
+</div>

@@ -1,0 +1,16 @@
+<main class="single-page">
+  <nav class="breadcrumbs">
+    <%= link_to "ホーム", root_path %>
+    <span>›</span>
+    <span>タグ一覧</span>
+  </nav>
+  <h1>タグ一覧</h1>
+  <div class="tag-cloud">
+    <% @tags.each do |tag| %>
+      <%= link_to posts_path(tag: tag.slug), class: "tag-pill" do %>
+        <span><%= tag.name %></span>
+        <strong><%= tag.respond_to?(:posts_count) ? tag.posts_count : tag.posts.count %></strong>
+      <% end %>
+    <% end %>
+  </div>
+</main>

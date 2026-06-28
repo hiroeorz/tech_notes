@@ -1,0 +1,101 @@
+<main class="editor-page">
+  <nav class="breadcrumbs">
+    <%= link_to "ホーム", root_path %>
+    <span>›</span>
+    <%= link_to "記事", admin_posts_path %>
+    <span>›</span>
+    <span><%= post.persisted? ? "編集" : "新規作成" %></span>
+  </nav>
+
+  <%= form_with model: [ :admin, post ], class: "editor-form" do |form| %>
+    <% if post.errors.any? %>
+      <div class="error-box"><%= post.errors.full_messages.join(" / ") %></div>
+    <% end %>
+
+    <div class="editor-actions">
+      <button type="submit" name="post[status]" value="draft" class="secondary-button">下書き保存</button>
+      <%= link_to "プレビュー", post.persisted? ? preview_admin_post_path(post.slug) : "#", class: "secondary-button" %>
+      <details class="publish-menu">
+        <summary class="primary-button">公開 ▾</summary>
+        <div class="publish-menu-panel">
+          <button type="submit" name="post[status]" value="published" class="publish-menu-item">公開</button>
+          <button type="button" class="publish-menu-item" disabled>公開予約（準備中）</button>
+          <button type="button" class="publish-menu-item" disabled>レビュー依頼（準備中）</button>
+        </div>
+      </details>
+    </div>
+
+    <div class="editor-fields">
+      <label class="span-3">
+        <span>タイトル <b>*</b></span>
+        <%= form.text_field :title, maxlength: 100, required: true, data: { live_count_input: "title", live_count_max: 100 } %>
+        <em data-live-count-output="title"><%= post.title.to_s.length %> / 100</em>
+      </label>
+      <label>
+        <span>スラッグ <b>*</b></span>
+        <%= form.text_field :slug, required: true %>
+      </label>
+      <label>
+        <span>カテゴリー</span>
+        <%= form.collection_select :category_id, categories, :id, :name %>
+      </label>
+      <label>
+        <span>種別</span>
+        <%= form.select :kind, options_for_select(Post.kinds.keys.map { |kind| [ kind_label(kind), kind ] }, post.kind) %>
+      </label>
+      <label class="span-3">
+        <span>タグ（カンマ区切りで入力）</span>
+        <%= form.text_field :tag_names, value: post.tag_names, placeholder: "Terraform, IaC, AWS", data: { tag_input: true } %>
+        <span class="tag-preview chip-list" data-tag-preview>
+          <% post.tag_names.split(",").map(&:strip).reject(&:blank?).each do |tag_name| %>
+            <span class="chip"><%= tag_name %></span>
+          <% end %>
+        </span>
+      </label>
+      <label class="span-3">
+        <span>記事の要約（エクサープト）</span>
+        <%= form.text_field :excerpt, maxlength: 160, data: { live_count_input: "excerpt", live_count_max: 160 } %>
+        <em data-live-count-output="excerpt"><%= post.excerpt.to_s.length %> / 160</em>
+      </label>
+      <label>
+        <span>ステータス</span>
+        <%= form.select :status, options_for_select(Post.statuses.keys.map { |status| [ status_label(status), status ] }, post.status) %>
+      </label>
+      <label>
+        <span>公開日時</span>
+        <%= form.datetime_local_field :published_at %>
+      </label>
+    </div>
+
+    <section class="markdown-editor">
+      <div class="editor-tabs">
+        <button type="button" class="active" data-editor-tab="markdown">Markdown</button>
+        <button type="button" data-editor-tab="preview">プレビュー</button>
+        <a href="https://www.markdownguide.org/basic-syntax/" target="_blank" rel="noreferrer">Markdownガイド ↗</a>
+      </div>
+      <div class="toolbar" aria-label="Markdownツールバー">
+        <button type="button" data-md-action="bold" aria-label="太字を挿入"><b>B</b></button>
+        <button type="button" data-md-action="italic" aria-label="斜体を挿入"><i>I</i></button>
+        <button type="button" data-md-action="code" aria-label="コードを挿入">&lt;/&gt;</button>
+        <button type="button" data-md-action="list" aria-label="箇条書きを挿入">☷</button>
+        <button type="button" data-md-action="quote" aria-label="引用を挿入">❞</button>
+        <button type="button" data-md-action="ordered" aria-label="番号付きリストを挿入">1.</button>
+        <button type="button" data-md-action="check" aria-label="チェックボックスを挿入">☑</button>
+        <button type="button" data-md-action="image" aria-label="画像を挿入">▧</button>
+        <button type="button" data-md-action="table" aria-label="テーブルを挿入">▦</button>
+        <button type="button" data-md-action="link" aria-label="リンクを挿入">↗</button>
+      </div>
+      <div class="textarea-shell">
+        <div class="line-numbers"><% 44.times do |i| %><span><%= i + 1 %></span><% end %></div>
+        <%= form.text_area :body, rows: 28, spellcheck: false, data: { markdown_source: true, body_stats_source: true } %>
+        <div class="markdown-preview" data-markdown-preview hidden></div>
+      </div>
+      <footer class="editor-footer">
+        <span data-body-stat="lines">Lines: <%= post.body.to_s.lines.count %></span>
+        <span data-body-stat="words">Words: <%= post.body.to_s.split.size %></span>
+        <span data-body-stat="chars">文字数: <%= post.body.to_s.length %></span>
+        <a href="https://www.markdownguide.org/basic-syntax/" target="_blank" rel="noreferrer">Markdown Guide ↗</a>
+      </footer>
+    </section>
+  <% end %>
+</main>

@@ -1,0 +1,9 @@
+<main class="page-grid">
+  <section class="content-area prose-panel">
+    <nav class="breadcrumbs"><%= link_to "ホーム", root_path %><span>›</span><span>プロフィール</span></nav>
+    <h1>プロフィール</h1>
+    <p><%= current_site_setting.profile_bio %></p>
+    <p>AWS、IaC、自動化、SRE、Observabilityを中心に、日々の業務と個人実験で学んだことを記録しています。</p>
+  </section>
+  <%= render "shared/sidebar", categories: @categories, archives: @archives %>
+</main>

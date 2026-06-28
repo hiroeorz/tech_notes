@@ -1,0 +1,38 @@
+<main class="page-grid archives-page">
+  <section class="content-area">
+    <nav class="breadcrumbs">
+      <%= link_to "ホーム", root_path %>
+      <span>›</span>
+      <span>アーカイブ</span>
+    </nav>
+
+    <div class="page-title-row">
+      <h1>アーカイブ</h1>
+      <%= link_to "記事一覧へ →", posts_path, class: "secondary-button" %>
+    </div>
+
+    <div class="archive-groups">
+      <% @archive_groups.sort_by { |month, _posts| month }.reverse.each do |month, posts| %>
+        <section class="archive-group">
+          <h2><%= month.strftime("%Y 年 %-m 月") %> <span><%= posts.size %>件</span></h2>
+          <div class="article-lines">
+            <% posts.each do |post| %>
+              <%= link_to post_path(post.slug), class: "article-line" do %>
+                <time><%= post.display_date.strftime("%Y-%m-%d") %></time>
+                <strong><%= post.title %></strong>
+                <span class="line-tags">
+                  <span class="chip"><%= post.category.name %></span>
+                  <% post.tags.limit(2).each do |tag| %>
+                    <span class="chip"><%= tag.name %></span>
+                  <% end %>
+                </span>
+              <% end %>
+            <% end %>
+          </div>
+        </section>
+      <% end %>
+    </div>
+  </section>
+
+  <%= render "shared/sidebar", categories: @categories, archives: @archives %>
+</main>
