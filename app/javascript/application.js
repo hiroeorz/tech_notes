@@ -149,6 +149,17 @@ document.addEventListener("turbo:load", () => {
       return `<figure class="article-image"><img src="${escapeHtml(source)}" alt="${escapeHtml(alt)}" loading="lazy"><figcaption>${escapeHtml(alt)}</figcaption></figure>`
     }
 
+    const insertAtCursor = (value) => {
+      const start = markdownSource.selectionStart
+      const end = markdownSource.selectionEnd
+      const prefix = start > 0 && markdownSource.value[start - 1] !== "\n" ? "\n" : ""
+      const suffix = markdownSource.value[end] && markdownSource.value[end] !== "\n" ? "\n" : ""
+      const inserted = `${prefix}${value}${suffix}`
+      markdownSource.setRangeText(inserted, start, end, "end")
+      markdownSource.dispatchEvent(new Event("input", { bubbles: true }))
+      markdownSource.focus()
+    }
+
     const renderListItem = (text) => {
       const task = text.match(/^\[( |x|X)\]\s+(.+)$/)
       if (!task) return `<li>${inlineMarkdown(text)}</li>`
@@ -297,6 +308,49 @@ document.addEventListener("turbo:load", () => {
         markdownSource.setRangeText(inserted, start, end, "end")
         markdownSource.dispatchEvent(new Event("input", { bubbles: true }))
         markdownSource.focus()
+      })
+    })
+
+    document.querySelectorAll("[data-insert-markdown]").forEach((button) => {
+      button.addEventListener("click", () => {
+        if (!button.dataset.insertMarkdown) return
+        insertAtCursor(button.dataset.insertMarkdown)
+      })
+    })
+
+    document.querySelectorAll("[data-post-image-input]").forEach((input) => {
+      input.addEventListener("change", async () => {
+        const file = input.files?.[0]
+        const message = input.closest("[data-post-image-panel]")?.querySelector("[data-post-image-message]")
+        const uploadUrl = input.dataset.uploadUrl
+        if (!file || !uploadUrl) return
+
+        const token = document.querySelector("meta[name='csrf-token']")?.content
+        const body = new FormData()
+        body.append("image", file)
+        input.disabled = true
+        if (message) message.textContent = "アップロードしています..."
+
+        try {
+          const response = await fetch(uploadUrl, {
+            method: "POST",
+            headers: {
+              "Accept": "application/json",
+              "X-CSRF-Token": token || ""
+            },
+            body
+          })
+          const payload = await response.json()
+          if (!response.ok) throw new Error(payload.error || "画像をアップロードできませんでした。")
+
+          insertAtCursor(payload.markdown)
+          if (message) message.textContent = "画像をアップロードし、Markdownを挿入しました。ページを再読み込みすると添付一覧に反映されます。"
+          input.value = ""
+        } catch (error) {
+          if (message) message.textContent = error.message
+        } finally {
+          input.disabled = false
+        }
       })
     })
   }

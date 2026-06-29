@@ -24,6 +24,7 @@ Rails.application.routes.draw do
       collection do
         post :markdown_preview
       end
+      resources :images, only: [ :create, :destroy ], controller: "post_images"
     end
     resource :settings, only: [ :show, :update ]
     root "posts#index"

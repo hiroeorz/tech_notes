@@ -3,8 +3,12 @@ require "digest"
 class Post < ApplicationRecord
   belongs_to :category
   belongs_to :admin_user
+  has_many_attached :images
   has_many :post_tags, dependent: :destroy
   has_many :tags, through: :post_tags
+
+  IMAGE_CONTENT_TYPES = %w[image/jpeg image/png image/webp image/gif].freeze
+  IMAGE_MAX_SIZE = 10.megabytes
 
   enum :status, { draft: 0, published: 1, reviewing: 2 }
   enum :kind, { article: 0, experiment: 1 }
@@ -13,6 +17,7 @@ class Post < ApplicationRecord
   validates :slug, uniqueness: true
   validates :slug, format: { with: /\A[a-z0-9]+(?:-[a-z0-9]+)*\z/, message: "は半角英数字とハイフンで入力してください" }
   validates :reading_minutes, numericality: { greater_than: 0 }
+  validate :validate_images
 
   before_validation :set_defaults
   before_validation :set_reading_minutes
@@ -40,7 +45,25 @@ class Post < ApplicationRecord
     slug
   end
 
+  def self.valid_image_upload?(upload)
+    upload.present? &&
+      upload.content_type.in?(IMAGE_CONTENT_TYPES) &&
+      upload.size <= IMAGE_MAX_SIZE
+  end
+
   private
+
+  def validate_images
+    images.each do |image|
+      unless image.blob.content_type.in?(IMAGE_CONTENT_TYPES)
+        errors.add(:images, "はJPG、PNG、WebP、GIFでアップロードしてください。")
+      end
+
+      next unless image.blob.byte_size > IMAGE_MAX_SIZE
+
+      errors.add(:images, "は10MB以下でアップロードしてください。")
+    end
+  end
 
   def slug_for_tag(name)
     name.parameterize.presence || "tag-#{Digest::SHA1.hexdigest(name)[0, 10]}"

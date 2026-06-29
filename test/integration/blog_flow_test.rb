@@ -1,5 +1,6 @@
 require "test_helper"
 require "json"
+require "tempfile"
 
 class BlogFlowTest < ActionDispatch::IntegrationTest
   setup do
@@ -288,6 +289,9 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "data-md-action=\"bold\""
     assert_includes response.body, "aria-label=\"太字を挿入\""
     assert_includes response.body, "aria-label=\"画像を挿入\""
+    assert_select "input[type='file'][data-post-image-input][accept='image/jpeg,image/png,image/webp,image/gif']"
+    assert_includes response.body, admin_post_images_path(@post)
+    assert_includes response.body, "添付画像"
     assert_includes response.body, "data-tag-input=\"true\""
     assert_select ".tag-preview .chip", text: @tag.name
     assert_includes response.body, "data-live-count-input=\"title\""
@@ -296,6 +300,8 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     get new_admin_post_path
     assert_response :success
     assert_includes response.body, "data-open-editor-preview"
+    assert_includes response.body, "先に下書き保存してください"
+    assert_select "input[data-post-image-input]", count: 0
     assert_not_includes response.body, "href=\"#\""
 
     get preview_admin_post_path(@post.slug)
@@ -339,6 +345,12 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_redirected_to admin_login_path
 
     post markdown_preview_admin_posts_path, params: { body: "* 非公開プレビュー" }
+    assert_redirected_to admin_login_path
+
+    post admin_post_images_path(@post), params: { image: valid_image_upload }
+    assert_redirected_to admin_login_path
+
+    delete admin_post_image_path(@post, 999)
     assert_redirected_to admin_login_path
 
     post admin_posts_path, params: {
@@ -617,6 +629,85 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_not_includes response.body, "href=\"javascript:alert"
     assert_not_includes response.body, "<script>alert"
     assert_not_includes response.body, "alert('xss')"
+  end
+
+  test "admin can upload insert metadata and delete post images" do
+    with_public_storage_url("https://cdn.example.com") do
+      post admin_login_path, params: { email: @admin.email, password: "password123" }
+
+      assert_difference("ActiveStorage::Attachment.count", 1) do
+        assert_difference("ActiveStorage::Blob.count", 1) do
+          post admin_post_images_path(@post), params: { image: valid_image_upload }
+        end
+      end
+
+      assert_response :created
+      payload = JSON.parse(response.body)
+      attachment = @post.reload.images.attachments.last
+      assert_equal attachment.id, payload.fetch("id")
+      assert_equal "screen.png", payload.fetch("filename")
+      assert_equal "image/png", payload.fetch("content_type")
+      assert_equal "https://cdn.example.com/#{attachment.blob.key}", payload.fetch("url")
+      assert_equal "![screen](https://cdn.example.com/#{attachment.blob.key})", payload.fetch("markdown")
+
+      get edit_admin_post_path(@post.slug)
+      assert_response :success
+      assert_includes response.body, "screen.png"
+      assert_includes response.body, payload.fetch("url")
+      assert_includes response.body, "data-insert-markdown"
+      assert_includes response.body, "本文にURLが残っている場合は画像切れ"
+
+      assert_difference("ActiveStorage::Attachment.count", -1) do
+        assert_difference("ActiveStorage::Blob.count", -1) do
+          delete admin_post_image_path(@post, attachment)
+        end
+      end
+
+      assert_redirected_to edit_admin_post_path(@post.slug)
+      assert_not @post.reload.images.attached?
+    end
+  end
+
+  test "admin post image uploads require configured cdn and valid files" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+
+    assert_no_difference("ActiveStorage::Attachment.count") do
+      post admin_post_images_path(@post), params: { image: valid_image_upload }
+    end
+
+    assert_response :unprocessable_entity
+    assert_includes response.parsed_body.fetch("error"), "CDN URL"
+
+    with_public_storage_url("https://cdn.example.com") do
+      invalid_upload = Rack::Test::UploadedFile.new(
+        Rails.root.join("test/fixtures/files/not-image.txt"),
+        "text/plain"
+      )
+
+      assert_no_difference("ActiveStorage::Attachment.count") do
+        post admin_post_images_path(@post), params: { image: invalid_upload }
+      end
+
+      assert_response :unprocessable_entity
+      assert_includes response.parsed_body.fetch("error"), "JPG、PNG、WebP、GIF"
+
+      oversize_file = Tempfile.new([ "large", ".png" ])
+      oversize_file.binmode
+      oversize_file.write("x" * (Post::IMAGE_MAX_SIZE + 1))
+      oversize_file.rewind
+      oversize_upload = Rack::Test::UploadedFile.new(oversize_file.path, "image/png", original_filename: "large.png")
+
+      begin
+        assert_no_difference("ActiveStorage::Attachment.count") do
+          post admin_post_images_path(@post), params: { image: oversize_upload }
+        end
+      ensure
+        oversize_file.close!
+      end
+
+      assert_response :unprocessable_entity
+      assert_includes response.parsed_body.fetch("error"), "10MB以下"
+    end
   end
 
   test "article table of contents links to generated markdown heading ids" do
@@ -918,5 +1009,23 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert_includes response.body, "OGP画像はJPGまたはPNGでアップロードしてください。"
     assert_not @setting.reload.ogp_image.attached?
+  end
+
+  private
+
+  def valid_image_upload
+    Rack::Test::UploadedFile.new(
+      Rails.root.join("test/fixtures/files/not-image.txt"),
+      "image/png",
+      original_filename: "screen.png"
+    )
+  end
+
+  def with_public_storage_url(url)
+    previous = ENV["ACTIVE_STORAGE_PUBLIC_BASE_URL"]
+    ENV["ACTIVE_STORAGE_PUBLIC_BASE_URL"] = url
+    yield
+  ensure
+    ENV["ACTIVE_STORAGE_PUBLIC_BASE_URL"] = previous
   end
 end

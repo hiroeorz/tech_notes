@@ -1289,6 +1289,37 @@ textarea {
   background: rgba(255,255,255,0.72);
 }
 
+.post-image-uploader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 22px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255,255,255,0.36);
+}
+
+.post-image-uploader label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+}
+
+.post-image-uploader span,
+.post-image-uploader p {
+  font-size: 13px;
+}
+
+.post-image-uploader input {
+  max-width: 280px;
+}
+
+.post-image-uploader p {
+  margin: 0;
+  color: var(--muted);
+}
+
 .textarea-shell {
   display: grid;
   grid-template-columns: 42px 1fr;
@@ -1374,6 +1405,88 @@ textarea {
   margin-left: auto;
   color: #1a57a8;
   font-weight: 800;
+}
+
+.post-image-list {
+  margin-top: 16px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: rgba(255,252,247,0.58);
+}
+
+.post-image-list-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+
+.post-image-list-header h2,
+.post-image-list-header p {
+  margin: 0;
+}
+
+.post-image-list-header h2 {
+  font-size: 18px;
+}
+
+.post-image-list-header p,
+.empty-note {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.post-image-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.post-image-item {
+  display: grid;
+  grid-template-columns: 110px 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: 6px;
+  background: rgba(255,255,255,0.5);
+}
+
+.post-image-thumb {
+  width: 110px;
+  height: 72px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #fff;
+}
+
+.post-image-item strong,
+.post-image-item small,
+.post-image-item code,
+.post-image-item em {
+  display: block;
+}
+
+.post-image-item small,
+.post-image-item em {
+  color: var(--muted);
+}
+
+.post-image-item code {
+  max-width: 100%;
+  margin-top: 4px;
+  color: #1a57a8;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.post-image-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .login-header {

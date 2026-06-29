@@ -48,6 +48,17 @@
         <button type="button" data-md-action="table" aria-label="テーブルを挿入">▦</button>
         <button type="button" data-md-action="link" aria-label="リンクを挿入">↗</button>
       </div>
+      <div class="post-image-uploader" data-post-image-panel>
+        <% if post.persisted? %>
+          <label>
+            <span>記事画像</span>
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" data-post-image-input data-upload-url="<%= admin_post_images_path(post) %>">
+          </label>
+          <p data-post-image-message>画像を選択するとアップロードし、カーソル位置に Markdown を挿入します。</p>
+        <% else %>
+          <p>画像を追加するには、先に下書き保存してください。</p>
+        <% end %>
+      </div>
       <div class="textarea-shell">
         <div class="line-numbers"><% 44.times do |i| %><span><%= i + 1 %></span><% end %></div>
         <%= form.text_area :body, rows: 28, spellcheck: false, data: { markdown_source: true, body_stats_source: true } %>
@@ -60,6 +71,41 @@
         <a href="https://www.markdownguide.org/basic-syntax/" target="_blank" rel="noreferrer">Markdown Guide ↗</a>
       </footer>
     </section>
+
+    <% if post.persisted? %>
+      <section class="post-image-list" aria-labelledby="post-images-title">
+        <div class="post-image-list-header">
+          <h2 id="post-images-title">添付画像</h2>
+          <p>本文から Markdown を削除しても画像は残ります。不要な画像はここから削除してください。</p>
+        </div>
+        <% if post.images.attached? %>
+          <div class="post-image-grid">
+            <% post.images.each do |image| %>
+              <% public_url = post_image_public_url(image) %>
+              <% markdown = post_image_markdown(image) %>
+              <article class="post-image-item">
+                <%= image_tag(public_url || image, alt: image.filename.to_s, class: "post-image-thumb") %>
+                <div>
+                  <strong><%= image.filename %></strong>
+                  <small><%= human_image_size(image) %></small>
+                  <% if public_url.present? %>
+                    <code><%= public_url %></code>
+                  <% else %>
+                    <em>CDN URL未設定</em>
+                  <% end %>
+                </div>
+                <div class="post-image-actions">
+                  <button type="button" class="secondary-button" data-insert-markdown="<%= markdown %>" <%= "disabled" if markdown.blank? %>>挿入</button>
+                  <%= link_to "削除", admin_post_image_path(post, image), class: "outline-danger", data: { turbo_method: :delete, turbo_confirm: "この画像を削除します。本文にURLが残っている場合は画像切れになります。" } %>
+                </div>
+              </article>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="empty-note">添付画像はありません。</p>
+        <% end %>
+      </section>
+    <% end %>
 
     <div class="modal-backdrop" data-publish-modal-backdrop hidden>
       <div class="publish-modal-card" role="dialog" aria-labelledby="modal-title" aria-modal="true">
