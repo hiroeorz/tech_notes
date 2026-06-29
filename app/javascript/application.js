@@ -2,6 +2,40 @@
 import "@hotwired/turbo-rails"
 import "controllers"
 
+document.addEventListener("change", (event) => {
+  const input = event.target
+  if (!(input instanceof HTMLInputElement) || !input.matches("[data-profile-image-input]")) return
+
+  const file = input.files?.[0]
+  if (!file || !file.type.startsWith("image/")) return
+
+  const container = input.closest("[data-profile-image-preview-container]")
+  if (!container) return
+
+  const reader = new FileReader()
+  reader.addEventListener("load", () => {
+    let image = container.querySelector("[data-profile-image-preview]")
+    const placeholder = container.querySelector("[data-profile-image-placeholder]")
+
+    if (!image) {
+      image = document.createElement("img")
+      image.alt = "プロフィール画像"
+      image.className = "settings-avatar-image"
+      image.dataset.profileImagePreview = "true"
+
+      if (placeholder) {
+        placeholder.replaceWith(image)
+      } else {
+        input.before(image)
+      }
+    }
+
+    image.src = reader.result
+    document.querySelector("[data-profile-image-save-notice]")?.removeAttribute("hidden")
+  })
+  reader.readAsDataURL(file)
+})
+
 document.addEventListener("turbo:load", () => {
   const savedTheme = window.localStorage.getItem("theme")
   const defaultTheme = document.documentElement.dataset.defaultTheme || "light"

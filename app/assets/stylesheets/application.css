@@ -1614,6 +1614,14 @@ textarea {
   cursor: pointer;
 }
 
+.settings-save-notice {
+  grid-column: 1 / -1;
+  margin: -4px 0 0;
+  color: var(--orange);
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .settings-avatar {
   width: 100px;
   height: 100px;
@@ -1922,4 +1930,3 @@ textarea {
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
 }
-

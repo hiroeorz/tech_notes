@@ -47,15 +47,16 @@
         <label><span>肩書き</span><%= form.text_field :profile_title %></label>
         <label><span>メールアドレス</span><%= form.email_field :profile_email %></label>
         <label class="wide"><span>自己紹介</span><%= form.text_area :profile_bio, rows: 3 %></label>
-        <label class="settings-avatar-upload">
+        <label class="settings-avatar-upload" data-profile-image-preview-container>
           <% if @setting.profile_image.attached? && @setting.profile_image.blob.persisted? %>
-            <%= image_tag @setting.profile_image, alt: "プロフィール画像", class: "settings-avatar-image" %>
+            <%= image_tag @setting.profile_image, alt: "プロフィール画像", class: "settings-avatar-image", data: { profile_image_preview: true } %>
           <% else %>
-            <span class="settings-avatar avatar-drawing"><span class="face"></span></span>
+            <span class="settings-avatar avatar-drawing" data-profile-image-placeholder><span class="face"></span></span>
           <% end %>
-          <%= form.file_field :profile_image, accept: "image/png,image/jpeg", id: "site_setting_profile_image" %>
+          <%= form.file_field :profile_image, accept: "image/png,image/jpeg", id: "site_setting_profile_image", data: { profile_image_input: true } %>
         </label>
         <label class="secondary-button file-label" for="site_setting_profile_image">プロフィール画像を変更</label>
+        <p class="settings-save-notice" data-profile-image-save-notice hidden>反映するには「変更を保存」をクリックしてください</p>
       </div>
     </section>
 

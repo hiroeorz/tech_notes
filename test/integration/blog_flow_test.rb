@@ -1,4 +1,5 @@
 require "test_helper"
+require "json"
 
 class BlogFlowTest < ActionDispatch::IntegrationTest
   setup do
@@ -310,6 +311,16 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_select "label[for='site_setting_ogp_image']", text: "画像を変更"
     assert_select "input#site_setting_profile_image[type='file']"
     assert_select "label[for='site_setting_profile_image']", text: "プロフィール画像を変更"
+    assert_select "[data-profile-image-input]"
+    assert_select "[data-profile-image-preview-container]"
+    assert_select "[data-profile-image-save-notice][hidden]", text: "反映するには「変更を保存」をクリックしてください"
+
+    importmap_json = response.body[/<script type="importmap"[^>]*>(.*?)<\/script>/m, 1]
+    application_asset_path = JSON.parse(importmap_json).fetch("imports").fetch("application")
+    get application_asset_path
+    assert_response :success
+    assert_includes response.body, "data-profile-image-input"
+    assert_includes response.body, "FileReader"
   end
 
   test "admin management actions require sign in" do
