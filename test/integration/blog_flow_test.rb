@@ -671,8 +671,10 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
   test "admin post image uploads require configured cdn and valid files" do
     post admin_login_path, params: { email: @admin.email, password: "password123" }
 
-    assert_no_difference("ActiveStorage::Attachment.count") do
-      post admin_post_images_path(@post), params: { image: valid_image_upload }
+    with_public_storage_url(nil) do
+      assert_no_difference("ActiveStorage::Attachment.count") do
+        post admin_post_images_path(@post), params: { image: valid_image_upload }
+      end
     end
 
     assert_response :unprocessable_entity
@@ -1023,7 +1025,11 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
   def with_public_storage_url(url)
     previous = ENV["ACTIVE_STORAGE_PUBLIC_BASE_URL"]
-    ENV["ACTIVE_STORAGE_PUBLIC_BASE_URL"] = url
+    if url.nil?
+      ENV.delete("ACTIVE_STORAGE_PUBLIC_BASE_URL")
+    else
+      ENV["ACTIVE_STORAGE_PUBLIC_BASE_URL"] = url
+    end
     yield
   ensure
     ENV["ACTIVE_STORAGE_PUBLIC_BASE_URL"] = previous
