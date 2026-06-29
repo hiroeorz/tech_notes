@@ -309,17 +309,19 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "aria-label=\"現在のパスワードの表示切り替え\""
     assert_select "input#site_setting_ogp_image[type='file']"
     assert_select "label[for='site_setting_ogp_image']", text: "画像を変更"
+    assert_select "input#site_setting_ogp_image[data-settings-image-input][data-preview-alt='OGP画像']"
+    assert_select "[data-settings-image-preview-container] [data-settings-image-placeholder]", text: /推奨サイズ/
+    assert_select "[data-settings-image-save-notice][hidden]", text: "反映するには「変更を保存」をクリックしてください", count: 2
     assert_select "input#site_setting_profile_image[type='file']"
     assert_select "label[for='site_setting_profile_image']", text: "プロフィール画像を変更"
-    assert_select "[data-profile-image-input]"
-    assert_select "[data-profile-image-preview-container]"
-    assert_select "[data-profile-image-save-notice][hidden]", text: "反映するには「変更を保存」をクリックしてください"
+    assert_select "input#site_setting_profile_image[data-settings-image-input][data-preview-alt='プロフィール画像']"
+    assert_select "[data-settings-image-preview-container]", count: 2
 
     importmap_json = response.body[/<script type="importmap"[^>]*>(.*?)<\/script>/m, 1]
     application_asset_path = JSON.parse(importmap_json).fetch("imports").fetch("application")
     get application_asset_path
     assert_response :success
-    assert_includes response.body, "data-profile-image-input"
+    assert_includes response.body, "data-settings-image-input"
     assert_includes response.body, "FileReader"
   end
 

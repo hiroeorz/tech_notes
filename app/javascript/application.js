@@ -4,24 +4,24 @@ import "controllers"
 
 document.addEventListener("change", (event) => {
   const input = event.target
-  if (!(input instanceof HTMLInputElement) || !input.matches("[data-profile-image-input]")) return
+  if (!(input instanceof HTMLInputElement) || !input.matches("[data-settings-image-input]")) return
 
   const file = input.files?.[0]
   if (!file || !file.type.startsWith("image/")) return
 
-  const container = input.closest("[data-profile-image-preview-container]")
+  const container = input.closest("[data-settings-image-preview-container]")
   if (!container) return
 
   const reader = new FileReader()
   reader.addEventListener("load", () => {
-    let image = container.querySelector("[data-profile-image-preview]")
-    const placeholder = container.querySelector("[data-profile-image-placeholder]")
+    let image = container.querySelector("[data-settings-image-preview]")
+    const placeholder = container.querySelector("[data-settings-image-placeholder]")
 
     if (!image) {
       image = document.createElement("img")
-      image.alt = "プロフィール画像"
-      image.className = "settings-avatar-image"
-      image.dataset.profileImagePreview = "true"
+      image.alt = input.dataset.previewAlt || ""
+      image.className = input.dataset.previewClass || ""
+      image.dataset.settingsImagePreview = "true"
 
       if (placeholder) {
         placeholder.replaceWith(image)
@@ -31,7 +31,7 @@ document.addEventListener("change", (event) => {
     }
 
     image.src = reader.result
-    document.querySelector("[data-profile-image-save-notice]")?.removeAttribute("hidden")
+    input.closest(".settings-fields")?.querySelector("[data-settings-image-save-notice]")?.removeAttribute("hidden")
   })
   reader.readAsDataURL(file)
 })
