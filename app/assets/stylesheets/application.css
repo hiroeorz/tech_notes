@@ -1614,6 +1614,14 @@ textarea {
   cursor: pointer;
 }
 
+.file-upload-hint {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
 .settings-avatar {
   width: 100px;
   height: 100px;

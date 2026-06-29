@@ -1,40 +1,51 @@
-# SQLite. Versions 3.8.0 and up are supported.
-#   gem install sqlite3
+# SQLite is used for development and test environments.
+# PostgreSQL is used for production on the Kamal accessory container.
 #
-#   Ensure the SQLite 3 gem is defined in your Gemfile
-#   gem "sqlite3"
+#   gem install pg
 #
-default: &default
+# Ensure the pg gem is defined in the Gemfile for production.
+#
+sqlite_default: &sqlite_default
   adapter: sqlite3
-  max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   timeout: 5000
 
+pg_default: &pg_default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  timeout: 5000
+  host: <%= ENV.fetch("DB_HOST", "127.0.0.1") %>
+  port: <%= ENV.fetch("DB_PORT", 5432) %>
+  username: <%= ENV.fetch("POSTGRES_USER", "hiroe") %>
+  password: <%= ENV.fetch("POSTGRES_PASSWORD", "") %>
+
 development:
-  <<: *default
+  <<: *sqlite_default
   database: storage/development.sqlite3
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
 test:
-  <<: *default
+  <<: *sqlite_default
   database: storage/test.sqlite3
 
-# Store production database in the storage/ directory, which by default
-# is mounted as a persistent Docker volume in config/deploy.yml.
+# Production uses PostgreSQL via Kamal accessory (tech_notes-db).
+# Solid Cache / Queue / Cable use separated logical databases on the same cluster.
 production:
   primary:
-    <<: *default
-    database: storage/production.sqlite3
+    <<: *pg_default
+    database: <%= ENV.fetch("POSTGRES_DB", "tech_notes_production") %>
   cache:
-    <<: *default
-    database: storage/production_cache.sqlite3
+    <<: *pg_default
+    database: <%= ENV.fetch("POSTGRES_DB_CACHE", "tech_notes_production_cache") %>
     migrations_paths: db/cache_migrate
   queue:
-    <<: *default
-    database: storage/production_queue.sqlite3
+    <<: *pg_default
+    database: <%= ENV.fetch("POSTGRES_DB_QUEUE", "tech_notes_production_queue") %>
     migrations_paths: db/queue_migrate
   cable:
-    <<: *default
-    database: storage/production_cable.sqlite3
+    <<: *pg_default
+    database: <%= ENV.fetch("POSTGRES_DB_CABLE", "tech_notes_production_cable") %>
     migrations_paths: db/cable_migrate

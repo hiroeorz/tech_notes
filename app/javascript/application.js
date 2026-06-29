@@ -320,4 +320,28 @@ document.addEventListener("turbo:load", () => {
       }
     })
   }
+
+  document.querySelectorAll("[data-image-upload-input]").forEach((input) => {
+    const scope = input.dataset.imageUploadInput
+    const preview = document.querySelector(`[data-image-upload-preview="${scope}"]`)
+    if (!preview) return
+
+    const current = document.querySelector(`[data-image-upload-current="${scope}"]`)
+    const fallback = document.querySelector(`[data-image-upload-fallback="${scope}"]`)
+    const hint = document.querySelector(`[data-image-upload-hint="${scope}"]`)
+
+    input.addEventListener("change", () => {
+      const file = input.files[0]
+      if (!file) return
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        preview.src = event.target.result
+        preview.hidden = false
+        if (current) current.hidden = true
+        if (fallback) fallback.hidden = true
+        if (hint) hint.hidden = false
+      }
+      reader.readAsDataURL(file)
+    })
+  })
 })
