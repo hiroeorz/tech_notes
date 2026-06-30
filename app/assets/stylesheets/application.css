@@ -1289,11 +1289,17 @@ textarea {
 }
 
 .toolbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 38px;
   height: 28px;
   border: 1px solid var(--line);
   border-radius: 4px;
   background: rgba(255,255,255,0.72);
+  line-height: 1;
+  overflow-wrap: normal;
+  white-space: nowrap;
 }
 
 .post-image-uploader {
@@ -1311,6 +1317,8 @@ textarea {
   align-items: center;
   gap: 10px;
   font-weight: 800;
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .post-image-uploader span,
@@ -1319,7 +1327,9 @@ textarea {
 }
 
 .post-image-uploader input {
-  max-width: 280px;
+  width: 280px;
+  max-width: min(280px, 100%);
+  overflow-wrap: normal;
 }
 
 .post-image-uploader p {
