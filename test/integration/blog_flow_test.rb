@@ -285,6 +285,8 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "投稿を公開する"
     assert_includes response.body, "name=\"commit_status\" value=\"draft\""
     assert_includes response.body, "name=\"commit_status\" value=\"published\""
+    assert_select "button[name='commit_status'][value='draft'][formnovalidate]", count: 2
+    assert_select "button[name='commit_status'][value='published'][formnovalidate]", count: 0
     assert_includes response.body, "公開日時"
     assert_includes response.body, "data-md-action=\"bold\""
     assert_includes response.body, "aria-label=\"太字を挿入\""
@@ -465,6 +467,9 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to edit_admin_post_path(@post.slug)
     assert_equal "更新したTerraform記事", @post.reload.title
+
+    follow_redirect!
+    assert_select ".flash.notice[data-flash-kind='notice']", text: "記事を保存しました。"
   end
 
   test "admin cannot save a post with an invalid slug" do
@@ -524,6 +529,34 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     }
 
     assert @post.reload.published?
+  end
+
+  test "admin can draft save a post without entering the hidden slug field" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+    follow_redirect!
+
+    assert_difference("Post.count", 1) do
+      post admin_posts_path, params: {
+        commit_status: "draft",
+        post: {
+          title: "Hidden Slug Draft",
+          slug: "",
+          excerpt: "下書き保存の確認です。",
+          body: "下書き本文です。",
+          category_id: @category.id,
+          status: "published",
+          kind: "article",
+          tag_names: ""
+        }
+      }
+    end
+
+    created = Post.find_by!(slug: "hidden-slug-draft")
+    assert created.draft?
+    assert_redirected_to edit_admin_post_path(created.slug)
+
+    follow_redirect!
+    assert_select ".flash.notice[data-flash-kind='notice']", text: "記事を保存しました。"
   end
 
   test "admin post list can sort by oldest update" do

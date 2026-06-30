@@ -204,6 +204,13 @@ textarea {
   color: #b42300;
 }
 
+.flash.notice,
+.flash[data-flash-kind="notice"] {
+  border-color: #2f8f46;
+  background-color: #e8f7ed;
+  color: #1f6f35;
+}
+
 .page-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 330px;

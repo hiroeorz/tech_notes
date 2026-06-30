@@ -45,8 +45,9 @@
       <%= render "shared/header" %>
 
       <% if notice.present? || alert.present? %>
+        <% flash_kind = alert.present? ? "alert" : "notice" %>
         <div class="flash-wrap">
-          <p class="flash <%= alert.present? ? "alert" : "notice" %>"><%= alert || notice %></p>
+          <p class="flash <%= flash_kind %>" data-flash-kind="<%= flash_kind %>"><%= alert || notice %></p>
         </div>
       <% end %>
 

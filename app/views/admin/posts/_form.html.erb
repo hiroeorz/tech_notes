@@ -20,7 +20,7 @@
       </label>
 
       <div class="editor-actions">
-        <button type="submit" name="commit_status" value="draft" class="secondary-button">下書き保存</button>
+        <button type="submit" name="commit_status" value="draft" class="secondary-button" formnovalidate>下書き保存</button>
         <% if post.persisted? %>
           <%= link_to "プレビュー", preview_admin_post_path(post.slug), class: "secondary-button" %>
         <% else %>
@@ -152,7 +152,7 @@
         <div class="modal-footer">
           <button type="button" class="secondary-button" data-close-publish-modal>キャンセル</button>
           <button type="button" class="secondary-button" disabled>公開予約（準備中）</button>
-          <button type="submit" name="commit_status" value="draft" class="secondary-button">下書き保存</button>
+          <button type="submit" name="commit_status" value="draft" class="secondary-button" formnovalidate>下書き保存</button>
           <button type="submit" name="commit_status" value="published" class="primary-button">投稿を公開する</button>
         </div>
       </div>
