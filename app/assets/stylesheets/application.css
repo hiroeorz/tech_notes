@@ -899,7 +899,7 @@ textarea {
 }
 
 .code-block.highlight code {
-  color: #d8dee9;
+  color: #d4d4d4;
 }
 
 .code-block .c,
@@ -907,7 +907,7 @@ textarea {
 .code-block .cp,
 .code-block .c1,
 .code-block .cs {
-  color: #7f8c8d;
+  color: #6a9955;
   font-style: italic;
 }
 
@@ -918,7 +918,7 @@ textarea {
 .code-block .kp,
 .code-block .kr,
 .code-block .kt {
-  color: #c792ea;
+  color: #c586c0;
   font-weight: 700;
 }
 
@@ -936,7 +936,7 @@ textarea {
 .code-block .sr,
 .code-block .s1,
 .code-block .ss {
-  color: #a3be8c;
+  color: #ce9178;
 }
 
 .code-block .m,
@@ -946,11 +946,10 @@ textarea {
 .code-block .mi,
 .code-block .mo,
 .code-block .il {
-  color: #f78c6c;
+  color: #b5cea8;
 }
 
 .code-block .n,
-.code-block .na,
 .code-block .nb,
 .code-block .bp,
 .code-block .nc,
@@ -970,13 +969,30 @@ textarea {
 .code-block .vg,
 .code-block .vi,
 .code-block .vm {
-  color: #82aaff;
+  color: #d4d4d4;
+}
+
+.code-block .na,
+.code-block .nt {
+  color: #9cdcfe;
+}
+
+.code-block .nc,
+.code-block .no,
+.code-block .ne,
+.code-block .nn {
+  color: #4ec9b0;
+}
+
+.code-block .nf,
+.code-block .fm {
+  color: #dcdcaa;
 }
 
 .code-block .o,
 .code-block .ow,
 .code-block .p {
-  color: #89ddff;
+  color: #d4d4d4;
 }
 
 .code-block .err,
