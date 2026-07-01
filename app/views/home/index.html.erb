@@ -21,13 +21,16 @@
           <time><%= Date.current.strftime("%Y-%m-%d") %></time>
           <h2>TerraformでS3バケットを作ってみる</h2>
         <% end %>
-        <pre class="code-card"><code>resource "aws_s3_bucket" "example" {
-  bucket = "hiroe-tech-notes"
-  acl    = "private"
-  tags = {
-    Name = "hiroe-tech-notes-bucket"
-  }
-}</code></pre>
+        <% daily_code = [
+          'resource "aws_s3_bucket" "example" {',
+          '  bucket = "hiroe-tech-notes"',
+          '  acl    = "private"',
+          "  tags = {",
+          '    Name = "hiroe-tech-notes-bucket"',
+          "  }",
+          "}"
+        ].join("\n") %>
+        <pre class="code-card highlight language-terraform"><code class="highlight"><%= highlight_code(daily_code, language: "terraform") %></code></pre>
         <p class="memo"># メモ: バージョニングも有効化しておく<br># → 実験ログに続く...</p>
         <%= link_to "実験ログに続く →", experiments_path, class: "daily-link" %>
       </article>

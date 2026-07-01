@@ -36,6 +36,8 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_not_includes response.body, admin_login_path
     assert_select "button[data-theme-toggle][aria-label='テーマ切り替え'][aria-pressed]"
     assert_select ".latest-posts .filter-tabs a[href='#{posts_path(category: @ai_category.slug)}']", text: @ai_category.name
+    assert_select "pre.code-card.highlight.language-terraform code.highlight"
+    assert_includes response.body, "<span"
 
     get posts_path
     assert_response :success

@@ -898,105 +898,173 @@ textarea {
   white-space: pre-wrap;
 }
 
+.code-card.highlight code,
 .code-block.highlight code {
   color: #d4d4d4;
 }
 
+.code-card .c,
 .code-block .c,
+.code-card .cm,
 .code-block .cm,
+.code-card .cp,
 .code-block .cp,
+.code-card .c1,
 .code-block .c1,
+.code-card .cs,
 .code-block .cs {
   color: #6a9955;
   font-style: italic;
 }
 
+.code-card .k,
 .code-block .k,
+.code-card .kc,
 .code-block .kc,
+.code-card .kd,
 .code-block .kd,
+.code-card .kn,
 .code-block .kn,
+.code-card .kp,
 .code-block .kp,
+.code-card .kr,
 .code-block .kr,
+.code-card .kt,
 .code-block .kt {
   color: #c586c0;
   font-weight: 700;
 }
 
+.code-card .s,
 .code-block .s,
+.code-card .sa,
 .code-block .sa,
+.code-card .sb,
 .code-block .sb,
+.code-card .sc,
 .code-block .sc,
+.code-card .dl,
 .code-block .dl,
+.code-card .sd,
 .code-block .sd,
+.code-card .s2,
 .code-block .s2,
+.code-card .se,
 .code-block .se,
+.code-card .sh,
 .code-block .sh,
+.code-card .si,
 .code-block .si,
+.code-card .sx,
 .code-block .sx,
+.code-card .sr,
 .code-block .sr,
+.code-card .s1,
 .code-block .s1,
+.code-card .ss,
 .code-block .ss {
   color: #ce9178;
 }
 
+.code-card .m,
 .code-block .m,
+.code-card .mb,
 .code-block .mb,
+.code-card .mf,
 .code-block .mf,
+.code-card .mh,
 .code-block .mh,
+.code-card .mi,
 .code-block .mi,
+.code-card .mo,
 .code-block .mo,
+.code-card .il,
 .code-block .il {
   color: #b5cea8;
 }
 
+.code-card .n,
 .code-block .n,
+.code-card .nb,
 .code-block .nb,
+.code-card .bp,
 .code-block .bp,
+.code-card .nc,
 .code-block .nc,
+.code-card .no,
 .code-block .no,
+.code-card .nd,
 .code-block .nd,
+.code-card .ni,
 .code-block .ni,
+.code-card .ne,
 .code-block .ne,
+.code-card .nf,
 .code-block .nf,
+.code-card .fm,
 .code-block .fm,
+.code-card .nl,
 .code-block .nl,
+.code-card .nn,
 .code-block .nn,
+.code-card .nx,
 .code-block .nx,
+.code-card .py,
 .code-block .py,
+.code-card .nt,
 .code-block .nt,
+.code-card .nv,
 .code-block .nv,
+.code-card .vc,
 .code-block .vc,
+.code-card .vg,
 .code-block .vg,
+.code-card .vi,
 .code-block .vi,
+.code-card .vm,
 .code-block .vm {
   color: #d4d4d4;
 }
 
+.code-card .na,
 .code-block .na,
+.code-card .nt,
 .code-block .nt {
   color: #9cdcfe;
 }
 
+.code-card .nc,
 .code-block .nc,
+.code-card .no,
 .code-block .no,
+.code-card .ne,
 .code-block .ne,
+.code-card .nn,
 .code-block .nn {
   color: #4ec9b0;
 }
 
+.code-card .nf,
 .code-block .nf,
+.code-card .fm,
 .code-block .fm {
   color: #dcdcaa;
 }
 
+.code-card .o,
 .code-block .o,
+.code-card .ow,
 .code-block .ow,
+.code-card .p,
 .code-block .p {
   color: #d4d4d4;
 }
 
+.code-card .err,
 .code-block .err,
+.code-card .gr,
 .code-block .gr,
+.code-card .gt,
 .code-block .gt {
   color: #ff7b72;
 }
