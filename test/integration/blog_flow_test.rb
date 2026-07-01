@@ -298,6 +298,11 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_select ".tag-preview .chip", text: @tag.name
     assert_includes response.body, "data-live-count-input=\"title\""
     assert_includes response.body, "data-body-stat=\"lines\""
+    assert_includes response.body, "data-controller=\"post-summary\""
+    assert_includes response.body, admin_post_summaries_path
+    assert_includes response.body, "AIで要約生成"
+    assert_includes response.body, "data-post-summary-target=\"body\""
+    assert_includes response.body, "data-post-summary-target=\"excerpt\""
 
     get new_admin_post_path
     assert_response :success
@@ -350,6 +355,9 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_redirected_to admin_login_path
 
     post admin_post_images_path(@post), params: { image: valid_image_upload }
+    assert_redirected_to admin_login_path
+
+    post admin_post_summaries_path, params: { title: "未ログイン", body: "本文" }
     assert_redirected_to admin_login_path
 
     delete admin_post_image_path(@post, 999)
@@ -409,6 +417,65 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_not_includes response.body, "<img src=\"javascript:alert"
     assert_not_includes response.body, "<script>alert"
     assert_not_includes response.body, "alert('xss')"
+  end
+
+  test "admin can generate post summary without saving the post" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+
+    fake_generator = Object.new
+    def fake_generator.generate(title:, body:)
+      raise "unexpected title" unless title == "Terraformのリモートステート設計"
+      raise "unexpected body" unless body.include?("S3")
+
+      "Terraformのリモートステート設計について、構成例と運用上の注意点を整理した記事です。"
+    end
+
+    with_post_summary_generator(fake_generator) do
+      assert_no_changes -> { @post.reload.excerpt } do
+        post admin_post_summaries_path,
+          params: { title: @post.title, body: @post.body },
+          as: :json
+      end
+    end
+
+    assert_response :success
+    assert_equal "Terraformのリモートステート設計について、構成例と運用上の注意点を整理した記事です。", response.parsed_body.fetch("summary")
+  end
+
+  test "admin post summary generation validates input and reports ai failures" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+
+    post admin_post_summaries_path, params: { title: "空本文", body: " " }, as: :json
+    assert_response :bad_request
+    assert_includes response.parsed_body.fetch("error"), "本文"
+
+    fake_generator = Object.new
+    def fake_generator.generate(title:, body:)
+      raise PostSummaryGenerator::GenerationError, "Cloudflare Workers AIの設定が不足しています。"
+    end
+
+    with_post_summary_generator(fake_generator) do
+      post admin_post_summaries_path,
+        params: { title: "設定不足", body: "本文" },
+        as: :json
+    end
+
+    assert_response :bad_gateway
+    assert_includes response.parsed_body.fetch("error"), "設定"
+
+    rate_limited_generator = Object.new
+    def rate_limited_generator.generate(title:, body:)
+      raise PostSummaryGenerator::RateLimitError, "レート制限に達しました。"
+    end
+
+    with_post_summary_generator(rate_limited_generator) do
+      post admin_post_summaries_path,
+        params: { title: "制限", body: "本文" },
+        as: :json
+    end
+
+    assert_response :too_many_requests
+    assert_includes response.parsed_body.fetch("error"), "レート制限"
   end
 
   test "remember me keeps admin signed in through signed cookie and logout clears it" do
@@ -1047,6 +1114,14 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def with_post_summary_generator(generator)
+    original_new = PostSummaryGenerator.method(:new)
+    PostSummaryGenerator.define_singleton_method(:new) { |*| generator }
+    yield
+  ensure
+    PostSummaryGenerator.define_singleton_method(:new) { |*args, **kwargs| original_new.call(*args, **kwargs) }
+  end
 
   def valid_image_upload
     Rack::Test::UploadedFile.new(

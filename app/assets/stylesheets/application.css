@@ -1240,6 +1240,29 @@ textarea {
   pointer-events: none;
 }
 
+.ai-summary-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ai-summary-controls small {
+  color: var(--muted);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.ai-summary-message {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ai-summary-message.error {
+  color: #b42300;
+}
+
 .span-3,
 .settings-fields .wide {
   grid-column: span 3;

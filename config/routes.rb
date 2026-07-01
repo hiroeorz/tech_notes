@@ -26,6 +26,7 @@ Rails.application.routes.draw do
       end
       resources :images, only: [ :create, :destroy ], controller: "post_images"
     end
+    resources :post_summaries, only: [ :create ]
     resource :settings, only: [ :show, :update ]
     root "posts#index"
   end

@@ -7,7 +7,7 @@
     <span><%= post.persisted? ? "編集" : "新規作成" %></span>
   </nav>
 
-  <%= form_with model: [ :admin, post ], class: "editor-form" do |form| %>
+  <%= form_with model: [ :admin, post ], class: "editor-form", data: { controller: "post-summary", post_summary_url_value: admin_post_summaries_path } do |form| %>
     <% if post.errors.any? %>
       <div class="error-box"><%= post.errors.full_messages.join(" / ") %></div>
     <% end %>
@@ -15,7 +15,7 @@
     <div class="editor-title-row">
       <label class="editor-title-field">
         <span>タイトル <b>*</b></span>
-        <%= form.text_field :title, maxlength: 100, required: true, data: { live_count_input: "title", live_count_max: 100 } %>
+        <%= form.text_field :title, maxlength: 100, required: true, data: { live_count_input: "title", live_count_max: 100, post_summary_target: "title" } %>
         <em data-live-count-output="title"><%= post.title.to_s.length %> / 100</em>
       </label>
 
@@ -61,7 +61,7 @@
       </div>
       <div class="textarea-shell">
         <div class="line-numbers"><% 44.times do |i| %><span><%= i + 1 %></span><% end %></div>
-        <%= form.text_area :body, rows: 28, spellcheck: false, data: { markdown_source: true, body_stats_source: true } %>
+        <%= form.text_area :body, rows: 28, spellcheck: false, data: { markdown_source: true, body_stats_source: true, post_summary_target: "body" } %>
         <div class="markdown-preview" data-markdown-preview hidden></div>
       </div>
       <footer class="editor-footer">
@@ -137,8 +137,13 @@
           </label>
           <label class="span-full">
             <span>記事の要約（エクサープト）</span>
-            <%= form.text_field :excerpt, maxlength: 160, data: { live_count_input: "excerpt", live_count_max: 160 } %>
+            <div class="ai-summary-controls">
+              <button type="button" class="secondary-button" data-action="post-summary#generate" data-post-summary-target="button">AIで要約生成</button>
+              <small>現在のタイトルと本文を外部AIに送信し、生成結果を要約欄に反映します。</small>
+            </div>
+            <%= form.text_field :excerpt, maxlength: 200, data: { live_count_input: "excerpt", live_count_max: 160, post_summary_target: "excerpt" } %>
             <em data-live-count-output="excerpt"><%= post.excerpt.to_s.length %> / 160</em>
+            <strong class="ai-summary-message" data-post-summary-target="message" hidden></strong>
           </label>
           <label>
             <span>ステータス</span>
