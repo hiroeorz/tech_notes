@@ -303,8 +303,10 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "data-controller=\"post-summary\""
     assert_includes response.body, admin_post_summaries_path
     assert_includes response.body, admin_post_slugs_path
-    assert_includes response.body, "AIで要約生成"
-    assert_includes response.body, "AIで生成"
+    assert_includes response.body, "aria-label=\"AIで要約を生成\""
+    assert_includes response.body, "aria-label=\"AIでスラッグを生成\""
+    assert_includes response.body, "data-tooltip=\"現在のタイトルと本文を外部AIに送信し、生成結果を要約欄に反映します。\""
+    assert_includes response.body, "data-tooltip=\"タイトルと本文から英語のURL用スラッグを生成します。\""
     assert_includes response.body, "data-post-summary-target=\"body\""
     assert_includes response.body, "data-post-summary-target=\"excerpt\""
     assert_includes response.body, "data-post-summary-target=\"slug\""

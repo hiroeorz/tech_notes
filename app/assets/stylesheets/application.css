@@ -1249,14 +1249,65 @@ textarea {
 .ai-summary-controls {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  justify-content: flex-start;
 }
 
-.ai-summary-controls small {
-  color: var(--muted);
-  font-weight: 600;
+.ai-icon-button {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(255, 252, 247, 0.78);
+  color: var(--ink);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ai-icon-button:hover,
+.ai-icon-button:focus-visible {
+  border-color: var(--orange);
+  background: rgba(241, 90, 36, 0.1);
+  outline: none;
+}
+
+.ai-icon-button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.ai-icon-button::after {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  z-index: 20;
+  width: max-content;
+  max-width: min(280px, 70vw);
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper-deep);
+  box-shadow: 0 8px 20px rgba(33, 28, 22, 0.16);
+  color: var(--ink);
+  content: attr(data-tooltip);
+  font-size: 12px;
+  font-weight: 700;
   line-height: 1.5;
+  opacity: 0;
+  pointer-events: none;
+  text-align: left;
+  transform: translateX(-50%) translateY(4px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  white-space: normal;
+}
+
+.ai-icon-button:hover::after,
+.ai-icon-button:focus-visible::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 .ai-summary-message {

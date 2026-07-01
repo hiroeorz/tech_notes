@@ -117,8 +117,7 @@
           <label>
             <span>スラッグ <b>*</b></span>
             <div class="ai-summary-controls">
-              <button type="button" class="secondary-button" data-action="post-summary#generateSlug" data-post-summary-target="slugButton">AIで生成</button>
-              <small>タイトルと本文から英語のURL用スラッグを生成します。</small>
+              <button type="button" class="ai-icon-button" data-action="post-summary#generateSlug" data-post-summary-target="slugButton" aria-label="AIでスラッグを生成" data-tooltip="タイトルと本文から英語のURL用スラッグを生成します。">🧠</button>
             </div>
             <%= form.text_field :slug, required: true, pattern: "[a-z0-9]+(-[a-z0-9]+)*", title: "半角英数字とハイフンで入力してください", data: { post_summary_target: "slug" } %>
             <strong class="ai-summary-message" data-post-summary-target="slugMessage" hidden></strong>
@@ -143,8 +142,7 @@
           <label class="span-full">
             <span>記事の要約（エクサープト）</span>
             <div class="ai-summary-controls">
-              <button type="button" class="secondary-button" data-action="post-summary#generate" data-post-summary-target="button">AIで要約生成</button>
-              <small>現在のタイトルと本文を外部AIに送信し、生成結果を要約欄に反映します。</small>
+              <button type="button" class="ai-icon-button" data-action="post-summary#generate" data-post-summary-target="button" aria-label="AIで要約を生成" data-tooltip="現在のタイトルと本文を外部AIに送信し、生成結果を要約欄に反映します。">🧠</button>
             </div>
             <%= form.text_area :excerpt, rows: 3, maxlength: 100, data: { live_count_input: "excerpt", live_count_max: 100, post_summary_target: "excerpt" } %>
             <em data-live-count-output="excerpt"><%= post.excerpt.to_s.length %> / 100</em>
