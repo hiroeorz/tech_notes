@@ -78,6 +78,21 @@ class PostSummaryGeneratorTest < ActiveSupport::TestCase
     assert_includes error.message, "レート制限"
   end
 
+  test "truncates generated summaries at sentence boundary under one hundred characters" do
+    client = CapturingClient.new(response: "#{"あ" * 80}。#{"い" * 40}。")
+    summary = PostSummaryGenerator.new(client: client).generate(title: "タイトル", body: "本文")
+
+    assert_equal "#{"あ" * 80}。", summary
+  end
+
+  test "rejects overlong summaries without a sentence boundary" do
+    error = assert_raises(PostSummaryGenerator::GenerationError) do
+      PostSummaryGenerator.new(client: CapturingClient.new(response: "あ" * 120)).generate(title: "タイトル", body: "本文")
+    end
+
+    assert_includes error.message, "短く生成"
+  end
+
   test "rejects html output" do
     error = assert_raises(PostSummaryGenerator::GenerationError) do
       PostSummaryGenerator.new(client: CapturingClient.new(response: "<p>本文です</p>")).generate(title: "タイトル", body: "本文")

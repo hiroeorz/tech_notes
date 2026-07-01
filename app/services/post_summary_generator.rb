@@ -4,7 +4,7 @@ class PostSummaryGenerator
   class RateLimitError < GenerationError; end
 
   MAX_BODY_CHARS = 12_000
-  MAX_SUMMARY_CHARS = 200
+  MAX_SUMMARY_CHARS = 100
 
   def initialize(client: CloudflareAiClient.new)
     @client = client
@@ -33,13 +33,14 @@ class PostSummaryGenerator
           与えられたタイトルと本文だけを根拠に、記事の要約を作成してください。
           本文にない事実は追加しないでください。
           Markdown、HTML、箇条書き、見出し、引用符、前置き文は使わないでください。
+          要約は必ず句点「。」で終えてください。
           出力は要約本文のみとしてください。
         PROMPT
       },
       {
         role: "user",
         content: <<~PROMPT
-          次の記事を日本語で100から160字程度の1段落に要約してください。
+          次の記事を日本語で70から90字程度の1段落に要約してください。
           URLの羅列、コードの詳細、Markdown記法は要約に含めないでください。
 
           [タイトル]
@@ -60,11 +61,20 @@ class PostSummaryGenerator
     raise GenerationError, "Cloudflare Workers AIから要約を取得できませんでした。" if summary.blank?
     raise GenerationError, "AIが想定外のHTMLを返しました。" if summary.match?(/<[^>]+>/)
 
-    summary.first(MAX_SUMMARY_CHARS)
+    truncate_at_sentence_boundary(summary)
   end
 
   def wrapped_with_quote?(summary)
     (summary.start_with?("\"") && summary.end_with?("\"")) ||
       (summary.start_with?("「") && summary.end_with?("」"))
+  end
+
+  def truncate_at_sentence_boundary(summary)
+    return summary if summary.length <= MAX_SUMMARY_CHARS
+
+    boundary_index = summary.first(MAX_SUMMARY_CHARS).rindex(/[。！？]/)
+    return summary.first(boundary_index + 1) if boundary_index
+
+    raise GenerationError, "AIが要約を短く生成できませんでした。もう一度実行してください。"
   end
 end

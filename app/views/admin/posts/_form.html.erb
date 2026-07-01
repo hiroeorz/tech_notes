@@ -141,8 +141,8 @@
               <button type="button" class="secondary-button" data-action="post-summary#generate" data-post-summary-target="button">AIで要約生成</button>
               <small>現在のタイトルと本文を外部AIに送信し、生成結果を要約欄に反映します。</small>
             </div>
-            <%= form.text_area :excerpt, rows: 3, maxlength: 200, data: { live_count_input: "excerpt", live_count_max: 160, post_summary_target: "excerpt" } %>
-            <em data-live-count-output="excerpt"><%= post.excerpt.to_s.length %> / 160</em>
+            <%= form.text_area :excerpt, rows: 3, maxlength: 100, data: { live_count_input: "excerpt", live_count_max: 100, post_summary_target: "excerpt" } %>
+            <em data-live-count-output="excerpt"><%= post.excerpt.to_s.length %> / 100</em>
             <strong class="ai-summary-message" data-post-summary-target="message" hidden></strong>
           </label>
           <label>
