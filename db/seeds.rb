@@ -27,8 +27,9 @@ categories = [
   [ "自動化", "automation", "automation", 4 ],
   [ "プログラミング", "programming", "code", 5 ],
   [ "セキュリティ", "security", "security", 6 ],
-  [ "運用", "operations", "ops", 7 ],
-  [ "ポエム", "poem", "poem", 8 ]
+  [ "AI開発", "ai-development", "code", 7 ],
+  [ "運用", "operations", "ops", 8 ],
+  [ "ポエム", "poem", "poem", 9 ]
 ].to_h { |name, slug, icon, position|
   category = Category.find_or_create_by!(slug: slug) do |record|
     record.name = name

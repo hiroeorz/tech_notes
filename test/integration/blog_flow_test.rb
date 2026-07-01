@@ -11,6 +11,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       password_digest: AdminUser.digest_password("password123", "salt")
     )
     @category = Category.create!(name: "AWS", slug: "aws", icon_key: "aws", position: 1)
+    @ai_category = Category.create!(name: "AI開発", slug: "ai-development", icon_key: "code", position: 2)
     @tag = Tag.create!(name: "Terraform", slug: "terraform")
     @post = Post.create!(
       admin_user: @admin,
@@ -34,6 +35,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_not_includes response.body, "管理者ログイン"
     assert_not_includes response.body, admin_login_path
     assert_select "button[data-theme-toggle][aria-label='テーマ切り替え'][aria-pressed]"
+    assert_select ".latest-posts .filter-tabs a[href='#{posts_path(category: @ai_category.slug)}']", text: @ai_category.name
 
     get posts_path
     assert_response :success

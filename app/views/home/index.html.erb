@@ -38,7 +38,7 @@
         <h2>最新の記事</h2>
         <div class="filter-tabs">
           <%= link_to "すべて", posts_path, class: "active" %>
-          <% %w[infrastructure aws automation programming security].each do |slug| %>
+          <% %w[infrastructure aws automation programming security ai-development].each do |slug| %>
             <% if (category = @top_filter_categories[slug]) %>
               <%= link_to category.name, posts_path(category: category.slug) %>
             <% end %>
