@@ -19,8 +19,6 @@
         <%= link_to tag.name, posts_path(tag: tag.slug), class: "chip" %>
       <% end %>
     </div>
-    <p class="article-excerpt"><%= @post.excerpt %></p>
-
     <div class="markdown-body">
       <%= render_markdown(@post.body) %>
     </div>
