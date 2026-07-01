@@ -165,6 +165,39 @@ The recommended initial value is:
 export CLOUDFLARE_AI_TIMEOUT_SECONDS="60"
 ```
 
+## Google Search Console
+
+This application embeds the Google Search Console site verification meta tag
+when the verification token is provided via an environment variable. The tag is
+rendered in `app/views/layouts/application.html.erb` only when
+`GOOGLE_SITE_VERIFICATION` is set, so local development without the variable
+produces no tag.
+
+Required environment variable:
+
+```bash
+export GOOGLE_SITE_VERIFICATION="..."
+```
+
+### Verification token
+
+Set `GOOGLE_SITE_VERIFICATION` to the `content` value of the meta tag issued by
+Google Search Console. The tag has the form:
+
+```html
+<meta name="google-site-verification" content="..." />
+```
+
+Copy only the `content` value (not the entire tag) into the environment
+variable.
+
+In Google Search Console:
+
+1. Open `Settings`.
+2. Open `Ownership verification`.
+3. Select `HTML tag` as the verification method.
+4. Copy the `content` value from the displayed meta tag.
+
 ### Kamal deployment
 
 `config/deploy.yml` expects these values as secrets:
@@ -178,6 +211,7 @@ export CLOUDFLARE_AI_TIMEOUT_SECONDS="60"
 - `CLOUDFLARE_AI_API_TOKEN`
 - `CLOUDFLARE_AI_MODEL`
 - `CLOUDFLARE_AI_TIMEOUT_SECONDS`
+- `GOOGLE_SITE_VERIFICATION`
 
 Set them in the shell or secret manager used by `.kamal/secrets` before running
 `kamal deploy`.

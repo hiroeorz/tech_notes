@@ -4,6 +4,9 @@
     <title><%= @page_title || content_for(:title) || "Hiroe Tech Notes" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="description" content="<%= @page_description || content_for(:description) || current_site_setting.description %>">
+    <% if ENV["GOOGLE_SITE_VERIFICATION"].present? %>
+      <meta name="google-site-verification" content="<%= ENV["GOOGLE_SITE_VERIFICATION"] %>" />
+    <% end %>
     <meta property="og:site_name" content="<%= current_site_setting.blog_title %>">
     <meta property="og:title" content="<%= @page_title || content_for(:title) || current_site_setting.blog_title %>">
     <meta property="og:description" content="<%= @page_description || content_for(:description) || current_site_setting.description %>">
