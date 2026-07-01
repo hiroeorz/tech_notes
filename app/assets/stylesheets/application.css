@@ -898,6 +898,93 @@ textarea {
   white-space: pre-wrap;
 }
 
+.code-block.highlight code {
+  color: #d8dee9;
+}
+
+.code-block .c,
+.code-block .cm,
+.code-block .cp,
+.code-block .c1,
+.code-block .cs {
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+.code-block .k,
+.code-block .kc,
+.code-block .kd,
+.code-block .kn,
+.code-block .kp,
+.code-block .kr,
+.code-block .kt {
+  color: #c792ea;
+  font-weight: 700;
+}
+
+.code-block .s,
+.code-block .sa,
+.code-block .sb,
+.code-block .sc,
+.code-block .dl,
+.code-block .sd,
+.code-block .s2,
+.code-block .se,
+.code-block .sh,
+.code-block .si,
+.code-block .sx,
+.code-block .sr,
+.code-block .s1,
+.code-block .ss {
+  color: #a3be8c;
+}
+
+.code-block .m,
+.code-block .mb,
+.code-block .mf,
+.code-block .mh,
+.code-block .mi,
+.code-block .mo,
+.code-block .il {
+  color: #f78c6c;
+}
+
+.code-block .n,
+.code-block .na,
+.code-block .nb,
+.code-block .bp,
+.code-block .nc,
+.code-block .no,
+.code-block .nd,
+.code-block .ni,
+.code-block .ne,
+.code-block .nf,
+.code-block .fm,
+.code-block .nl,
+.code-block .nn,
+.code-block .nx,
+.code-block .py,
+.code-block .nt,
+.code-block .nv,
+.code-block .vc,
+.code-block .vg,
+.code-block .vi,
+.code-block .vm {
+  color: #82aaff;
+}
+
+.code-block .o,
+.code-block .ow,
+.code-block .p {
+  color: #89ddff;
+}
+
+.code-block .err,
+.code-block .gr,
+.code-block .gt {
+  color: #ff7b72;
+}
+
 .article-footer {
   margin-top: 28px;
   padding-top: 8px;

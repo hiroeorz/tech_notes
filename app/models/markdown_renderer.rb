@@ -1,5 +1,6 @@
 require "digest"
 require "nokogiri"
+require "rouge"
 
 class MarkdownRenderer
   COMMONMARK_OPTIONS = {
@@ -85,6 +86,7 @@ class MarkdownRenderer
   def decorate_code_blocks(fragment)
     fragment.css("pre").each do |pre|
       pre["class"] = append_class(pre["class"], "code-block")
+      highlight_code_block(pre)
     end
   end
 
@@ -130,6 +132,26 @@ class MarkdownRenderer
     classes = current.to_s.split
     classes << class_name
     classes.uniq.join(" ")
+  end
+
+  def highlight_code_block(pre)
+    language = pre["lang"].to_s.strip.presence
+    code = pre.at_css("code")
+    return if language.blank? || code.blank?
+    return if language.in?(%w[text plaintext])
+
+    lexer = Rouge::Lexer.find_fancy(language, code.text)
+    return unless lexer
+
+    formatter = Rouge::Formatters::HTML.new
+    highlighted = formatter.format(lexer.lex(code.text))
+    code.children.remove
+    code.add_child(Nokogiri::HTML5.fragment(highlighted))
+    pre["class"] = append_class(pre["class"], "highlight")
+    pre["class"] = append_class(pre["class"], "language-#{lexer.tag}")
+    code["class"] = append_class(code["class"], "highlight")
+  rescue Rouge::Guesser::Ambiguous
+    nil
   end
 
   def diagram_markup

@@ -21,4 +21,50 @@ class MarkdownRendererTest < ActiveSupport::TestCase
     assert_equal "セクション1", headings[0][1]
     assert_equal "セクション2", headings[1][1]
   end
+
+  test "highlights fenced code blocks by language" do
+    markdown = <<~MARKDOWN
+      ```ruby
+      puts "hello"
+      ```
+
+      ```bash
+      echo "hello"
+      ```
+
+      ```elixir
+      IO.puts("hello")
+      ```
+
+      ```javascript
+      console.log("hello")
+      ```
+    MARKDOWN
+
+    html = MarkdownRenderer.new(markdown).render
+
+    assert_includes html, "code-block"
+    assert_includes html, "highlight"
+    assert_includes html, "language-ruby"
+    assert_includes html, "language-shell"
+    assert_includes html, "language-elixir"
+    assert_includes html, "language-javascript"
+    assert_includes html, "<span"
+    assert_not_includes html, "style="
+  end
+
+  test "keeps code blocks without a language unhighlighted" do
+    markdown = <<~MARKDOWN
+      ```
+      puts "hello"
+      ```
+    MARKDOWN
+
+    html = MarkdownRenderer.new(markdown).render
+
+    assert_includes html, "code-block"
+    assert_not_includes html, "language-ruby"
+    assert_not_includes html, "highlight"
+    assert_includes html, "puts"
+  end
 end

@@ -48,6 +48,7 @@ gem "aws-sdk-s3", require: false
 
 # Render CommonMark/GitHub Flavored Markdown for public articles and admin previews.
 gem "commonmarker"
+gem "rouge"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

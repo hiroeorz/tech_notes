@@ -941,6 +941,28 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_select ".markdown-body ul", count: 0
   end
 
+  test "article markdown highlights fenced code blocks with known languages" do
+    @post.update!(
+      body: <<~MARKDOWN
+        ```ruby
+        puts "hello"
+        ```
+
+        ```bash
+        echo "hello"
+        ```
+      MARKDOWN
+    )
+
+    get post_path(@post.slug)
+
+    assert_response :success
+    assert_includes response.body, "code-block"
+    assert_includes response.body, "language-ruby"
+    assert_includes response.body, "language-shell"
+    assert_not_includes response.body, "style="
+  end
+
   test "admin can create preview publish and delete a post" do
     post admin_login_path, params: { email: @admin.email, password: "password123" }
     follow_redirect!
