@@ -11,6 +11,9 @@ module Admin
     rescue PostSummaryGenerator::GenerationError => error
       Rails.logger.warn("post_summary_generation_failed: #{error.class}: #{error.message}")
       render json: { error: error.message }, status: :bad_gateway
+    rescue StandardError => error
+      Rails.logger.error("post_summary_generation_unexpected_error: #{error.class}: #{error.message}")
+      render json: { error: "要約を生成できませんでした。サーバーログを確認してください。" }, status: :internal_server_error
     end
 
     private

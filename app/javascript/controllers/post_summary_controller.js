@@ -27,7 +27,7 @@ export default class extends Controller {
           body: this.bodyTarget.value
         })
       })
-      const payload = await response.json()
+      const payload = await this.parseResponse(response)
       if (!response.ok) throw new Error(payload.error || "要約を生成できませんでした。")
 
       this.excerptTarget.value = payload.summary || ""
@@ -46,5 +46,24 @@ export default class extends Controller {
     this.messageTarget.hidden = false
     this.messageTarget.textContent = text
     this.messageTarget.classList.toggle("error", error)
+  }
+
+  async parseResponse(response) {
+    const contentType = response.headers.get("Content-Type") || ""
+    if (contentType.includes("application/json")) {
+      try {
+        return await response.json()
+      } catch (_error) {
+        return { error: "サーバーから不正なJSONレスポンスが返りました。サーバーログを確認してください。" }
+      }
+    }
+
+    const text = await response.text()
+    if (response.status === 401) return { error: "ログインし直してから要約を生成してください。" }
+    if (text.includes("<!doctype") || text.includes("<html")) {
+      return { error: "サーバーからHTMLエラーページが返りました。ログイン状態やサーバーログを確認してください。" }
+    }
+
+    return { error: text.trim() || "要約を生成できませんでした。" }
   }
 }

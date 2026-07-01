@@ -117,7 +117,7 @@ Required environment variables:
 export CLOUDFLARE_ACCOUNT_ID="..."
 export CLOUDFLARE_AI_API_TOKEN="..."
 export CLOUDFLARE_AI_MODEL="@cf/meta/llama-3.2-1b-instruct"
-export CLOUDFLARE_AI_TIMEOUT_SECONDS="10"
+export CLOUDFLARE_AI_TIMEOUT_SECONDS="60"
 ```
 
 ### Account ID
@@ -162,7 +162,7 @@ Set `CLOUDFLARE_AI_TIMEOUT_SECONDS` to the HTTP timeout for Workers AI requests.
 The recommended initial value is:
 
 ```bash
-export CLOUDFLARE_AI_TIMEOUT_SECONDS="10"
+export CLOUDFLARE_AI_TIMEOUT_SECONDS="60"
 ```
 
 ### Kamal deployment

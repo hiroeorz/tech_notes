@@ -340,7 +340,17 @@ document.addEventListener("turbo:load", () => {
             },
             body
           })
-          const payload = await response.json()
+          const contentType = response.headers.get("Content-Type") || ""
+          let payload
+          if (contentType.includes("application/json")) {
+            try {
+              payload = await response.json()
+            } catch (_error) {
+              payload = { error: "サーバーから不正なJSONレスポンスが返りました。サーバーログを確認してください。" }
+            }
+          } else {
+            payload = { error: response.status === 401 ? "ログインし直してから画像をアップロードしてください。" : "サーバーからHTMLエラーページが返りました。ログイン状態やサーバーログを確認してください。" }
+          }
           if (!response.ok) throw new Error(payload.error || "画像をアップロードできませんでした。")
 
           insertAtCursor(payload.markdown)

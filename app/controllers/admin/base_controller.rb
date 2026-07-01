@@ -5,7 +5,12 @@ module Admin
     private
 
     def require_admin
-      redirect_to admin_login_path, alert: "ログインしてください。" unless admin_signed_in?
+      return if admin_signed_in?
+
+      respond_to do |format|
+        format.json { render json: { error: "ログインし直してから実行してください。" }, status: :unauthorized }
+        format.any { redirect_to admin_login_path, alert: "ログインしてください。" }
+      end
     end
   end
 end

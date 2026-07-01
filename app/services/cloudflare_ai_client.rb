@@ -7,7 +7,7 @@ class CloudflareAiClient
   class RequestError < StandardError; end
   class RateLimitError < RequestError; end
 
-  DEFAULT_TIMEOUT_SECONDS = 10
+  DEFAULT_TIMEOUT_SECONDS = 60
 
   def initialize(
     account_id: self.class.config_value(:account_id, "CLOUDFLARE_ACCOUNT_ID"),

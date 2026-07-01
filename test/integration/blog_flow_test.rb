@@ -363,6 +363,10 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     post admin_post_summaries_path, params: { title: "未ログイン", body: "本文" }
     assert_redirected_to admin_login_path
 
+    post admin_post_summaries_path, params: { title: "未ログイン", body: "本文" }, as: :json
+    assert_response :unauthorized
+    assert_includes response.parsed_body.fetch("error"), "ログイン"
+
     delete admin_post_image_path(@post, 999)
     assert_redirected_to admin_login_path
 
