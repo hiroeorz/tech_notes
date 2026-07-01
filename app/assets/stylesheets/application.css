@@ -1231,13 +1231,19 @@ textarea {
 }
 
 .editor-fields em {
-  margin-top: -34px;
   padding-right: 12px;
   color: var(--muted);
   text-align: right;
   font-style: normal;
   font-size: 12px;
   pointer-events: none;
+}
+
+.editor-fields textarea {
+  width: 100%;
+  min-width: 0;
+  resize: vertical;
+  overflow-wrap: anywhere;
 }
 
 .ai-summary-controls {

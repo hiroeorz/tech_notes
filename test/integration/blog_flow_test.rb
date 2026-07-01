@@ -303,6 +303,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "AIで要約生成"
     assert_includes response.body, "data-post-summary-target=\"body\""
     assert_includes response.body, "data-post-summary-target=\"excerpt\""
+    assert_select "textarea[name='post[excerpt]'][data-post-summary-target='excerpt']"
 
     get new_admin_post_path
     assert_response :success
