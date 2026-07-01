@@ -7,7 +7,7 @@
     <span><%= post.persisted? ? "編集" : "新規作成" %></span>
   </nav>
 
-  <%= form_with model: [ :admin, post ], class: "editor-form", data: { controller: "post-summary", post_summary_url_value: admin_post_summaries_path } do |form| %>
+  <%= form_with model: [ :admin, post ], class: "editor-form", data: { controller: "post-summary", post_summary_url_value: admin_post_summaries_path, post_summary_slug_url_value: admin_post_slugs_path } do |form| %>
     <% if post.errors.any? %>
       <div class="error-box"><%= post.errors.full_messages.join(" / ") %></div>
     <% end %>
@@ -116,7 +116,12 @@
         <div class="modal-body editor-fields">
           <label>
             <span>スラッグ <b>*</b></span>
-            <%= form.text_field :slug, required: true, pattern: "[a-z0-9]+(-[a-z0-9]+)*", title: "半角英数字とハイフンで入力してください" %>
+            <div class="ai-summary-controls">
+              <button type="button" class="secondary-button" data-action="post-summary#generateSlug" data-post-summary-target="slugButton">AIで生成</button>
+              <small>タイトルと本文から英語のURL用スラッグを生成します。</small>
+            </div>
+            <%= form.text_field :slug, required: true, pattern: "[a-z0-9]+(-[a-z0-9]+)*", title: "半角英数字とハイフンで入力してください", data: { post_summary_target: "slug" } %>
+            <strong class="ai-summary-message" data-post-summary-target="slugMessage" hidden></strong>
           </label>
           <label>
             <span>カテゴリー</span>

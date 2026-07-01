@@ -302,9 +302,12 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "data-body-stat=\"lines\""
     assert_includes response.body, "data-controller=\"post-summary\""
     assert_includes response.body, admin_post_summaries_path
+    assert_includes response.body, admin_post_slugs_path
     assert_includes response.body, "AIで要約生成"
+    assert_includes response.body, "AIで生成"
     assert_includes response.body, "data-post-summary-target=\"body\""
     assert_includes response.body, "data-post-summary-target=\"excerpt\""
+    assert_includes response.body, "data-post-summary-target=\"slug\""
     assert_select "textarea[name='post[excerpt]'][data-post-summary-target='excerpt']"
 
     get new_admin_post_path
@@ -364,6 +367,13 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_redirected_to admin_login_path
 
     post admin_post_summaries_path, params: { title: "未ログイン", body: "本文" }, as: :json
+    assert_response :unauthorized
+    assert_includes response.parsed_body.fetch("error"), "ログイン"
+
+    post admin_post_slugs_path, params: { title: "未ログイン", body: "本文" }
+    assert_redirected_to admin_login_path
+
+    post admin_post_slugs_path, params: { title: "未ログイン", body: "本文" }, as: :json
     assert_response :unauthorized
     assert_includes response.parsed_body.fetch("error"), "ログイン"
 
@@ -477,6 +487,68 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
     with_post_summary_generator(rate_limited_generator) do
       post admin_post_summaries_path,
+        params: { title: "制限", body: "本文" },
+        as: :json
+    end
+
+    assert_response :too_many_requests
+    assert_includes response.parsed_body.fetch("error"), "レート制限"
+  end
+
+  test "admin can generate post slug without saving the post" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+
+    fake_generator = Object.new
+    def fake_generator.generate(title:, body:)
+      raise "unexpected title" unless title == "Aurora PostgreSQLへオンプレから移行期間中に接続する"
+      raise "unexpected body" unless body.include?("Aurora")
+
+      "aurora-postgresql-onprem-migration-access"
+    end
+
+    with_post_slug_generator(fake_generator) do
+      assert_no_changes -> { @post.reload.slug } do
+        post admin_post_slugs_path,
+          params: {
+            title: "Aurora PostgreSQLへオンプレから移行期間中に接続する",
+            body: "AWSでAurora for PostgreSQLを使い、移行期間中はオンプレからもアクセスします。"
+          },
+          as: :json
+      end
+    end
+
+    assert_response :success
+    assert_equal "aurora-postgresql-onprem-migration-access", response.parsed_body.fetch("slug")
+  end
+
+  test "admin post slug generation validates input and reports ai failures" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+
+    post admin_post_slugs_path, params: { title: " ", body: " " }, as: :json
+    assert_response :bad_request
+    assert_includes response.parsed_body.fetch("error"), "タイトル"
+
+    fake_generator = Object.new
+    def fake_generator.generate(title:, body:)
+      raise PostSlugGenerator::GenerationError, "Cloudflare Workers AIの設定が不足しています。"
+    end
+
+    with_post_slug_generator(fake_generator) do
+      post admin_post_slugs_path,
+        params: { title: "設定不足", body: "本文" },
+        as: :json
+    end
+
+    assert_response :bad_gateway
+    assert_includes response.parsed_body.fetch("error"), "設定"
+
+    rate_limited_generator = Object.new
+    def rate_limited_generator.generate(title:, body:)
+      raise PostSlugGenerator::RateLimitError, "レート制限に達しました。"
+    end
+
+    with_post_slug_generator(rate_limited_generator) do
+      post admin_post_slugs_path,
         params: { title: "制限", body: "本文" },
         as: :json
     end
@@ -1128,6 +1200,14 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     yield
   ensure
     PostSummaryGenerator.define_singleton_method(:new) { |*args, **kwargs| original_new.call(*args, **kwargs) }
+  end
+
+  def with_post_slug_generator(generator)
+    original_new = PostSlugGenerator.method(:new)
+    PostSlugGenerator.define_singleton_method(:new) { |*| generator }
+    yield
+  ensure
+    PostSlugGenerator.define_singleton_method(:new) { |*args, **kwargs| original_new.call(*args, **kwargs) }
   end
 
   def valid_image_upload
