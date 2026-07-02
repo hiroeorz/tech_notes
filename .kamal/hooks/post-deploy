@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+set -eu
+
+USER="${BACKUP_DEPLOY_USER:-hiroe}"
+HOSTS="${BACKUP_DEPLOY_HOSTS:-${KAMAL_HOSTS:-133.117.73.23}}"
+REMOTE_DIR="${BACKUP_DEPLOY_DIR:-/home/$USER/ops}"
+SCRIPT="backup_postgres_to_r2.sh"
+LOCAL_SCRIPT="script/ops/$SCRIPT"
+
+if [ ! -f "$LOCAL_SCRIPT" ]; then
+  echo "Backup script not found: $LOCAL_SCRIPT" >&2
+  exit 1
+fi
+
+echo "Deploying backup script to $HOSTS:$REMOTE_DIR/$SCRIPT"
+
+for HOST in $(printf '%s' "$HOSTS" | tr ',' ' '); do
+  ssh "$USER@$HOST" "mkdir -p '$REMOTE_DIR'"
+  scp "$LOCAL_SCRIPT" "$USER@$HOST:$REMOTE_DIR/$SCRIPT"
+  ssh "$USER@$HOST" "chmod 0750 '$REMOTE_DIR/$SCRIPT'"
+done
+
+echo "Backup script deployed"

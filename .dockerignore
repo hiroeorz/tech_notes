@@ -20,6 +20,9 @@
 !/log/.keep
 !/tmp/.keep
 
+# Ignore ad-hoc PostgreSQL backup dumps.
+/*.dump
+
 # Ignore pidfiles, but keep the directory.
 /tmp/pids/*
 !/tmp/pids/.keep

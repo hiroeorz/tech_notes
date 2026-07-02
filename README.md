@@ -106,6 +106,134 @@ if the blob key is `abc123`, this URL must return the image:
 https://cdn.example.com/abc123
 ```
 
+## PostgreSQL backup preparation
+
+Production PostgreSQL backups are run from the VM host with cron. The backup
+script is documented in `docs/backup-requirements.md` and is expected to upload
+dump files to Cloudflare R2 with `rclone copyto`.
+
+The backup bucket is:
+
+```text
+hiroe-tech-notes-backup
+```
+
+### Cloudflare R2 setup
+
+In Cloudflare Dashboard:
+
+1. Open `R2 Object Storage`.
+2. Create or open the `hiroe-tech-notes-backup` bucket.
+3. Create an R2 API token or access key for the backup bucket.
+4. Grant object read/write access to `hiroe-tech-notes-backup`.
+5. Copy the generated `Access Key ID` and `Secret Access Key`.
+
+Use a backup-specific key instead of reusing the image bucket key. A key that
+only has access to the image bucket will fail with `403 Forbidden` when writing
+to `hiroe-tech-notes-backup`.
+
+### VM rclone setup
+
+Install `rclone` on the VM host:
+
+```bash
+sudo apt update
+sudo apt install -y rclone
+rclone version
+```
+
+Configure the `r2` remote as the same user that will run cron. The production
+VM uses the `hiroe` user.
+
+```bash
+rclone config
+```
+
+Use these values:
+
+```text
+name = r2
+type = s3
+provider = Cloudflare
+region = auto
+endpoint = https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+acl = private
+no_check_bucket = true
+```
+
+Set `access_key_id` and `secret_access_key` to the backup bucket key created in
+Cloudflare.
+
+Confirm the config file location:
+
+```bash
+rclone config file
+```
+
+For the `hiroe` user, it is usually:
+
+```text
+/home/hiroe/.config/rclone/rclone.conf
+```
+
+### R2 write test
+
+Test upload with `copyto`. Do not use `rclone rcat` for this backup flow,
+because streaming uploads can fail against R2 with `501 NotImplemented`.
+
+```bash
+tmp=$(mktemp)
+echo "test $(date)" > "$tmp"
+
+rclone copyto "$tmp" r2:hiroe-tech-notes-backup/postgresql/rclone_test.txt --s3-no-check-bucket
+rclone cat r2:hiroe-tech-notes-backup/postgresql/rclone_test.txt --s3-no-check-bucket
+rclone deletefile r2:hiroe-tech-notes-backup/postgresql/rclone_test.txt --s3-no-check-bucket
+
+rm "$tmp"
+```
+
+If the upload fails with `403 Forbidden`, recreate the R2 access key with
+object read/write access to `hiroe-tech-notes-backup`.
+
+### VM cron preparation
+
+Create the script destination directory:
+
+```bash
+mkdir -p /home/hiroe/ops
+chmod 750 /home/hiroe/ops
+```
+
+Create the backup log file:
+
+```bash
+sudo touch /var/log/tech_notes_backup.log
+sudo chown hiroe:hiroe /var/log/tech_notes_backup.log
+chmod 640 /var/log/tech_notes_backup.log
+```
+
+Confirm the Kamal PostgreSQL accessory container is visible:
+
+```bash
+docker ps --filter label=service=tech_notes-db --format '{{.Names}}'
+```
+
+After `script/ops/backup_postgres_to_r2.sh` is deployed to
+`/home/hiroe/ops/backup_postgres_to_r2.sh`, register cron as the `hiroe` user:
+
+```bash
+crontab -e
+```
+
+Example:
+
+```cron
+0 3 * * * /home/hiroe/ops/backup_postgres_to_r2.sh >> /var/log/tech_notes_backup.log 2>&1
+```
+
+Do not use `sudo crontab -e` unless the script explicitly passes
+`--config /home/hiroe/.config/rclone/rclone.conf` to `rclone`.
+
 ## Cloudflare Workers AI
 
 This application can call Cloudflare Workers AI to generate draft article
