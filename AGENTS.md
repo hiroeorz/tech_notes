@@ -28,8 +28,10 @@ This file guides AI agents (and humans) working in this repo. It captures non-ob
 - Single integration suite covers the whole app: `test/integration/blog_flow_test.rb` (most assertions live here). Model tests are tiny and focused.
 - Tests run on **SQLite in `RAILS_ENV=test`** — no external services required.
 - Run all: `bin/rails test`
+- Run system tests: `bin/rails test:system`
 - Run a single file: `bin/rails test test/integration/blog_flow_test.rb`
 - Run a single test by name: `bin/rails test test/integration/blog_flow_test.rb -n test_admin_can_sign_in_and_view_management_pages`
+- System tests live under `test/system/` and cover browser-driven JavaScript behavior. They require Chromium/Chrome and Chromedriver; in sandboxed environments they may need to run outside the sandbox because Capybara/Selenium use local socket communication.
 - `parallelize(workers: :number_of_processors)` is enabled — failures may interleave; rerun with `--seed` from the failure output for stable ordering.
 - Fixtures are minimal (`test/fixtures/files/` only has `not-image.txt` for Active Storage validation tests). Tests build records in `setup` instead.
 - Admin password hashing is custom (`AdminUser.digest_password` with a per-user salt + secret_key_base). When creating an `AdminUser` in tests, pass `password_salt:` and `password_digest: AdminUser.digest_password(...)` — the `password=` setter regenerates the salt and is awkward to use in test setup.
