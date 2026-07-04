@@ -358,6 +358,13 @@ textarea {
   font-weight: 800;
 }
 
+.sidebar-admin-entry {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
 .align-right {
   display: block;
   text-align: right;
