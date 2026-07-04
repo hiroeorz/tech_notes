@@ -27,7 +27,7 @@
         <span>パスワード</span>
         <div class="password-field">
           <%= form.password_field :password, placeholder: "パスワードを入力", required: true %>
-          <button type="button" data-password-toggle aria-label="パスワードの表示切り替え">◎</button>
+          <button type="button" data-password-toggle data-password-toggle-label="パスワード" aria-label="パスワードを表示する" aria-pressed="false">◎</button>
         </div>
       </label>
       <div class="login-options">

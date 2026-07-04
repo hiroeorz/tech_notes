@@ -87,16 +87,16 @@
       <div class="settings-fields">
         <label>
           <span>現在のパスワード</span>
-          <span class="password-field"><%= password_field_tag :current_password, nil, placeholder: "現在のパスワードを入力" %><button type="button" data-password-toggle aria-label="現在のパスワードの表示切り替え">◎</button></span>
+          <span class="password-field"><%= password_field_tag :current_password, nil, placeholder: "現在のパスワードを入力" %><button type="button" data-password-toggle data-password-toggle-label="現在のパスワード" aria-label="現在のパスワードを表示する" aria-pressed="false">◎</button></span>
         </label>
         <label>
           <span>新しいパスワード</span>
-          <span class="password-field"><%= password_field_tag :new_password, nil, placeholder: "新しいパスワードを入力" %><button type="button" data-password-toggle aria-label="新しいパスワードの表示切り替え">◎</button></span>
+          <span class="password-field"><%= password_field_tag :new_password, nil, placeholder: "新しいパスワードを入力" %><button type="button" data-password-toggle data-password-toggle-label="新しいパスワード" aria-label="新しいパスワードを表示する" aria-pressed="false">◎</button></span>
           <small>8文字以上、英数字を含めてください</small>
         </label>
         <label>
           <span>新しいパスワード（確認）</span>
-          <span class="password-field"><%= password_field_tag :new_password_confirmation, nil, placeholder: "新しいパスワードを再入力" %><button type="button" data-password-toggle aria-label="新しいパスワード確認の表示切り替え">◎</button></span>
+          <span class="password-field"><%= password_field_tag :new_password_confirmation, nil, placeholder: "新しいパスワードを再入力" %><button type="button" data-password-toggle data-password-toggle-label="新しいパスワード確認" aria-label="新しいパスワード確認を表示する" aria-pressed="false">◎</button></span>
         </label>
         <button type="submit" class="outline-danger">▣ パスワードを更新</button>
       </div>

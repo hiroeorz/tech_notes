@@ -36,17 +36,39 @@ document.addEventListener("change", (event) => {
   reader.readAsDataURL(file)
 })
 
+const passwordToggleInput = (button) => button.closest(".password-field")?.querySelector("input")
+
+const updatePasswordToggle = (button, visible) => {
+  const input = passwordToggleInput(button)
+  if (!input) return
+
+  const label = button.dataset.passwordToggleLabel || "パスワード"
+  input.type = visible ? "text" : "password"
+  button.setAttribute("aria-pressed", visible ? "true" : "false")
+  button.setAttribute("aria-label", `${label}を${visible ? "非表示にする" : "表示する"}`)
+  button.textContent = visible ? "◉" : "◎"
+}
+
+document.addEventListener("click", (event) => {
+  if (!(event.target instanceof Element)) return
+
+  const button = event.target.closest("[data-password-toggle]")
+  if (!(button instanceof HTMLButtonElement)) return
+
+  const input = passwordToggleInput(button)
+  if (!input) return
+
+  updatePasswordToggle(button, input.type === "password")
+  input.focus()
+})
+
 document.addEventListener("turbo:load", () => {
   const savedTheme = window.localStorage.getItem("theme")
   const defaultTheme = document.documentElement.dataset.defaultTheme || "light"
   document.documentElement.classList.toggle("theme-dark", (savedTheme || defaultTheme) === "dark")
 
   document.querySelectorAll("[data-password-toggle]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const input = button.closest(".password-field")?.querySelector("input")
-      if (!input) return
-      input.type = input.type === "password" ? "text" : "password"
-    })
+    updatePasswordToggle(button, passwordToggleInput(button)?.type === "text")
   })
 
   document.querySelectorAll("[data-theme-toggle]").forEach((button) => {

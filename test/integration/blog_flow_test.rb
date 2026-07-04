@@ -269,7 +269,8 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     get admin_login_path
     assert_response :success
     assert_includes response.body, "ログイン"
-    assert_includes response.body, "aria-label=\"パスワードの表示切り替え\""
+    assert_select ".password-field input[type='password'][name='password']"
+    assert_select ".password-field button[data-password-toggle][data-password-toggle-label='パスワード'][aria-label='パスワードを表示する'][aria-pressed='false']", text: "◎"
     assert_not_includes response.body, "グローバルナビゲーション"
     assert_not_includes response.body, "記事一覧"
     assert_not_includes response.body, "管理者ログイン"
@@ -344,7 +345,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "管理設定"
     assert_includes response.body, "data-password-toggle"
-    assert_includes response.body, "aria-label=\"現在のパスワードの表示切り替え\""
+    assert_select ".password-field button[data-password-toggle][data-password-toggle-label='現在のパスワード'][aria-label='現在のパスワードを表示する'][aria-pressed='false']"
     assert_select "input#site_setting_ogp_image[type='file']"
     assert_select "label[for='site_setting_ogp_image']", text: "画像を変更"
     assert_select "input#site_setting_ogp_image[data-settings-image-input][data-preview-alt='OGP画像']"
@@ -361,6 +362,12 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "data-settings-image-input"
     assert_includes response.body, "FileReader"
+
+    application_source = Rails.root.join("app/javascript/application.js").read
+    assert_includes application_source, "const updatePasswordToggle"
+    assert_includes application_source, "input.type = visible ? \"text\" : \"password\""
+    assert_includes application_source, "button.setAttribute(\"aria-pressed\", visible ? \"true\" : \"false\")"
+    assert_includes application_source, "button.setAttribute(\"aria-label\", `${label}を${visible ? \"非表示にする\" : \"表示する\"}`)"
   end
 
   test "admin management actions require sign in" do

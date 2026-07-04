@@ -5,6 +5,7 @@ This file guides AI agents (and humans) working in this repo. It captures non-ob
 ## Communication
 
 - すべてのユーザー向けメッセージ（説明・質問・要約・コミットメッセージ案を含む）は**日本語**で記述すること。
+- コミットメッセージは**日本語**で記述すること。
 
 ## Stack
 
@@ -32,6 +33,11 @@ This file guides AI agents (and humans) working in this repo. It captures non-ob
 - `parallelize(workers: :number_of_processors)` is enabled — failures may interleave; rerun with `--seed` from the failure output for stable ordering.
 - Fixtures are minimal (`test/fixtures/files/` only has `not-image.txt` for Active Storage validation tests). Tests build records in `setup` instead.
 - Admin password hashing is custom (`AdminUser.digest_password` with a per-user salt + secret_key_base). When creating an `AdminUser` in tests, pass `password_salt:` and `password_digest: AdminUser.digest_password(...)` — the `password=` setter regenerates the salt and is awkward to use in test setup.
+
+## Feature implementation workflow
+
+- 機能追加は、要件整理、設計、実装、テスト実装、テスト実行、Rubocopなどのリンター実行の順で進める。
+- UIや画面挙動を追加・変更する場合は、実装前に `docs/requirements.md` の該当セクションへ要件を追記または更新する。
 
 ## Lint / security scans
 
