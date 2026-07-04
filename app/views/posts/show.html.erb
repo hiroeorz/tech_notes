@@ -24,7 +24,7 @@
         <%= link_to tag.name, posts_path(tag: tag.slug), class: "chip" %>
       <% end %>
     </div>
-    <div class="markdown-body">
+    <div class="markdown-body" data-image-lightbox>
       <%= render_markdown(@post.body) %>
     </div>
 

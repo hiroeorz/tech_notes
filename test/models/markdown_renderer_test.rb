@@ -67,4 +67,17 @@ class MarkdownRendererTest < ActiveSupport::TestCase
     assert_not_includes html, "highlight"
     assert_includes html, "puts"
   end
+
+  test "decorates markdown images for article lightbox" do
+    html = MarkdownRenderer.new("![構成図](/images/architecture.png)").render
+
+    assert_includes html, %(<figure class="article-image">)
+    assert_includes html, %(class="article-image-viewer-trigger")
+    assert_includes html, %(src="/images/architecture.png")
+    assert_includes html, %(alt="構成図")
+    assert_includes html, %(loading="lazy")
+    assert_includes html, %(role="button")
+    assert_includes html, %(tabindex="0")
+    assert_includes html, "<figcaption>構成図</figcaption>"
+  end
 end

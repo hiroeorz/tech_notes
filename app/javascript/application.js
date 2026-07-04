@@ -37,6 +37,8 @@ document.addEventListener("change", (event) => {
 })
 
 const passwordToggleInput = (button) => button.closest(".password-field")?.querySelector("input")
+let activeImageLightbox = null
+let activeImageLightboxTrigger = null
 
 const updatePasswordToggle = (button, visible) => {
   const input = passwordToggleInput(button)
@@ -49,8 +51,77 @@ const updatePasswordToggle = (button, visible) => {
   button.textContent = visible ? "◉" : "◎"
 }
 
+const imageLightboxTarget = (target) => {
+  if (!(target instanceof Element)) return null
+
+  const image = target.closest("[data-image-lightbox] .article-image img")
+  if (!(image instanceof HTMLImageElement)) return null
+
+  return image
+}
+
+const closeImageLightbox = () => {
+  if (!activeImageLightbox) return
+
+  activeImageLightbox.remove()
+  activeImageLightbox = null
+  document.body.classList.remove("image-lightbox-open")
+  activeImageLightboxTrigger?.focus()
+  activeImageLightboxTrigger = null
+}
+
+const openImageLightbox = (image) => {
+  closeImageLightbox()
+  activeImageLightboxTrigger = image
+
+  const overlay = document.createElement("div")
+  overlay.className = "image-lightbox"
+  overlay.setAttribute("role", "dialog")
+  overlay.setAttribute("aria-modal", "true")
+  overlay.setAttribute("aria-label", image.alt || "記事画像の拡大表示")
+  overlay.dataset.imageLightboxOverlay = "true"
+
+  const frame = document.createElement("div")
+  frame.className = "image-lightbox-frame"
+
+  const closeButton = document.createElement("button")
+  closeButton.type = "button"
+  closeButton.className = "image-lightbox-close"
+  closeButton.setAttribute("aria-label", "拡大画像を閉じる")
+  closeButton.textContent = "×"
+
+  const expandedImage = document.createElement("img")
+  expandedImage.className = "image-lightbox-image"
+  expandedImage.src = image.currentSrc || image.src
+  expandedImage.alt = image.alt || ""
+
+  frame.append(closeButton, expandedImage)
+  overlay.append(frame)
+  activeImageLightbox = overlay
+  document.body.append(overlay)
+  document.body.classList.add("image-lightbox-open")
+  closeButton.focus()
+}
+
 document.addEventListener("click", (event) => {
   if (!(event.target instanceof Element)) return
+
+  const image = imageLightboxTarget(event.target)
+  if (image) {
+    event.preventDefault()
+    openImageLightbox(image)
+    return
+  }
+
+  if (event.target.closest(".image-lightbox-close")) {
+    closeImageLightbox()
+    return
+  }
+
+  if (event.target.matches("[data-image-lightbox-overlay]")) {
+    closeImageLightbox()
+    return
+  }
 
   const button = event.target.closest("[data-password-toggle]")
   if (!(button instanceof HTMLButtonElement)) return
@@ -61,6 +132,23 @@ document.addEventListener("click", (event) => {
   updatePasswordToggle(button, input.type === "password")
   input.focus()
 })
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closeImageLightbox()
+    return
+  }
+
+  if (event.key !== "Enter" && event.key !== " ") return
+
+  const image = imageLightboxTarget(event.target)
+  if (!image) return
+
+  event.preventDefault()
+  openImageLightbox(image)
+})
+
+document.addEventListener("turbo:before-cache", closeImageLightbox)
 
 document.addEventListener("turbo:load", () => {
   const savedTheme = window.localStorage.getItem("theme")
@@ -168,7 +256,7 @@ document.addEventListener("turbo:load", () => {
 
     const renderImage = (alt, source) => {
       if (!safeImageSource(source)) return `<p>${escapeHtml(`![${alt}](${source})`)}</p>`
-      return `<figure class="article-image"><img src="${escapeHtml(source)}" alt="${escapeHtml(alt)}" loading="lazy"><figcaption>${escapeHtml(alt)}</figcaption></figure>`
+      return `<figure class="article-image"><img class="article-image-viewer-trigger" src="${escapeHtml(source)}" alt="${escapeHtml(alt)}" loading="lazy" role="button" tabindex="0"><figcaption>${escapeHtml(alt)}</figcaption></figure>`
     }
 
     const insertAtCursor = (value) => {

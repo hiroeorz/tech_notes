@@ -22,7 +22,7 @@ class MarkdownRenderer
   ].freeze
 
   ALLOWED_ATTRIBUTES = %w[
-    alt checked class disabled href id loading rel src type
+    alt checked class disabled href id loading rel role src tabindex type
   ].freeze
 
   def initialize(markdown)
@@ -118,6 +118,9 @@ class MarkdownRenderer
       end
 
       image["loading"] = "lazy"
+      image["class"] = append_class(image["class"], "article-image-viewer-trigger")
+      image["role"] = "button"
+      image["tabindex"] = "0"
       figure = Nokogiri::XML::Node.new("figure", fragment)
       figure["class"] = "article-image"
       caption = Nokogiri::XML::Node.new("figcaption", fragment)

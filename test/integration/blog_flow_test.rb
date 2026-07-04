@@ -98,6 +98,16 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_includes response.body, @post.title
   end
 
+  test "public post markdown images are wired for in-page lightbox" do
+    @post.update!(body: "## 構成例\n\n![構成図](/icon.png)")
+
+    get post_path(@post.slug)
+    assert_response :success
+
+    assert_select ".markdown-body[data-image-lightbox]"
+    assert_select ".markdown-body .article-image img.article-image-viewer-trigger[role='button'][tabindex='0'][src='/icon.png'][alt='構成図']"
+  end
+
   test "post filters tolerate invalid month and experiment search stays on experiments path" do
     get posts_path(month: "not-a-month")
     assert_response :success
