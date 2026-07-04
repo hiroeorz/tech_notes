@@ -10,6 +10,11 @@
 
     <div class="article-label"><%= @post.category.name %> / <%= @post.tags.first&.name || "Tech" %></div>
     <h1><%= @post.title %></h1>
+    <% if admin_signed_in? %>
+      <div class="article-admin-actions">
+        <%= link_to "Edit", edit_admin_post_path(@post.slug), class: "admin-edit-link" %>
+      </div>
+    <% end %>
     <div class="article-meta">
       <span>▦ <%= @post.display_date.strftime("%Y-%m-%d") %></span>
       <span>↻ 更新 <%= @post.updated_at.strftime("%Y-%m-%d") %></span>

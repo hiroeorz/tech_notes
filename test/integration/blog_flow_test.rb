@@ -56,6 +56,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "code-block"
     assert_includes response.body, "https://x.com/intent/tweet"
     assert_includes response.body, feed_path(format: :xml)
+    assert_select ".article-admin-actions .admin-edit-link[href='#{edit_admin_post_path(@post.slug)}']", count: 0
 
     get tags_path
     assert_response :success
@@ -81,6 +82,20 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     get about_path
     assert_response :success
     assert_includes response.body, "Hiroe Tech Notes"
+  end
+
+  test "signed in admin can edit from the public post title" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+    assert_redirected_to admin_posts_path
+
+    get post_path(@post.slug)
+    assert_response :success
+    assert_select "h1", text: @post.title
+    assert_select ".article-content > h1 + .article-admin-actions .admin-edit-link[href='#{edit_admin_post_path(@post.slug)}']", text: "Edit"
+
+    get edit_admin_post_path(@post.slug)
+    assert_response :success
+    assert_includes response.body, @post.title
   end
 
   test "post filters tolerate invalid month and experiment search stays on experiments path" do

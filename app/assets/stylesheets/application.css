@@ -741,6 +741,16 @@ textarea {
   line-height: 1.4;
 }
 
+.article-admin-actions {
+  margin: -4px 0 14px;
+}
+
+.admin-edit-link {
+  color: var(--orange);
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .article-meta {
   display: flex;
   flex-wrap: wrap;
