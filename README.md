@@ -23,7 +23,7 @@ export POSTGRES_PASSWORD="your-password"                  # パスワード
 # ============================================
 # アプリケーション
 # ============================================
-export APP_HOST="hiroe-tech-notes.example.com"      # 本番ホスト名（production必須）
+export APP_HOST="your-app.example.com"              # 本番ホスト名（production必須）
 # export RAILS_MAX_THREADS="5"                      # Pumaスレッド数 / DBプールサイズ (デフォルト: 3)
 # export PORT="3000"                                # Pumaリスンポート (デフォルト: 3000)
 # export RAILS_LOG_LEVEL="info"                     # ログレベル (デフォルト: info)
@@ -56,10 +56,10 @@ export GOOGLE_SITE_VERIFICATION="your-verification-token"
 # ============================================
 # Kamal デプロイ用 (デプロイ実行環境でのみ必要)
 # ============================================
-export IMAGE="hiroeorz/tech_notes"                      # Dockerイメージ名
+export IMAGE="your-docker-user/tech_notes"               # Dockerイメージ名
 export SERVER_IP="192.168.0.1"                          # デプロイ先サーバーIP
-export PROXY_HOST="hiroe-tech-notes.example.com"        # SSLプロキシホスト名
-export REGISTRY_USERNAME="hiroeorz"                     # Docker Hubユーザー名
+export PROXY_HOST="your-app.example.com"          # SSLプロキシホスト名
+export REGISTRY_USERNAME="your-docker-user"              # Docker Hubユーザー名
 export SSH_USER="deploy"                                # SSH接続ユーザー
 export KAMAL_REGISTRY_PASSWORD="your-docker-hub-token"  # Docker Hubアクセストークン
 export RAILS_MASTER_KEY="$(cat config/master.key)"      # credentials復号キー
@@ -136,7 +136,7 @@ https://cdn.example.com/abc123
 バックアップバケット:
 
 ```text
-hiroe-tech-notes-backup
+your-project-backup
 ```
 
 ### Cloudflare R2 セットアップ
@@ -144,12 +144,12 @@ hiroe-tech-notes-backup
 Cloudflare ダッシュボードで:
 
 1. `R2 Object Storage` を開く
-2. `hiroe-tech-notes-backup` バケットを作成または開く
+2. `your-project-backup` バケットを作成または開く
 3. バケット用の R2 API トークンまたはアクセスキーを作成する
-4. `hiroe-tech-notes-backup` へのオブジェクト読み書き権限を付与する
+4. `your-project-backup` へのオブジェクト読み書き権限を付与する
 5. 生成された `Access Key ID` と `Secret Access Key` をコピーする
 
-画像バケットのキーを流用せず、バックアップ専用のキーを使用してください。画像バケットのみにアクセスできるキーでは `hiroe-tech-notes-backup` への書き込み時に `403 Forbidden` が発生します。
+画像バケットのキーを流用せず、バックアップ専用のキーを使用してください。画像バケットのみにアクセスできるキーでは `your-project-backup` への書き込み時に `403 Forbidden` が発生します。
 
 ### VM rclone セットアップ
 
@@ -161,7 +161,7 @@ sudo apt install -y rclone
 rclone version
 ```
 
-cron を実行するユーザーで `r2` リモートを設定します。本番 VM では `hiroe` ユーザーを使用します。
+cron を実行するユーザーで `r2` リモートを設定します。本番 VM ではデプロイユーザーを使用します。
 
 ```bash
 rclone config
@@ -187,10 +187,10 @@ no_check_bucket = true
 rclone config file
 ```
 
-`hiroe` ユーザーの場合、通常は以下の場所:
+デプロイユーザーの場合、通常は以下の場所:
 
 ```text
-/home/hiroe/.config/rclone/rclone.conf
+~/.config/rclone/rclone.conf
 ```
 
 ### R2 書き込みテスト
@@ -201,29 +201,29 @@ rclone config file
 tmp=$(mktemp)
 echo "test $(date)" > "$tmp"
 
-rclone copyto "$tmp" r2:hiroe-tech-notes-backup/postgresql/rclone_test.txt --s3-no-check-bucket
-rclone cat r2:hiroe-tech-notes-backup/postgresql/rclone_test.txt --s3-no-check-bucket
-rclone deletefile r2:hiroe-tech-notes-backup/postgresql/rclone_test.txt --s3-no-check-bucket
+rclone copyto "$tmp" r2:your-project-backup/postgresql/rclone_test.txt --s3-no-check-bucket
+rclone cat r2:your-project-backup/postgresql/rclone_test.txt --s3-no-check-bucket
+rclone deletefile r2:your-project-backup/postgresql/rclone_test.txt --s3-no-check-bucket
 
 rm "$tmp"
 ```
 
-アップロードが `403 Forbidden` で失敗する場合は、`hiroe-tech-notes-backup` へのオブジェクト読み書き権限を持つ R2 アクセスキーを再作成してください。
+アップロードが `403 Forbidden` で失敗する場合は、`your-project-backup` へのオブジェクト読み書き権限を持つ R2 アクセスキーを再作成してください。
 
 ### VM cron 準備
 
 スクリプト保存先ディレクトリを作成:
 
 ```bash
-mkdir -p /home/hiroe/ops
-chmod 750 /home/hiroe/ops
+mkdir -p ~/ops
+chmod 750 ~/ops
 ```
 
 バッククログファイルを作成:
 
 ```bash
 sudo touch /var/log/tech_notes_backup.log
-sudo chown hiroe:hiroe /var/log/tech_notes_backup.log
+sudo chown $USER:$USER /var/log/tech_notes_backup.log
 chmod 640 /var/log/tech_notes_backup.log
 ```
 
@@ -233,7 +233,7 @@ Kamal PostgreSQL accessory コンテナが表示されることを確認:
 docker ps --filter label=service=tech_notes-db --format '{{.Names}}'
 ```
 
-`script/ops/backup_postgres_to_r2.sh` が `/home/hiroe/ops/backup_postgres_to_r2.sh` にデプロイされた後、`hiroe` ユーザーで cron を登録:
+`script/ops/backup_postgres_to_r2.sh` が `~/ops/backup_postgres_to_r2.sh` にデプロイされた後、デプロイユーザーで cron を登録:
 
 ```bash
 crontab -e
@@ -242,10 +242,10 @@ crontab -e
 例:
 
 ```cron
-0 3 * * * /home/hiroe/ops/backup_postgres_to_r2.sh >> /var/log/tech_notes_backup.log 2>&1
+0 3 * * * ~/ops/backup_postgres_to_r2.sh >> /var/log/tech_notes_backup.log 2>&1
 ```
 
-スクリプトが `rclone` に明示的に `--config /home/hiroe/.config/rclone/rclone.conf` を渡していない限り、`sudo crontab -e` は使用しないでください。
+スクリプトが `rclone` に明示的に `--config ~/.config/rclone/rclone.conf` を渡していない限り、`sudo crontab -e` は使用しないでください。
 
 ## Cloudflare Workers AI
 
