@@ -117,7 +117,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_163437) do
     t.string "rss_url"
     t.string "site_url", default: "https://hiroe-tech-notes.dev", null: false
     t.boolean "sns_visible", default: true, null: false
-    t.string "tagline", default: "技術を、実践し、言語化する。", null: false
+    t.string "tagline", default: "あるエンジニアの技術ノート", null: false
     t.datetime "updated_at", null: false
     t.string "x_url"
     t.string "zenn_url"

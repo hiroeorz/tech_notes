@@ -1,7 +1,7 @@
 setting = SiteSetting.current
 setting.update!(
   blog_title: "Hiroe Tech Notes",
-  tagline: "技術を、実践し、言語化する。",
+  tagline: "あるエンジニアの技術ノート",
   site_url: "https://hiroe-tech-notes.dev",
   description: "インフラ、クラウド、SRE、自動化などに関する学びや実践を記録する個人のテックブログです。実際の構築手順やトラブルシューティング、ツールの使い方、実験ログなどをわかりやすく共有しています。",
   profile_name: "Hiroe",
