@@ -1,42 +1,77 @@
-# README
+# Hiroe Tech Notes
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+個人のテックブログアプリケーション（Rails 8 + PostgreSQL + Cloudflare R2）。
 
-Things you may want to cover:
+## 環境変数一覧
 
-* Ruby version
+以下の全変数を bash にコピペして利用できます。値はサンプルです。
 
-* System dependencies
+```bash
+# ============================================
+# PostgreSQL 接続
+# ============================================
+export DB_HOST="tech_notes-db"                     # ホスト (デフォルト: 127.0.0.1)
+export DB_PORT="5432"                              # ポート (デフォルト: 5432)
+export POSTGRES_USER="postgres"                    # ユーザー名
+export POSTGRES_PASSWORD="your-password"           # パスワード (default: "")
+export POSTGRES_DB="tech_notes_production"         # プライマリDB名
+export POSTGRES_DB_CACHE="tech_notes_production_cache"  # Solid Cache用DB
+export POSTGRES_DB_QUEUE="tech_notes_production_queue"  # Solid Queue用DB
+export POSTGRES_DB_CABLE="tech_notes_production_cable"  # Solid Cable用DB
 
-* Configuration
+# ============================================
+# アプリケーション
+# ============================================
+export APP_HOST="hiroe-tech-notes.example.com"     # 本番ホスト名（production必須）
+export RAILS_MAX_THREADS="5"                       # Pumaスレッド数 / DBプールサイズ
+export PORT="3000"                                 # Pumaリスンポート (デフォルト: 3000)
+export RAILS_LOG_LEVEL="info"                      # ログレベル (info / debug)
+export ACTIVE_STORAGE_SERVICE="cloudflare_r2"      # 開発環境のストレージ (local / cloudflare_r2)
+export SOLID_QUEUE_IN_PUMA="true"                  # Puma内でSolid Queueを起動
+export JOB_CONCURRENCY="1"                         # Solid Queueワーカー数
 
-* Database creation
+# ============================================
+# Cloudflare R2 (Active Storage 画像保存)
+# ============================================
+export CLOUDFLARE_R2_ACCESS_KEY_ID="your-access-key"
+export CLOUDFLARE_R2_SECRET_ACCESS_KEY="your-secret-key"
+export CLOUDFLARE_R2_BUCKET="tech-notes-images"
+export CLOUDFLARE_R2_ENDPOINT="https://<ACCOUNT_ID>.r2.cloudflarestorage.com"
+export ACTIVE_STORAGE_PUBLIC_BASE_URL="https://cdn.example.com"
 
-* Database initialization
+# ============================================
+# Cloudflare Workers AI (記事要約生成)
+# ============================================
+export CLOUDFLARE_ACCOUNT_ID="your-account-id"
+export CLOUDFLARE_AI_API_TOKEN="your-api-token"
+export CLOUDFLARE_AI_MODEL="@cf/meta/llama-3.2-1b-instruct"
+export CLOUDFLARE_AI_TIMEOUT_SECONDS="60"
 
-* How to run the test suite
+# ============================================
+# Google Search Console (サイト所有権確認)
+# ============================================
+export GOOGLE_SITE_VERIFICATION="your-verification-token"
 
-* Services (job queues, cache servers, search engines, etc.)
+# ============================================
+# Kamal デプロイ用 (デプロイ実行環境でのみ必要)
+# ============================================
+export IMAGE="hiroeorz/tech_notes"                 # Dockerイメージ名
+export SERVER_IP="192.168.0.1"                     # デプロイ先サーバーIP
+export PROXY_HOST="hiroe-tech-notes.example.com"   # SSLプロキシホスト名
+export REGISTRY_USERNAME="hiroeorz"                # Docker Hubユーザー名
+export SSH_USER="deploy"                           # SSH接続ユーザー
+export KAMAL_REGISTRY_PASSWORD="your-docker-hub-token"  # Docker Hubアクセストークン
+export RAILS_MASTER_KEY="$(cat config/master.key)" # credentials復号キー
+```
 
-* Deployment instructions
+> **補足**: `POSTGRES_PASSWORD` / Cloudflare 関連の一部変数は `config/credentials.yml.enc` からのフォールバックを持ちます。環境変数が未設定の場合は credentials の値が使われます。
 
-* ...
+---
 
 ## Cloudflare R2 image storage
 
 This application stores uploaded images with Active Storage on Cloudflare R2.
 Article images are inserted into Markdown as public CDN URLs.
-
-Required environment variables:
-
-```bash
-export CLOUDFLARE_R2_ACCESS_KEY_ID="..."
-export CLOUDFLARE_R2_SECRET_ACCESS_KEY="..."
-export CLOUDFLARE_R2_BUCKET="your-bucket-name"
-export CLOUDFLARE_R2_ENDPOINT="https://<ACCOUNT_ID>.r2.cloudflarestorage.com"
-export ACTIVE_STORAGE_PUBLIC_BASE_URL="https://cdn.example.com"
-```
 
 ### Bucket name
 
@@ -68,14 +103,10 @@ immediately.
 
 Set `CLOUDFLARE_R2_ENDPOINT` from the Cloudflare account ID.
 
-```bash
-export CLOUDFLARE_R2_ENDPOINT="https://<ACCOUNT_ID>.r2.cloudflarestorage.com"
-```
+For an EU jurisdiction bucket, use the EU-specific endpoint:
 
-For an EU jurisdiction bucket, use:
-
-```bash
-export CLOUDFLARE_R2_ENDPOINT="https://<ACCOUNT_ID>.eu.r2.cloudflarestorage.com"
+```text
+https://<ACCOUNT_ID>.eu.r2.cloudflarestorage.com
 ```
 
 The account ID is available in the Cloudflare Dashboard account overview.
@@ -92,12 +123,6 @@ In Cloudflare Dashboard:
 3. Open `Settings`.
 4. Add a domain under `Custom Domains`.
 5. Wait until the domain status becomes active.
-
-Then set:
-
-```bash
-export ACTIVE_STORAGE_PUBLIC_BASE_URL="https://cdn.example.com"
-```
 
 The CDN URL must serve objects by their Active Storage blob key. For example,
 if the blob key is `abc123`, this URL must return the image:
@@ -239,15 +264,6 @@ Do not use `sudo crontab -e` unless the script explicitly passes
 This application can call Cloudflare Workers AI to generate draft article
 summaries in the admin post form.
 
-Required environment variables:
-
-```bash
-export CLOUDFLARE_ACCOUNT_ID="..."
-export CLOUDFLARE_AI_API_TOKEN="..."
-export CLOUDFLARE_AI_MODEL="@cf/meta/llama-3.2-1b-instruct"
-export CLOUDFLARE_AI_TIMEOUT_SECONDS="60"
-```
-
 ### Account ID
 
 Set `CLOUDFLARE_ACCOUNT_ID` to the Cloudflare account ID that owns the Workers
@@ -274,11 +290,7 @@ Store the token securely. Do not commit it to the repository.
 
 Set `CLOUDFLARE_AI_MODEL` to the Workers AI model used for summary generation.
 
-The initial recommended value is:
-
-```bash
-export CLOUDFLARE_AI_MODEL="@cf/meta/llama-3.2-1b-instruct"
-```
+The initial recommended value is `@cf/meta/llama-3.2-1b-instruct`.
 
 If summary quality is not sufficient, switch this value to another Workers AI
 instruct model after checking pricing and limits.
@@ -287,11 +299,7 @@ instruct model after checking pricing and limits.
 
 Set `CLOUDFLARE_AI_TIMEOUT_SECONDS` to the HTTP timeout for Workers AI requests.
 
-The recommended initial value is:
-
-```bash
-export CLOUDFLARE_AI_TIMEOUT_SECONDS="60"
-```
+The recommended initial value is `60`.
 
 ## Google Search Console
 
@@ -300,12 +308,6 @@ when the verification token is provided via an environment variable. The tag is
 rendered in `app/views/layouts/application.html.erb` only when
 `GOOGLE_SITE_VERIFICATION` is set, so local development without the variable
 produces no tag.
-
-Required environment variable:
-
-```bash
-export GOOGLE_SITE_VERIFICATION="..."
-```
 
 ### Verification token
 
@@ -328,18 +330,7 @@ In Google Search Console:
 
 ### Kamal deployment
 
-`config/deploy.yml` expects these values as secrets:
-
-- `CLOUDFLARE_R2_ACCESS_KEY_ID`
-- `CLOUDFLARE_R2_SECRET_ACCESS_KEY`
-- `CLOUDFLARE_R2_BUCKET`
-- `CLOUDFLARE_R2_ENDPOINT`
-- `ACTIVE_STORAGE_PUBLIC_BASE_URL`
-- `CLOUDFLARE_ACCOUNT_ID`
-- `CLOUDFLARE_AI_API_TOKEN`
-- `CLOUDFLARE_AI_MODEL`
-- `CLOUDFLARE_AI_TIMEOUT_SECONDS`
-- `GOOGLE_SITE_VERIFICATION`
-
-Set them in the shell or secret manager used by `.kamal/secrets` before running
-`kamal deploy`.
+`.kamal/secrets` resolves the secret env vars from the [環境変数一覧](#環境変数一覧) above.
+All `CLOUDFLARE_*`, `GOOGLE_SITE_VERIFICATION`, `RAILS_MASTER_KEY`, and
+`POSTGRES_PASSWORD` must be set in the shell before running `kamal deploy`.
+The `.kamal/secrets` file itself must not contain raw values.
