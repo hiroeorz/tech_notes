@@ -2,12 +2,12 @@
 service: tech_notes
 
 # Name of the container image (use your-user/app-name on external registries).
-image: hiroeorz/tech_notes
+image: <%= ENV.fetch("IMAGE") %>
 
 # Deploy to these servers.
 servers:
   web:
-    - 133.117.73.23
+    - <%= ENV.fetch("SERVER_IP") %>
   # job:
   #   hosts:
   #     - 192.168.0.1
@@ -21,7 +21,7 @@ servers:
 # Don't use this when deploying to multiple web servers (then you have to terminate SSL at your load balancer).
 proxy:
   ssl: true
-  host: hiroe-tech-notes.aomaro.com
+  host: <%= ENV.fetch("PROXY_HOST") %>
   healthcheck:
     path: /up
     interval: 10
@@ -33,7 +33,7 @@ registry:
   server: docker.io
 
   # Docker Hub username for the image repository.
-  username: hiroeorz
+  username: <%= ENV.fetch("REGISTRY_USERNAME") %>
 
   # Docker Hub access token. Never use your account password here.
   password:
@@ -70,7 +70,7 @@ env:
     # Reach the database accessory on the internal Kamal Docker network.
     DB_HOST: tech_notes-db
     POSTGRES_DB: tech_notes_production
-    POSTGRES_USER: hiroe
+    POSTGRES_USER: <%= ENV.fetch("POSTGRES_USER") %>
     POSTGRES_DB_CACHE: tech_notes_production_cache
     POSTGRES_DB_QUEUE: tech_notes_production_queue
     POSTGRES_DB_CABLE: tech_notes_production_cable
@@ -105,22 +105,22 @@ builder:
   #   - GITHUB_TOKEN
   #   - RAILS_MASTER_KEY
 
-# Use hiroe user for SSH deployment.
+# Use SSH_USER env var for SSH deployment user.
 ssh:
-  user: hiroe
+  user: <%= ENV.fetch("SSH_USER") %>
 
 # Accessory services (secrets come from .kamal/secrets).
 accessories:
   db:
     image: postgres:16-alpine
-    host: 133.117.73.23
+    host: <%= ENV.fetch("SERVER_IP") %>
     # Bind to the host loopback so the database is not exposed to the public internet.
     # The web container reaches the accessory via the internal Kamal Docker network using DB_HOST=tech_notes-db.
     port: "127.0.0.1:5432:5432"
     env:
       clear:
         POSTGRES_DB: tech_notes_production
-        POSTGRES_USER: hiroe
+        POSTGRES_USER: <%= ENV.fetch("POSTGRES_USER") %>
       secret:
         - POSTGRES_PASSWORD
     # Initialise the Solid Cache / Queue / Cable logical databases on first boot.

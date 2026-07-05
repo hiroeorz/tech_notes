@@ -17,7 +17,7 @@ pg_default: &pg_default
   timeout: 5000
   host: <%= ENV.fetch("DB_HOST", "127.0.0.1") %>
   port: <%= ENV.fetch("DB_PORT", 5432) %>
-  username: <%= ENV.fetch("POSTGRES_USER", "hiroe") %>
+  username: <%= ENV.fetch("POSTGRES_USER", "") %>
   password: <%= ENV.fetch("POSTGRES_PASSWORD", "") %>
 
 development:

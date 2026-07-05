@@ -47,6 +47,13 @@ This file guides AI agents (and humans) working in this repo. It captures non-ob
 - `bin/brakeman --no-pager` and `bin/bundler-audit` run in CI (no extra args expected).
 - JS deps audited via `bin/importmap audit`.
 
+## Pre-commit security check
+
+- `git commit` を実行する**前に必ず** `.agents/skills/security_check/SKILL.md` の手順に従い、リポジトリ全体の機密情報スキャンを実行すること。
+- 🔴 CRITICAL または 🟠 HIGH の指摘が見つかった場合は、**コミットを中断し**、発見内容をユーザーに報告して指示を仰ぐこと。
+- 🟡 MEDIUM 以下の指摘のみの場合は、報告は行うがユーザーの判断でコミットを継続してよい。
+- チェックで問題がなければ通常通りコミットを進めてよい。
+
 ## Architecture notes
 
 - Site-wide settings (title, tagline, profile, SNS links, theme, pagination) live in a **single `SiteSetting` row** accessed via `SiteSetting.current` / `ApplicationController#current_site_setting`. There is no admin auth on the settings form beyond the admin namespace; defaults are seeded in `db/seeds.rb`.
