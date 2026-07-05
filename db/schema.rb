@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_05_163437) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_05_163438) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -42,6 +42,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_163437) do
   create_table "admin_users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email", null: false
+    t.datetime "last_comments_read_at"
     t.string "password_digest", null: false
     t.string "password_salt", null: false
     t.datetime "updated_at", null: false
@@ -117,7 +118,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_163437) do
     t.string "rss_url"
     t.string "site_url", default: "https://hiroe-tech-notes.dev", null: false
     t.boolean "sns_visible", default: true, null: false
-    t.string "tagline", default: "あるエンジニアの技術ノート", null: false
+    t.string "tagline", default: "技術を、実践し、言語化する。", null: false
     t.datetime "updated_at", null: false
     t.string "x_url"
     t.string "zenn_url"

@@ -1331,6 +1331,40 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_redirected_to admin_login_path
   end
 
+  test "admin sees unread badge when comments exist" do
+    @post.comments.create!(author_name: "テスト太郎", body: "未読コメント", ip_address: "127.0.0.1")
+    @admin.update!(last_comments_read_at: 1.hour.ago)
+
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+
+    get admin_posts_path
+    assert_response :success
+    assert_select ".badge-dot"
+  end
+
+  test "admin does not see badge after viewing comments page" do
+    @post.comments.create!(author_name: "テスト太郎", body: "既読コメント", ip_address: "127.0.0.1")
+
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+
+    get admin_comments_path
+    assert_response :success
+
+    get admin_posts_path
+    assert_response :success
+    assert_select ".badge-dot", count: 0
+  end
+
+  test "admin does not see badge when there are no comments" do
+    @admin.update!(last_comments_read_at: Time.current)
+
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+
+    get admin_posts_path
+    assert_response :success
+    assert_select ".badge-dot", count: 0
+  end
+
   private
 
   def with_post_summary_generator(generator)

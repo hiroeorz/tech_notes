@@ -11,7 +11,12 @@
     <h1>記事一覧</h1>
     <div class="title-actions">
       <%= link_to "⚙ 設定", admin_settings_path, class: "secondary-button" %>
-      <%= link_to "◈ コメント", admin_comments_path, class: "secondary-button" %>
+      <span class="button-with-badge">
+        <%= link_to "◈ コメント", admin_comments_path, class: "secondary-button" %>
+        <% if @has_unread_comments %>
+          <span class="badge-dot" aria-label="未読コメントがあります"></span>
+        <% end %>
+      </span>
       <%= link_to "⊕ 新規作成", new_admin_post_path, class: "primary-button" %>
     </div>
   </div>

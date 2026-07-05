@@ -15,6 +15,7 @@ module Admin
       @page = [ @page, @total_pages ].min
       @posts = @posts.limit(@per_page).offset((@page - 1) * @per_page)
       @categories = Category.ordered
+      @has_unread_comments = Comment.where("created_at > ?", current_admin_user.last_comments_read_at || Time.at(0)).exists?
       @total_count = Post.count
       @published_count = Post.published.count
       @draft_count = Post.draft.count
