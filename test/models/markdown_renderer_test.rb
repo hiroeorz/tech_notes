@@ -68,6 +68,49 @@ class MarkdownRendererTest < ActiveSupport::TestCase
     assert_includes html, "puts"
   end
 
+  test "decorates code blocks with filename from lang attribute" do
+    html = MarkdownRenderer.new(<<~MARKDOWN).render
+      ```ruby:test.rb
+      puts "hello"
+      ```
+
+      ```elixir:app.ex
+      IO.puts("hi")
+      ```
+
+      ```:notes.txt
+      plain text
+      ```
+
+      ```javascript
+      console.log("no filename")
+      ```
+    MARKDOWN
+
+    doc = Nokogiri::HTML5.fragment(html)
+
+    blocks = doc.css("pre.code-block")
+    assert_equal 4, blocks.size
+
+    ruby_block = blocks[0]
+    assert_equal "test.rb", ruby_block["data-filename"]
+    assert_includes ruby_block.classes, "highlight"
+    assert_includes ruby_block.classes, "language-ruby"
+
+    elixir_block = blocks[1]
+    assert_equal "app.ex", elixir_block["data-filename"]
+    assert_includes elixir_block.classes, "highlight"
+    assert_includes elixir_block.classes, "language-elixir"
+
+    text_block = blocks[2]
+    assert_equal "notes.txt", text_block["data-filename"]
+    assert_not_includes text_block.classes, "highlight"
+
+    js_block = blocks[3]
+    assert_nil js_block["data-filename"]
+    assert_includes js_block.classes, "highlight"
+  end
+
   test "decorates markdown images for article lightbox" do
     html = MarkdownRenderer.new("![構成図](/images/architecture.png)").render
 

@@ -22,7 +22,7 @@ class MarkdownRenderer
   ].freeze
 
   ALLOWED_ATTRIBUTES = %w[
-    alt checked class disabled href id loading rel role src tabindex type
+    alt checked class data-filename disabled href id loading rel role src tabindex type
   ].freeze
 
   def initialize(markdown)
@@ -86,6 +86,7 @@ class MarkdownRenderer
   def decorate_code_blocks(fragment)
     fragment.css("pre").each do |pre|
       pre["class"] = append_class(pre["class"], "code-block")
+      decorate_code_block_filename(pre)
       highlight_code_block(pre)
     end
   end
@@ -137,8 +138,29 @@ class MarkdownRenderer
     classes.uniq.join(" ")
   end
 
+  def decorate_code_block_filename(pre)
+    lang = pre["lang"].to_s.strip
+    filename = extract_filename(lang)
+    pre["data-filename"] = filename if filename
+  end
+
+  def extract_filename(lang)
+    return unless lang.include?(":")
+
+    _, filename = lang.split(":", 2)
+    filename.presence
+  end
+
+  def extract_language(lang)
+    return lang unless lang.include?(":")
+
+    language, = lang.split(":", 2)
+    language.presence
+  end
+
   def highlight_code_block(pre)
-    language = pre["lang"].to_s.strip.presence
+    raw_lang = pre["lang"].to_s.strip
+    language = extract_language(raw_lang).presence
     code = pre.at_css("code")
     return if language.blank? || code.blank?
     return if language.in?(%w[text plaintext])

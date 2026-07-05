@@ -974,6 +974,26 @@ textarea {
   font-size: 12px;
 }
 
+pre[data-filename] {
+  padding-top: 36px;
+  position: relative;
+}
+
+pre[data-filename]::before {
+  content: attr(data-filename);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 6px 18px;
+  font-size: 12px;
+  font-family: var(--mono);
+  color: #a8a29e;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 7px 7px 0 0;
+}
+
 .code-block {
   max-width: 680px;
   padding: 14px 18px;
