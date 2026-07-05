@@ -2,9 +2,9 @@
 set -euo pipefail
 
 SERVICE_LABEL="${SERVICE_LABEL:-tech_notes-db}"
-POSTGRES_USER="${POSTGRES_USER:-hiroe}"
+POSTGRES_USER="${POSTGRES_USER:?POSTGRES_USER is required}"
 RCLONE_REMOTE="${RCLONE_REMOTE:-r2}"
-R2_BUCKET="${R2_BUCKET:-hiroe-tech-notes-backup}"
+R2_BUCKET="${R2_BUCKET:?R2_BUCKET is required}"
 R2_PREFIX="${R2_PREFIX:-postgresql}"
 S3_NO_CHECK_BUCKET="${S3_NO_CHECK_BUCKET:-1}"
 
