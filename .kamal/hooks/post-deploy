@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
 set -eu
 
-USER="${BACKUP_DEPLOY_USER:-hiroe}"
-HOSTS="${BACKUP_DEPLOY_HOSTS:-${KAMAL_HOSTS:-133.117.73.23}}"
+USER="${BACKUP_DEPLOY_USER:-${SSH_USER}}"
+HOSTS="${BACKUP_DEPLOY_HOSTS:-${KAMAL_HOSTS:-${SERVER_IP}}}"
 REMOTE_DIR="${BACKUP_DEPLOY_DIR:-/home/$USER/ops}"
 SCRIPT="backup_postgres_to_r2.sh"
 LOCAL_SCRIPT="script/ops/$SCRIPT"
