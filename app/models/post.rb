@@ -6,6 +6,7 @@ class Post < ApplicationRecord
   has_many_attached :images
   has_many :post_tags, dependent: :destroy
   has_many :tags, through: :post_tags
+  has_many :comments, dependent: :destroy
 
   IMAGE_CONTENT_TYPES = %w[image/jpeg image/png image/webp image/gif].freeze
   IMAGE_MAX_SIZE = 10.megabytes

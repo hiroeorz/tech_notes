@@ -5,7 +5,9 @@ Rails.application.routes.draw do
 
   get "feed", to: "posts#feed", defaults: { format: :xml }, as: :feed
   get "feed.xml", to: "posts#feed", defaults: { format: :xml }
-  resources :posts, only: [ :index, :show ], param: :slug
+  resources :posts, only: [ :index, :show ], param: :slug do
+    resources :comments, only: [ :create ]
+  end
   get "experiments", to: "posts#index", defaults: { kind: "experiment" }, as: :experiments
   get "categories", to: "posts#categories", as: :categories
   get "tags", to: "posts#tags", as: :tags
@@ -28,6 +30,7 @@ Rails.application.routes.draw do
     end
     resources :post_summaries, only: [ :create ]
     resources :post_slugs, only: [ :create ]
+    resources :comments, only: [ :index, :destroy ]
     resource :settings, only: [ :show, :update ]
     root "posts#index"
   end

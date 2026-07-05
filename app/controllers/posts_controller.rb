@@ -23,6 +23,8 @@ class PostsController < ApplicationController
 
   def show
     @post = Post.publicly_visible.includes(:category, :tags).find_by!(slug: params[:slug])
+    @comment = @post.comments.build
+    @comments = @post.comments.oldest
     set_post_meta(@post)
     @related_posts = Post.publicly_visible.where(category: @post.category).where.not(id: @post.id).recent.limit(3)
     @toc = helpers.extract_headings(@post.body)

@@ -1,3 +1,8 @@
+<% if turnstile_enabled? %>
+  <% content_for :head do %>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <% end %>
+<% end %>
 <main class="page-grid show-page">
   <article class="content-area article-content">
     <nav class="breadcrumbs">
@@ -29,6 +34,8 @@
     </div>
 
     <footer class="article-footer">© 2025 Hiroe Tech Notes. All rights reserved.</footer>
+
+    <%= render "posts/comments" %>
   </article>
 
   <%= render "shared/sidebar", toc: @toc, tags: @post.tags, related_posts: @related_posts, share: true %>

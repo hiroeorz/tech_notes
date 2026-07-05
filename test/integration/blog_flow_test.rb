@@ -1250,6 +1250,87 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_not @setting.reload.ogp_image.attached?
   end
 
+  test "article show page has comments section" do
+    get post_path(@post.slug)
+    assert_response :success
+    assert_select "#comments"
+    assert_select ".comment-form-wrap form"
+    assert_select "input[name='comment[author_name]']"
+    assert_select "textarea[name='comment[body]']"
+    assert_select "input[type='submit'][value='投稿する']"
+  end
+
+  test "visitor can post a comment with valid turnstile" do
+    post post_comments_path(@post.slug), params: {
+      comment: { author_name: "テスト太郎", body: "参考になりました！" },
+      "cf-turnstile-response" => "dummy-token"
+    }
+    assert_redirected_to post_path(@post.slug, anchor: "comments")
+    follow_redirect!
+    assert_includes response.body, "コメントを投稿しました"
+
+    get post_path(@post.slug)
+    assert_includes response.body, "テスト太郎"
+    assert_includes response.body, "参考になりました！"
+  end
+
+  test "visitor cannot post comment without turnstile" do
+    post post_comments_path(@post.slug), params: {
+      comment: { author_name: "テスト太郎", body: "参考になりました！" }
+    },
+    as: :html
+    assert_response :unprocessable_entity
+    assert_includes response.body, "スパム判定"
+  end
+
+  test "visitor cannot post comment with empty name" do
+    post post_comments_path(@post.slug), params: {
+      comment: { author_name: "", body: "参考になりました！" },
+      "cf-turnstile-response" => "dummy-token"
+    }
+    assert_response :unprocessable_entity
+    assert_includes response.body, "名前"
+  end
+
+  test "visitor cannot post comment with empty body" do
+    post post_comments_path(@post.slug), params: {
+      comment: { author_name: "テスト太郎", body: "" },
+      "cf-turnstile-response" => "dummy-token"
+    }
+    assert_response :unprocessable_entity
+  end
+
+  test "admin can view comment management page" do
+    @post.comments.create!(author_name: "テスト太郎", body: "参考になりました！", ip_address: "127.0.0.1")
+
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+    assert_redirected_to admin_posts_path
+
+    get admin_comments_path
+    assert_response :success
+    assert_includes response.body, "テスト太郎"
+    assert_includes response.body, "参考になりました！"
+    assert_select "a[href='#{post_path(@post.slug)}']", text: @post.title
+  end
+
+  test "admin can delete a comment" do
+    comment = @post.comments.create!(author_name: "テスト太郎", body: "削除対象", ip_address: "127.0.0.1")
+
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+
+    assert_difference -> { Comment.count }, -1 do
+      delete admin_comment_path(comment)
+    end
+    assert_redirected_to admin_comments_path
+    follow_redirect!
+    assert_includes response.body, "コメントを削除しました"
+  end
+
+  test "unauthenticated user cannot access admin comments" do
+    get admin_comments_path
+    assert_redirected_to admin_login_path
+  end
+
   private
 
   def with_post_summary_generator(generator)

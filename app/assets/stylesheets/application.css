@@ -1179,6 +1179,98 @@ pre[data-filename]::before {
   font-size: 13px;
 }
 
+/* Comments section */
+.comments-section {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.comments-section > .section-heading {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin-bottom: 18px;
+}
+
+.comments-section > .section-heading span {
+  font-size: 20px;
+  font-weight: 900;
+  padding-left: 12px;
+  border-left: 5px solid var(--orange);
+}
+
+.comment-list {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.comment-item {
+  padding: 14px 16px;
+  border: 1px solid var(--line-soft);
+  border-radius: 6px;
+  background: rgba(255, 252, 247, 0.48);
+}
+
+.comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.comment-author {
+  font-weight: 800;
+}
+
+.comment-date {
+  color: var(--muted);
+}
+
+.comment-body {
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.comment-form-wrap {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: rgba(255, 252, 247, 0.52);
+}
+
+.comment-form-fields {
+  display: grid;
+  gap: 14px;
+}
+
+.comment-form-fields label {
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.comment-form-fields input[type="text"] {
+  width: min(360px, 100%);
+}
+
+.comment-form-fields textarea {
+  width: 100%;
+  min-width: 0;
+  resize: vertical;
+}
+
+.turnstile-wrap {
+  margin-top: 16px;
+  min-height: 72px;
+}
+
+.comment-submit-row {
+  margin-top: 16px;
+}
+
 .admin-page,
 .editor-page,
 .settings-page,

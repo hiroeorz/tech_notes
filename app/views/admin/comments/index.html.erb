@@ -1,0 +1,53 @@
+<main class="admin-page">
+  <nav class="breadcrumbs">
+    <%= link_to "ホーム", root_path %>
+    <span>›</span>
+    <span>管理画面</span>
+    <span>›</span>
+    <span>コメント一覧</span>
+  </nav>
+
+  <div class="admin-title-row">
+    <h1>コメント一覧</h1>
+    <div class="title-actions">
+      <%= link_to "◈ 記事一覧", admin_posts_path, class: "secondary-button" %>
+    </div>
+  </div>
+
+  <section class="admin-table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>投稿者</th>
+          <th>本文</th>
+          <th>対象記事</th>
+          <th>投稿日時</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @comments.empty? %>
+          <tr>
+            <td colspan="5" style="text-align:center;padding:32px;color:var(--muted);">コメントはまだありません。</td>
+          </tr>
+        <% else %>
+          <% @comments.each do |comment| %>
+            <tr>
+              <td><strong><%= comment.author_name %></strong></td>
+              <td style="max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                <%= truncate(strip_tags(comment.body), length: 80) %>
+              </td>
+              <td>
+                <%= link_to comment.post.title, post_path(comment.post.slug), target: "_blank", class: "text-link" %>
+              </td>
+              <td><%= comment.created_at.strftime("%Y/%m/%d %H:%M") %></td>
+              <td class="action-cell">
+                <%= button_to "削除", admin_comment_path(comment), method: :delete, form: { data: { turbo_confirm: "このコメントを削除しますか？" } }, class: "danger-button" %>
+              </td>
+            </tr>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
+  </section>
+</main>

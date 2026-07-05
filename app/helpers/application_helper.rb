@@ -26,4 +26,16 @@ module ApplicationHelper
 
     link_to label, url, **options
   end
+
+  def turnstile_site_key
+    if Rails.env.test? || Rails.env.development?
+      "1x00000000000000000000AA"
+    else
+      ENV["TURNSTILE_SITE_KEY"].to_s
+    end
+  end
+
+  def turnstile_enabled?
+    turnstile_site_key.present?
+  end
 end
