@@ -471,6 +471,14 @@ Tech Notes は、インフラ、クラウド、SRE、自動化、プログラミ
 - パスワード未入力時はエラーを表示する。
 - 認証失敗時はログインできなかったことを表示する。
 
+### 8.4 Cloudflare Turnstile 連携
+
+- ログインフォーム送信時に Cloudflare Turnstile による bot 検証を行う。
+- Turnstile ウィジェットが未完了の場合はログインボタンを `disabled` にする。
+- Turnstile のトークンが無効な場合はログインできず、エラーメッセージを表示する。
+- Turnstile の設定が未登録（キーが空）の場合は検証をスキップし、通常のログインが可能であること。
+- 既存の Turnstile 実装（`TurnstileVerifier`、`turnstile_site_key` ヘルパー、`turnstile_enabled?` ヘルパー）を再利用する。
+
 ## 9. 管理設定ページ要件
 
 ### 9.1 パンくずと見出し

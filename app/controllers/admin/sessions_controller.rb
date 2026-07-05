@@ -13,6 +13,12 @@ module Admin
         return
       end
 
+      unless turnstile_valid?
+        flash.now[:alert] = "スパム判定されました。もう一度お試しください。"
+        render :new, status: :unprocessable_entity
+        return
+      end
+
       admin = AdminUser.find_by(email: params[:email].to_s.downcase)
 
       if admin&.authenticate(params[:password].to_s)
@@ -39,6 +45,14 @@ module Admin
         httponly: true,
         same_site: :lax
       }
+    end
+
+    def turnstile_valid?
+      return true if Rails.env.test?
+      return true unless helpers.turnstile_enabled?
+
+      token = params["cf-turnstile-response"]
+      TurnstileVerifier.verify(token, remote_ip: request.remote_ip)
     end
   end
 end

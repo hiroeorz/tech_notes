@@ -1,3 +1,8 @@
+<% if turnstile_enabled? %>
+  <% content_for :head do %>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <% end %>
+<% end %>
 <main class="login-page-main">
   <div class="login-illustration" aria-hidden="true">
     <span class="terminal-doodle">&gt;_</span>
@@ -18,7 +23,10 @@
       </div>
     <% end %>
 
-    <%= form_with url: admin_login_path, class: "login-form" do |form| %>
+    <% html_opts = { class: "login-form" } %>
+    <% html_opts["data-controller"] = "login-form" if turnstile_enabled? %>
+    <% html_opts["data-login-form-site-key-value"] = turnstile_site_key if turnstile_enabled? %>
+    <%= form_with url: admin_login_path, html: html_opts do |form| %>
       <label>
         <span>メールアドレス</span>
         <%= form.email_field :email, placeholder: "例）hiroe@example.com", required: true %>
@@ -34,7 +42,11 @@
         <label><%= form.check_box :remember_me %> ログイン状態を保持する</label>
         <%= mail_to current_site_setting.profile_email, "パスワードを忘れた場合", subject: "Hiroe Tech Notes パスワード再設定依頼" %>
       </div>
-      <%= form.submit "ログイン", class: "primary-button wide" %>
+      <% if turnstile_enabled? %>
+        <div class="turnstile-wrap" data-login-form-target="turnstile"></div>
+      <% end %>
+
+      <%= form.submit "ログイン", class: "primary-button wide", data: (turnstile_enabled? ? { "login-form-target" => "submit" } : {}) %>
     <% end %>
   </section>
 
