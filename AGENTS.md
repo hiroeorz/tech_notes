@@ -49,7 +49,7 @@ This file guides AI agents (and humans) working in this repo. It captures non-ob
 
 ## Pre-commit security check
 
-- `git commit` を実行する**前に必ず** `.agents/skills/security_check/SKILL.md` の手順に従い、リポジトリ全体の機密情報スキャンを実行すること。
+- `git commit` を実行する**前に必ず** `.agents/skills/security-check/SKILL.md` の手順に従い、リポジトリ全体の機密情報スキャンを実行すること。
 - 🔴 CRITICAL または 🟠 HIGH の指摘が見つかった場合は、**コミットを中断し**、発見内容をユーザーに報告して指示を仰ぐこと。
 - 🟡 MEDIUM 以下の指摘のみの場合は、報告は行うがユーザーの判断でコミットを継続してよい。
 - チェックで問題がなければ通常通りコミットを進めてよい。
