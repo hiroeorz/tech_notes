@@ -11,11 +11,11 @@
 # ============================================
 # PostgreSQL 接続（デフォルト値があるため変更時のみ設定）
 # ============================================
-# export DB_HOST="tech_notes-db"                    # ホスト (デフォルト: 127.0.0.1)
-# export DB_PORT="5432"                              # ポート (デフォルト: 5432)
-# export POSTGRES_USER="postgres"                   # ユーザー名 (デフォルト: "")
-# export POSTGRES_PASSWORD="your-password"          # パスワード (デフォルト: "")
-# export POSTGRES_DB="tech_notes_production"         # プライマリDB名
+# export DB_HOST="tech_notes-db"                          # ホスト (デフォルト: 127.0.0.1)
+# export DB_PORT="5432"                                   # ポート (デフォルト: 5432)
+export POSTGRES_USER="postgres"                           # ユーザー名
+export POSTGRES_PASSWORD="your-password"                  # パスワード
+# export POSTGRES_DB="tech_notes_production"              # プライマリDB名
 # export POSTGRES_DB_CACHE="tech_notes_production_cache"  # Solid Cache用DB
 # export POSTGRES_DB_QUEUE="tech_notes_production_queue"  # Solid Queue用DB
 # export POSTGRES_DB_CABLE="tech_notes_production_cable"  # Solid Cable用DB
@@ -23,7 +23,7 @@
 # ============================================
 # アプリケーション
 # ============================================
-export APP_HOST="hiroe-tech-notes.example.com"     # 本番ホスト名（production必須）
+export APP_HOST="hiroe-tech-notes.example.com"      # 本番ホスト名（production必須）
 # export RAILS_MAX_THREADS="5"                      # Pumaスレッド数 / DBプールサイズ (デフォルト: 3)
 # export PORT="3000"                                # Pumaリスンポート (デフォルト: 3000)
 # export RAILS_LOG_LEVEL="info"                     # ログレベル (デフォルト: info)
@@ -56,13 +56,13 @@ export GOOGLE_SITE_VERIFICATION="your-verification-token"
 # ============================================
 # Kamal デプロイ用 (デプロイ実行環境でのみ必要)
 # ============================================
-export IMAGE="hiroeorz/tech_notes"                 # Dockerイメージ名
-export SERVER_IP="192.168.0.1"                     # デプロイ先サーバーIP
-export PROXY_HOST="hiroe-tech-notes.example.com"   # SSLプロキシホスト名
-export REGISTRY_USERNAME="hiroeorz"                # Docker Hubユーザー名
-export SSH_USER="deploy"                           # SSH接続ユーザー
+export IMAGE="hiroeorz/tech_notes"                      # Dockerイメージ名
+export SERVER_IP="192.168.0.1"                          # デプロイ先サーバーIP
+export PROXY_HOST="hiroe-tech-notes.example.com"        # SSLプロキシホスト名
+export REGISTRY_USERNAME="hiroeorz"                     # Docker Hubユーザー名
+export SSH_USER="deploy"                                # SSH接続ユーザー
 export KAMAL_REGISTRY_PASSWORD="your-docker-hub-token"  # Docker Hubアクセストークン
-export RAILS_MASTER_KEY="$(cat config/master.key)" # credentials復号キー
+export RAILS_MASTER_KEY="$(cat config/master.key)"      # credentials復号キー
 ```
 
 > **補足**: `POSTGRES_PASSWORD` / Cloudflare 関連の一部変数は `config/credentials.yml.enc` からのフォールバックを持ちます。上記でコメントアウトした変数は全てコード内にデフォルト値が定義されており、未設定でもアプリは動作します。
