@@ -54,6 +54,12 @@ export CLOUDFLARE_AI_TIMEOUT_SECONDS="60"
 export GOOGLE_SITE_VERIFICATION="your-verification-token"
 
 # ============================================
+# Cloudflare Turnstile (bot検証: コメント・管理者ログイン)
+# ============================================
+export TURNSTILE_SITE_KEY="0x4AAAAAAA-example"
+export TURNSTILE_SECRET_KEY="0x4AAAAAAA-example-secret"
+
+# ============================================
 # Kamal デプロイ用 (デプロイ実行環境でのみ必要)
 # ============================================
 export IMAGE="your-docker-user/tech_notes"               # Dockerイメージ名
