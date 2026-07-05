@@ -1328,12 +1328,12 @@ pre[data-filename]::before {
 
 .badge-dot {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  width: 14px;
-  height: 14px;
+  top: -8px;
+  right: -8px;
+  width: 18px;
+  height: 18px;
   background: #e53e3e;
-  border: 2.5px solid #fff;
+  border: 3px solid #fff;
   border-radius: 50%;
   pointer-events: none;
 }
