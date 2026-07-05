@@ -1,4 +1,4 @@
-# Hiroe Tech Notes
+# Tech Notes
 
 個人のテックブログアプリケーション（Rails 8 + PostgreSQL + Cloudflare R2）。
 
