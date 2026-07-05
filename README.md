@@ -8,27 +8,27 @@
 
 ```bash
 # ============================================
-# PostgreSQL 接続
+# PostgreSQL 接続（デフォルト値があるため変更時のみ設定）
 # ============================================
-export DB_HOST="tech_notes-db"                     # ホスト (デフォルト: 127.0.0.1)
-export DB_PORT="5432"                              # ポート (デフォルト: 5432)
-export POSTGRES_USER="postgres"                    # ユーザー名
-export POSTGRES_PASSWORD="your-password"           # パスワード (default: "")
-export POSTGRES_DB="tech_notes_production"         # プライマリDB名
-export POSTGRES_DB_CACHE="tech_notes_production_cache"  # Solid Cache用DB
-export POSTGRES_DB_QUEUE="tech_notes_production_queue"  # Solid Queue用DB
-export POSTGRES_DB_CABLE="tech_notes_production_cable"  # Solid Cable用DB
+# export DB_HOST="tech_notes-db"                    # ホスト (デフォルト: 127.0.0.1)
+# export DB_PORT="5432"                              # ポート (デフォルト: 5432)
+# export POSTGRES_USER="postgres"                   # ユーザー名 (デフォルト: "")
+# export POSTGRES_PASSWORD="your-password"          # パスワード (デフォルト: "")
+# export POSTGRES_DB="tech_notes_production"         # プライマリDB名
+# export POSTGRES_DB_CACHE="tech_notes_production_cache"  # Solid Cache用DB
+# export POSTGRES_DB_QUEUE="tech_notes_production_queue"  # Solid Queue用DB
+# export POSTGRES_DB_CABLE="tech_notes_production_cable"  # Solid Cable用DB
 
 # ============================================
 # アプリケーション
 # ============================================
 export APP_HOST="hiroe-tech-notes.example.com"     # 本番ホスト名（production必須）
-export RAILS_MAX_THREADS="5"                       # Pumaスレッド数 / DBプールサイズ
-export PORT="3000"                                 # Pumaリスンポート (デフォルト: 3000)
-export RAILS_LOG_LEVEL="info"                      # ログレベル (info / debug)
-export ACTIVE_STORAGE_SERVICE="cloudflare_r2"      # 開発環境のストレージ (local / cloudflare_r2)
-export SOLID_QUEUE_IN_PUMA="true"                  # Puma内でSolid Queueを起動
-export JOB_CONCURRENCY="1"                         # Solid Queueワーカー数
+# export RAILS_MAX_THREADS="5"                      # Pumaスレッド数 / DBプールサイズ (デフォルト: 3)
+# export PORT="3000"                                # Pumaリスンポート (デフォルト: 3000)
+# export RAILS_LOG_LEVEL="info"                     # ログレベル (デフォルト: info)
+# export ACTIVE_STORAGE_SERVICE="cloudflare_r2"     # 開発環境のストレージ (デフォルト: cloudflare_r2)
+# export SOLID_QUEUE_IN_PUMA="true"                 # Puma内でSolid Queueを起動
+# export JOB_CONCURRENCY="1"                        # Solid Queueワーカー数 (デフォルト: 1)
 
 # ============================================
 # Cloudflare R2 (Active Storage 画像保存)
@@ -64,7 +64,7 @@ export KAMAL_REGISTRY_PASSWORD="your-docker-hub-token"  # Docker Hubアクセス
 export RAILS_MASTER_KEY="$(cat config/master.key)" # credentials復号キー
 ```
 
-> **補足**: `POSTGRES_PASSWORD` / Cloudflare 関連の一部変数は `config/credentials.yml.enc` からのフォールバックを持ちます。環境変数が未設定の場合は credentials の値が使われます。
+> **補足**: `POSTGRES_PASSWORD` / Cloudflare 関連の一部変数は `config/credentials.yml.enc` からのフォールバックを持ちます。上記でコメントアウトした変数は全てコード内にデフォルト値が定義されており、未設定でもアプリは動作します。
 
 ---
 
