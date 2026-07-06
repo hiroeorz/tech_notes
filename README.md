@@ -1,5 +1,7 @@
 # Tech Notes
 
+[![CI](https://github.com/hiroeorz/tech_notes/actions/workflows/ci.yml/badge.svg)](https://github.com/hiroeorz/tech_notes/actions/workflows/ci.yml)
+
 個人のテックブログアプリケーション（Rails 8 + PostgreSQL + Cloudflare R2）。
 
 ## 環境変数一覧
