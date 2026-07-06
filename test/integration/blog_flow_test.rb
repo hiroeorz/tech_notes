@@ -31,7 +31,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     get root_path
     assert_response :success
     assert_includes response.body, "Hiroe Tech Notes"
-    assert_includes response.body, "考えたことを"
+    assert_includes response.body, "動かしながら学ぶ"
     assert_not_includes response.body, "管理者ログイン"
     assert_not_includes response.body, admin_login_path
     assert_select "button[data-theme-toggle][aria-label='テーマ切り替え'][aria-pressed]"
