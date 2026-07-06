@@ -59,7 +59,7 @@ log "Starting PostgreSQL backup: container=${CONTAINER}, stamp=${STAMP}"
 
 for DB in "${DATABASES[@]}"; do
   dump_file="$(mktemp "/tmp/${DB}_${STAMP}.XXXXXX.dump")"
-  remote_path="${RCLONE_REMOTE}:${R2_BUCKET}/${R2_PREFIX}/${DB}_${STAMP}.dump"
+  remote_path="${RCLONE_REMOTE}:${R2_BUCKET}/${R2_PREFIX}/${STAMP}/${DB}_${STAMP}.dump"
 
   log "Dumping ${DB} to ${dump_file}"
   docker exec "$CONTAINER" pg_dump -U "$POSTGRES_USER" -Fc -d "$DB" > "$dump_file"
