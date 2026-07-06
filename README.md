@@ -1,6 +1,6 @@
 # Tech Notes
 
-[![CI](https://github.com/hiroeorz/tech_notes/actions/workflows/ci.yml/badge.svg)](https://github.com/hiroeorz/tech_notes/actions/workflows/ci.yml)
+[![CI](https://github.com/hiroeorz/tech_notes/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/hiroeorz/tech_notes/actions/workflows/ci.yml)
 
 個人のテックブログアプリケーション（Rails 8 + PostgreSQL + Cloudflare R2）。
 
