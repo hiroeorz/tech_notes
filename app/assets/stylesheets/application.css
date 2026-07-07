@@ -2734,16 +2734,42 @@ pre[data-filename]::before {
     padding-left: 36px;
     padding-right: 14px;
   }
+
+  .site-header {
+    gap: 12px;
+    padding-left: 36px;
+    padding-right: 14px;
+  }
+
+  .menu-toggle {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+    line-height: 36px;
+  }
+
+  .icon-button {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+    line-height: 36px;
+  }
 }
 
 @media (max-width: 720px) {
   .site-header {
     padding-left: 42px;
     padding-right: 18px;
+    gap: 18px;
   }
 
   .brand-title {
     font-size: 21px;
+  }
+
+  .brand-tagline {
+    font-size: 12px;
+    white-space: nowrap;
   }
 
   .hero-copy h1 {
