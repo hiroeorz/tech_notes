@@ -29,8 +29,45 @@
         <%= link_to tag.name, posts_path(tag: tag.slug), class: "chip" %>
       <% end %>
     </div>
+
+    <% if @toc.present? %>
+      <div class="mobile-toc-box mobile-only" data-controller="toc-toggle">
+        <div class="mobile-toc-header" role="button" tabindex="0" aria-expanded="false" data-action="click->toc-toggle#toggle keydown.enter->toc-toggle#toggle keydown.space->toc-toggle#toggle">
+          <span>☰</span>
+          <span>目次</span>
+          <span class="toc-toggle-icon">▾</span>
+        </div>
+        <div class="mobile-toc-body" hidden data-toc-toggle-target="body">
+          <ol>
+            <% @toc.each do |id, title| %>
+              <li><a href="#<%= id %>"><%= title %></a></li>
+            <% end %>
+          </ol>
+        </div>
+      </div>
+    <% end %>
+
     <div class="markdown-body" data-image-lightbox>
       <%= render_markdown(@post.body) %>
+    </div>
+
+    <% if @related_posts.present? %>
+      <div class="mobile-related-posts mobile-only">
+        <h3>関連記事</h3>
+        <% @related_posts.each do |post| %>
+          <%= link_to post_path(post.slug), class: "mobile-related-item" do %>
+            <span><%= post.title %></span>
+            <time><%= l(post.display_date, format: :short) %></time>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div class="mobile-share mobile-only">
+      <span>シェア:</span>
+      <%= link_to "GitHub", current_site_setting.github_url, aria: { label: "GitHub" } if current_site_setting.github_url.present? %>
+      <%= link_to "𝕏", "https://x.com/intent/tweet?url=#{ERB::Util.url_encode(request.original_url)}&text=#{ERB::Util.url_encode(@post.title)}", aria: { label: "Xでシェア" } %>
+      <%= link_to "RSS", feed_path(format: :xml), aria: { label: "RSS" } %>
     </div>
 
     <footer class="article-footer">© 2025 Hiroe Tech Notes. All rights reserved.</footer>

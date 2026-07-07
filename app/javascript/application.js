@@ -528,4 +528,21 @@ document.addEventListener("turbo:load", () => {
       }
     })
   }
+
+  const menuToggle = document.querySelector("[data-menu-toggle]")
+  const menuNav = document.querySelector("[data-menu-nav]")
+  if (menuToggle && menuNav) {
+    menuToggle.addEventListener("click", () => {
+      const expanded = menuToggle.getAttribute("aria-expanded") === "true"
+      menuToggle.setAttribute("aria-expanded", !expanded)
+      menuNav.toggleAttribute("data-menu-open")
+    })
+
+    document.addEventListener("click", (event) => {
+      if (!menuToggle.contains(event.target) && !menuNav.contains(event.target)) {
+        menuToggle.setAttribute("aria-expanded", "false")
+        menuNav.removeAttribute("data-menu-open")
+      }
+    })
+  }
 })

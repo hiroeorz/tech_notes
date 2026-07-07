@@ -14,6 +14,7 @@ Tech Notes は、インフラ、クラウド、SRE、自動化、プログラミ
 - 記事作成・編集ページ: `docs/images/edit.png`
 - 管理者ログインページ: `docs/images/login.png`
 - 管理設定ページ: `docs/images/settings.png`
+- モバイル公開側画面: `docs/mobile_images/` 以下の7画面（`home.png`, `posts_index.png`, `experiments.png`, `article_show.png`, `tags.png`, `profile.png`, `about.png`）を参照すること。
 
 ## 3. 共通要件
 
@@ -55,6 +56,7 @@ Tech Notes は、インフラ、クラウド、SRE、自動化、プログラミ
 - 管理側の一覧、編集、設定画面は、広い作業領域を確保するため全幅寄りの1カラム構成とする。
 - 主要コンテンツはページ左右に適切な余白を設け、画面幅が広い場合も読みづらくならない最大幅を持たせる。
 - スマートフォンや狭い画面では、2カラム構成を縦積みに切り替える。
+- モバイルの詳細要件は `docs/mobile_requirement.md` に定義する。実装時は同文書の全項目および `docs/mobile_images/` の参照画像を満たすこと。
 
 ### 3.4 アイコン
 

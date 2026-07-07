@@ -7,7 +7,7 @@
   </div>
 
   <% unless controller_path == "admin/sessions" %>
-    <nav class="global-nav" aria-label="グローバルナビゲーション">
+    <nav class="global-nav" aria-label="グローバルナビゲーション" data-menu-nav>
       <%= link_to "ホーム", root_path, class: ("active" if current_page?(root_path)) %>
       <%= link_to "記事一覧", posts_path, class: ("active" if controller_name == "posts" && action_name != "tags" && params[:kind] != "experiment" && request.path != experiments_path) %>
       <%= link_to "実験ログ", experiments_path, class: ("active" if request.path == experiments_path || params[:kind] == "experiment") %>
@@ -25,6 +25,7 @@
       <%= link_to "設定", admin_settings_path, class: "admin-link" %>
       <%= button_to "ログアウト", admin_logout_path, method: :delete, class: "logout-link" %>
     <% end %>
+    <button class="menu-toggle" type="button" data-menu-toggle aria-label="メニュー" aria-expanded="false">☰</button>
     <button class="icon-button" type="button" data-theme-toggle aria-label="テーマ切り替え" aria-pressed="<%= current_site_setting.default_theme == "dark" %>">☾</button>
     <button class="icon-button" type="button" data-search-toggle aria-label="検索">⌕</button>
   </div>
