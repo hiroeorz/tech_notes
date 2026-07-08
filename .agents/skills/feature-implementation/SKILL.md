@@ -187,7 +187,14 @@ bin/rubocop
 
 指摘がある場合は修正すること。
 
-### 8.2 ユニットテスト / 統合テスト
+### 8.2 セキュリティスキャン
+
+```bash
+bin/brakeman --no-pager
+bin/bundler-audit
+```
+
+### 8.3 ユニットテスト / 統合テスト
 
 ```bash
 bin/rails test
@@ -195,7 +202,7 @@ bin/rails test
 
 新規テストを追加し、既存テストが全てパスすることを確認する。
 
-### 8.3 システムテスト
+### 8.4 システムテスト
 
 ```bash
 bin/rails test:system

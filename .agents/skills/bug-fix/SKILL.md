@@ -162,7 +162,14 @@ bin/rubocop
 
 指摘がある場合は修正すること。
 
-### 7.2 全テスト実行
+### 7.2 セキュリティスキャン
+
+```bash
+bin/brakeman --no-pager
+bin/bundler-audit
+```
+
+### 7.3 全テスト実行
 
 ```bash
 bin/rails test
@@ -170,7 +177,7 @@ bin/rails test
 
 既存テストが全てパスすることを確認する。追加した再現テストがパスすることも確認する。
 
-### 7.3 システムテスト（必要な場合のみ）
+### 7.4 システムテスト（必要な場合のみ）
 
 ```bash
 bin/rails test:system
