@@ -638,7 +638,7 @@ textarea {
   line-height: 1.65;
   overflow-x: auto;
   border-radius: 5px;
-  max-height: 80px;
+  height: 140px;
 }
 
 .experiment-card-code code {
