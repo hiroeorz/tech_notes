@@ -220,6 +220,7 @@ textarea {
 
 .content-area {
   padding: 28px 34px 34px 8px;
+  min-width: 0;
 }
 
 .sidebar {
@@ -380,6 +381,10 @@ textarea {
   padding: 28px 42px 12px 40px;
 }
 
+.hero-section > * {
+  min-width: 0;
+}
+
 .hero-copy h1 {
   margin: 0 0 26px;
   font-family: var(--display);
@@ -417,6 +422,8 @@ textarea {
 
 .daily-card {
   position: relative;
+  max-width: 100%;
+  min-width: 0;
   padding: 32px 24px 20px;
   border: 1px solid var(--line);
   border-radius: 6px;
@@ -455,6 +462,8 @@ textarea {
 
 .code-card,
 .code-block {
+  max-width: 100%;
+  min-width: 0;
   overflow: auto;
   border-radius: 7px;
   background: radial-gradient(circle at 98% 14px, var(--orange) 0 4px, transparent 5px), #1b1b1b;
@@ -2372,7 +2381,7 @@ pre[data-filename]::before {
   }
 
   .page-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .sidebar {
@@ -2386,7 +2395,7 @@ pre[data-filename]::before {
   .settings-fields,
   .editor-title-row,
   .editor-fields {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .experiment-cards {
