@@ -138,6 +138,9 @@ bin/rails test 2>&1 | grep -i "deprecat"
 | `Gemfile` | `gem "rails", "~> X.Y.Z"` の書き換え | 必須 |
 | `Gemfile` | 関連gemのバージョン制約更新 | 状況による |
 | `config/` 以下のファイル | `rails app:update` で生成される新しいデフォルト設定との差分対応 | 必須 |
+| `README.md` | スタック欄のRailsバージョン表記を更新 | 必須 |
+| `AGENTS.md` | スタック欄のRailsバージョン表記を更新 | 必須 |
+| `docs/*.md` | ドキュメント内の古いRailsバージョン表記を更新（`grep` で旧バージョンを検索して確認） | 必須 |
 | アプリケーションコード | 削除/非推奨APIの置き換え | 状況による |
 
 ---
@@ -226,6 +229,7 @@ bin/rails app:update
 4. アプリケーションコードの修正（非推奨APIの置き換え等）
 5. テストコードの修正
 6. `Dockerfile` 等のインフラ関連ファイルの修正
+7. **ドキュメントのバージョン表記更新**: `README.md`, `AGENTS.md`, `docs/*.md`
 
 ---
 
@@ -250,6 +254,9 @@ bin/importmap audit
 
 # Railsバージョン確認
 bin/rails about
+
+# ドキュメント内の古いバージョン表記が残っていないか確認（該当がなければ出力なし）
+grep -rn '旧バージョン（ドット省略なしの完全なバージョン番号）' README.md AGENTS.md docs/ 2>/dev/null || echo "ドキュメントのバージョン表記に問題なし"
 ```
 
 ---

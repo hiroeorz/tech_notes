@@ -6,7 +6,7 @@
 
 ## スタック
 
-- **フレームワーク**: Rails 8 (Ruby 3.4)
+- **フレームワーク**: Rails 8 (Ruby 4.0)
 - **データベース**: PostgreSQL（開発・テストは SQLite）
 - **画像ストレージ**: Cloudflare R2
 - **フロントエンド**: importmap + Stimulus（Node.js 不要）
