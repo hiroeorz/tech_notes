@@ -9,7 +9,7 @@
 
 ## スタック
 
-- Rails 8.1 on Ruby 3.4.9（`rbenv`、`.ruby-version` でバージョン固定）
+- Rails 8.1 on Ruby 4.0.5（`rbenv`、`.ruby-version` でバージョン固定）
 - Bundle path は `vendor/bundle`（グローバルではない）— `.bundle/config` で設定。`bundle install` は gems をローカルに保持する。
 - フロントエンド: importmap + Stimulus、Node.js ツールチェーンなし。JS は `app/javascript/` に配置、pinning は `config/importmap.rb`。
 - Markdown はサーバーサイドで `MarkdownRenderer`（`app/models/markdown_renderer.rb`）によりレンダリング。`commonmarker` + Nokogiri ベースのサニタイズを使用。公開記事のレンダリングと管理画面のライブプレビューの両方がこの単一レンダラーを経由する。新たに markdown を扱う箇所は `PostsHelper#render_markdown` / `#extract_headings` を使用すること — コントローラーやビューから直接レンダリングしない。
