@@ -42,6 +42,14 @@ class Post < ApplicationRecord
     (published_at || created_at || Time.current).to_date
   end
 
+  def body_preview
+    if (img_match = body.to_s.match(/!\[([^\]]*)\]\(([^)]+)\)/))
+      { type: :image, url: img_match[2], alt: img_match[1].presence || title }
+    elsif (code_match = body.to_s.match(/```(\w*)\n(.+?)```/m))
+      { type: :code, code: code_match[2].strip, language: code_match[1].presence || "text" }
+    end
+  end
+
   def to_param
     slug
   end

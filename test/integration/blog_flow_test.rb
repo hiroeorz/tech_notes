@@ -216,6 +216,123 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_select ".daily-card h2", text: "TerraformでS3バケットを作ってみる"
   end
 
+  test "top experiment cards show body image preview when post has markdown image" do
+    experiment = Post.create!(
+      admin_user: @admin,
+      category: @category,
+      title: "画像あり実験",
+      slug: "experiment-with-image",
+      excerpt: "画像付き実験ログです。",
+      body: "![構成図](https://example.com/diagram.png)\n\n実験内容です。",
+      status: :published,
+      kind: :experiment,
+      published_at: Time.current
+    )
+
+    get root_path
+    assert_response :success
+    assert_select ".experiment-card[href='#{post_path(experiment.slug)}']" do
+      assert_select "time", text: experiment.display_date.strftime("%Y-%m-%d")
+      assert_select "h3", text: experiment.title
+      assert_select ".experiment-card-preview img.experiment-card-image[src='https://example.com/diagram.png'][alt='構成図']"
+      assert_select "p", text: experiment.excerpt
+    end
+  end
+
+  test "top experiment cards show code preview when post has code block" do
+    experiment = Post.create!(
+      admin_user: @admin,
+      category: @category,
+      title: "コード実験",
+      slug: "experiment-with-code",
+      excerpt: "コード付き実験ログです。",
+      body: "```ruby\nputs 'hello'\n```\n\n実験内容です。",
+      status: :published,
+      kind: :experiment,
+      published_at: Time.current
+    )
+
+    get root_path
+    assert_response :success
+    assert_select ".experiment-card[href='#{post_path(experiment.slug)}']" do
+      assert_select "time", text: experiment.display_date.strftime("%Y-%m-%d")
+      assert_select "h3", text: experiment.title
+      assert_select ".experiment-card-preview pre.experiment-card-code"
+      assert_select "p", text: experiment.excerpt
+    end
+  end
+
+  test "top experiment card hides preview when post has no image or code block" do
+    experiment = Post.create!(
+      admin_user: @admin,
+      category: @category,
+      title: "プレビューなし実験",
+      slug: "experiment-no-preview",
+      excerpt: "プレビューなし実験ログです。",
+      body: "実験内容のみの本文です。",
+      status: :published,
+      kind: :experiment,
+      published_at: Time.current
+    )
+
+    get root_path
+    assert_response :success
+    assert_select ".experiment-card[href='#{post_path(experiment.slug)}']" do
+      assert_select "h3", text: experiment.title
+      assert_select ".experiment-card-preview", count: 0
+    end
+  end
+
+  test "post body_preview extracts first image and first code block correctly" do
+    with_images = Post.create!(
+      admin_user: @admin,
+      category: @category,
+      title: "プレビュー抽出テスト",
+      slug: "preview-extraction-test",
+      excerpt: "テスト用",
+      body: "![画像1](/img1.png) ![画像2](/img2.png)\n```ruby\nputs 'ignored'\n```",
+      status: :published,
+      kind: :experiment,
+      published_at: Time.current
+    )
+
+    preview = with_images.body_preview
+    assert_equal :image, preview[:type]
+    assert_equal "/img1.png", preview[:url]
+    assert_equal "画像1", preview[:alt]
+
+    with_code = Post.create!(
+      admin_user: @admin,
+      category: @category,
+      title: "コードのみ",
+      slug: "code-only-preview",
+      excerpt: "テスト用",
+      body: "本文\n```javascript\nconsole.log('hi')\n```\n以上",
+      status: :published,
+      kind: :experiment,
+      published_at: Time.current
+    )
+
+    preview = with_code.body_preview
+    assert_equal :code, preview[:type]
+    assert_equal "console.log('hi')", preview[:code]
+    assert_equal "javascript", preview[:language]
+
+    without = Post.create!(
+      admin_user: @admin,
+      category: @category,
+      title: "プレビューなし",
+      slug: "no-preview-at-all",
+      excerpt: "テスト用",
+      body: "本文のみ",
+      status: :published,
+      kind: :experiment,
+      published_at: Time.current
+    )
+
+    assert_nil without.body_preview
+  end
+
   test "public sidebar tag list and category list count only published posts" do
     draft_category = Category.create!(name: "DraftCategory", slug: "draft-category", icon_key: "code", position: 2)
     draft_tag = Tag.create!(name: "DraftOnly", slug: "draft-only")

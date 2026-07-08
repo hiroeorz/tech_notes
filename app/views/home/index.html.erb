@@ -74,6 +74,15 @@
           <%= link_to post_path(post.slug), class: "experiment-card" do %>
             <time><%= post.display_date.strftime("%Y-%m-%d") %></time>
             <h3><%= post.title %></h3>
+            <% if (preview = post.body_preview) %>
+              <div class="experiment-card-preview">
+                <% if preview[:type] == :image %>
+                  <img src="<%= preview[:url] %>" alt="<%= preview[:alt] %>" loading="lazy" class="experiment-card-image">
+                <% elsif preview[:type] == :code %>
+                  <pre class="experiment-card-code"><code><%= highlight_code(preview[:code], language: preview[:language] || "text") %></code></pre>
+                <% end %>
+              </div>
+            <% end %>
             <p><%= post.excerpt %></p>
             <footer>
               <span>#<%= post.tags.first&.name || post.category.name %></span>
