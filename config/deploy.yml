@@ -21,7 +21,7 @@ servers:
 # Don't use this when deploying to multiple web servers (then you have to terminate SSL at your load balancer).
 proxy:
   ssl: true
-  host: <%= ENV.fetch("PROXY_HOST") %>
+  host: <%= ENV.fetch("APP_HOST") %>
   healthcheck:
     path: /up
     interval: 10

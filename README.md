@@ -55,18 +55,17 @@ bin/bundler-audit                # Gem脆弱性チェック
 これだけ設定すれば `kamal deploy` でアプリが起動します。
 
 ```bash
-# Docker Hub
+# Docker Hub等に作ったイメージへのパス
 export IMAGE="your-docker-user/tech_notes"
 export KAMAL_REGISTRY_PASSWORD="your-docker-hub-token"
 
 # デプロイ先サーバー
-export SERVER_IP="192.168.0.1"
-export PROXY_HOST="your-app.example.com"
-export SSH_USER="deploy"
+export SERVER_IP="192.168.0.1"           # SSHでログインする先の本番サーバーIPアドレス
+export SSH_USER="deploy"                 # SSHログインユーザー名
 
 # アプリケーション
 export RAILS_MASTER_KEY="$(cat config/master.key)"
-export APP_HOST="your-app.example.com"
+export APP_HOST="your-app.example.com"   # デプロイ先ホスト名（SSL証明書・Railsホスト解決用）
 
 # PostgreSQL
 export POSTGRES_USER="postgres"
@@ -108,7 +107,7 @@ export TURNSTILE_SECRET_KEY="0x4AAAAAAA-example-secret"
 # Kamal デプロイ
 export IMAGE="your-docker-user/tech_notes"
 export SERVER_IP="192.168.0.1"
-export PROXY_HOST="your-app.example.com"
+export APP_HOST="your-app.example.com"
 export REGISTRY_USERNAME="your-docker-user"
 export SSH_USER="deploy"
 export KAMAL_REGISTRY_PASSWORD="your-docker-hub-token"
