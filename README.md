@@ -2,7 +2,30 @@
 
 [![CI](https://github.com/hiroeorz/tech_notes/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/hiroeorz/tech_notes/actions/workflows/ci.yml)
 
-個人のテックブログアプリケーション（Rails 8 + PostgreSQL + Cloudflare R2）。
+
+## 概要
+本アプリケーションは、個人開発者向けのテックブログアプリです。
+テック記事サービスではなく、自分でサーバーを立ててブログを運用したい人向けのRailsアプリケーションです。
+
+```yaml
+フレームワーク：Rails 8
+RDB： PostgreSQL
+画像ストレージ：Cloudflare R2。
+```
+
+## 最小動作環境
+
+ハード構成：メモリ1GB以上（1VM上で Rails + PostgreSQL 運用想定）
+OS： Ubuntu 24 or 26
+
+メモリ1GBのVMが1つあれば、とりあえずは動きます。
+ConoHaなど使えば月額700円台に収まる、個人のお財布にやさしい構成です。
+
+具体的な構成は以下を参照
+[個人ブログのための最小構成サーバー](https://hiroe-tech-notes.aomaro.com/posts/minimal-blog-server-configuration)
+
+## サンプルサイト
+[サンプルサイト「Tech Notes」](https://hiroe-tech-notes.aomaro.com/)
 
 ## 環境変数一覧
 
