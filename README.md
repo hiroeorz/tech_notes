@@ -1,6 +1,7 @@
 # Tech Notes
 
 [![CI](https://github.com/hiroeorz/tech_notes/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/hiroeorz/tech_notes/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 自分でサーバーを立てて運用する個人向けテックブログアプリケーション。
 
@@ -119,3 +120,7 @@ export RAILS_MASTER_KEY="$(cat config/master.key)"
 - **デプロイアーキテクチャ**: `docs/deployment.md`
 - **運用セットアップ手順**（R2 / バックアップ / Workers AI / Google Search Console）: `docs/manuals/operations.md`
 - **バックアップ設計**: `docs/backup-requirements.md`
+
+## ライセンス
+
+MIT License。詳細は [LICENSE](LICENSE) を参照。
