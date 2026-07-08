@@ -606,6 +606,7 @@ textarea {
   padding: 18px;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .experiment-card h3 {
