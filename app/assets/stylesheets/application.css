@@ -141,6 +141,16 @@ textarea {
   display: flex;
   align-items: center;
   gap: 18px;
+  min-width: 0;
+}
+
+.locale-switch {
+  min-width: 0;
+}
+
+.locale-select {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .icon-button {

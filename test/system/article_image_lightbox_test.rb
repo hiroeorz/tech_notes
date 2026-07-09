@@ -22,7 +22,7 @@ class ArticleImageLightboxTest < ApplicationSystemTestCase
   end
 
   test "visitor can open and close a markdown image lightbox" do
-    visit post_path(@post.slug)
+    visit post_path(slug: @post.slug)
 
     image = find(".article-image img")
     image.click
