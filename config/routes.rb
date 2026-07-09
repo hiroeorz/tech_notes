@@ -1,19 +1,21 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
-  root "home#index"
+  scope "(:locale)", locale: /en|ja/ do
+    root "home#index"
 
-  get "feed", to: "posts#feed", defaults: { format: :xml }, as: :feed
-  get "feed.xml", to: "posts#feed", defaults: { format: :xml }
-  resources :posts, only: [ :index, :show ], param: :slug do
-    resources :comments, only: [ :create ]
+    get "feed", to: "posts#feed", defaults: { format: :xml }, as: :feed
+    get "feed.xml", to: "posts#feed", defaults: { format: :xml }
+    resources :posts, only: [ :index, :show ], param: :slug do
+      resources :comments, only: [ :create ]
+    end
+    get "experiments", to: "posts#index", defaults: { kind: "experiment" }, as: :experiments
+    get "categories", to: "posts#categories", as: :categories
+    get "tags", to: "posts#tags", as: :tags
+    get "archives", to: "posts#archives", as: :archives
+    get "profile", to: "home#profile", as: :profile
+    get "about", to: "home#about", as: :about
   end
-  get "experiments", to: "posts#index", defaults: { kind: "experiment" }, as: :experiments
-  get "categories", to: "posts#categories", as: :categories
-  get "tags", to: "posts#tags", as: :tags
-  get "archives", to: "posts#archives", as: :archives
-  get "profile", to: "home#profile", as: :profile
-  get "about", to: "home#about", as: :about
 
   post "locale", to: "locale#update"
 

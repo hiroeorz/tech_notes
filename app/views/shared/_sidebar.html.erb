@@ -49,7 +49,7 @@
       <h2><%= t("shared.sidebar.related_posts") %></h2>
       <div class="related-list">
         <% related_posts.each do |post| %>
-          <%= link_to post_path(post.slug), class: "related-item" do %>
+          <%= link_to post_path(post), class: "related-item" do %>
             <span><%= post.title %></span>
             <time><%= l(post.display_date, format: :short) %></time>
           <% end %>

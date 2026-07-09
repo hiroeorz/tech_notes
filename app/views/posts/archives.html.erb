@@ -17,7 +17,7 @@
           <h2><%= month.strftime("%Y 年 %-m 月") %> <span><%= posts.size %>件</span></h2>
           <div class="article-lines">
             <% posts.each do |post| %>
-              <%= link_to post_path(post.slug), class: "article-line" do %>
+              <%= link_to post_path(post), class: "article-line" do %>
                 <time><%= post.display_date.strftime("%Y-%m-%d") %></time>
                 <strong><%= post.title %></strong>
                 <span class="line-tags">

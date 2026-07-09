@@ -51,7 +51,7 @@
 
       <div class="article-lines">
         <% @latest_posts.each do |post| %>
-          <%= link_to post_path(post.slug), class: "article-line" do %>
+          <%= link_to post_path(post), class: "article-line" do %>
             <time><%= post.display_date.strftime("%Y-%m-%d") %></time>
             <strong><%= post.title %></strong>
             <span class="line-tags">
@@ -71,7 +71,7 @@
       </div>
       <div class="experiment-cards">
         <% @experiments.each do |post| %>
-          <%= link_to post_path(post.slug), class: "experiment-card" do %>
+          <%= link_to post_path(post), class: "experiment-card" do %>
             <time><%= post.display_date.strftime("%Y-%m-%d") %></time>
             <h3><%= post.title %></h3>
             <% if (preview = post.body_preview) %>

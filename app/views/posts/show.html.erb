@@ -55,7 +55,7 @@
       <div class="mobile-related-posts mobile-only">
         <h3><%= t("posts.show.related_posts") %></h3>
         <% @related_posts.each do |post| %>
-          <%= link_to post_path(post.slug), class: "mobile-related-item" do %>
+          <%= link_to post_path(post), class: "mobile-related-item" do %>
             <span><%= post.title %></span>
             <time><%= l(post.display_date, format: :short) %></time>
           <% end %>

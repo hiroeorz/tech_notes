@@ -5,15 +5,9 @@ export default class extends Controller {
     const locale = event.target.value
     if (!locale) return
 
-    const form = this.element
-    const action = form.action
-
-    const input = document.createElement("input")
-    input.type = "hidden"
-    input.name = "locale"
-    input.value = locale
-    form.appendChild(input)
-
-    form.submit()
+    // Remove existing locale prefix from path and navigate to new locale URL
+    const path = window.location.pathname.replace(/^\/(en|ja)(\/|$)/, "/")
+    const newPath = `/${locale}${path.startsWith("/") ? path : "/" + path}`
+    window.location.href = `${newPath}${window.location.search}`
   }
 }

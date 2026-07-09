@@ -36,7 +36,7 @@
           <div class="document-icon">▤</div>
           <div>
             <p class="post-meta"><%= post.display_date.strftime("%Y-%m-%d") %> / <%= post.category.name %> / <%= post.reading_minutes %><%= t("posts.index.minutes") %></p>
-            <h2><%= link_to post.title, post_path(post.slug) %></h2>
+            <h2><%= link_to post.title, post_path(post) %></h2>
             <p><%= post.excerpt %></p>
             <div class="chip-list">
               <% post.tags.each do |tag| %>

@@ -28,57 +28,57 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
   end
 
   test "public pages render blog content" do
-    get root_path
+    get "/en"
     assert_response :success
     assert_includes response.body, "Hiroe Tech Notes"
     assert_includes response.body, "Learn by doing"
     assert_not_includes response.body, admin_login_path
     assert_select "button[data-theme-toggle][aria-label='Toggle theme'][aria-pressed]"
-    assert_select ".latest-posts .filter-tabs a[href='#{posts_path(category: @ai_category.slug)}']", text: @ai_category.name
+    assert_select ".latest-posts .filter-tabs a[href='/en/posts?category=ai-development']", text: @ai_category.name
     assert_select "pre.code-card.highlight.language-terraform code.highlight"
     assert_includes response.body, "<span"
 
-    get posts_path
+    get "/en/posts"
     assert_response :success
     assert_includes response.body, @post.title
 
-    get posts_path(q: "terraform")
+    get "/en/posts", params: { q: "terraform" }
     assert_response :success
     assert_includes response.body, @post.title
 
-    get post_path(@post.slug)
+    get "/en/posts/terraform-remote-state"
     assert_response :success
     assert_includes response.body, "Terraform"
     assert_select "meta[property='og:type'][content='article']"
-    assert_select "meta[property='og:url'][content='#{post_url(@post.slug)}']"
-    assert_select "link[rel='canonical'][href='#{post_url(@post.slug)}']"
+    assert_select "meta[property='og:url'][content='http://www.example.com/en/posts/terraform-remote-state']"
+    assert_select "link[rel='canonical'][href='http://www.example.com/en/posts/terraform-remote-state']"
     assert_includes response.body, "code-block"
     assert_includes response.body, "https://x.com/intent/tweet"
-    assert_includes response.body, feed_path(format: :xml)
+    assert_includes response.body, "/en/feed"
     assert_select ".article-admin-actions .admin-edit-link[href='#{edit_admin_post_path(@post.slug)}']", count: 0
 
-    get tags_path
+    get "/en/tags"
     assert_response :success
     assert_includes response.body, @tag.name
 
-    get categories_path
+    get "/en/categories"
     assert_response :success
     assert_includes response.body, @category.name
-    assert_select "a[href='#{posts_path(category: @category.slug)}'] strong", text: "1"
+    assert_select "a[href='/en/posts?category=aws'] strong", text: "1"
 
-    get archives_path
+    get "/en/archives"
     assert_response :success
     assert_includes response.body, "Archives"
     assert_includes response.body, @post.title
 
-    get profile_path
+    get "/en/profile"
     assert_response :success
     assert_includes response.body, @setting.profile_name
     assert_includes response.body, @setting.profile_title
     assert_includes response.body, @setting.profile_email
     assert_includes response.body, @setting.github_url
 
-    get about_path
+    get "/en/about"
     assert_response :success
     assert_includes response.body, "Hiroe Tech Notes"
   end
@@ -87,10 +87,10 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     post admin_login_path, params: { email: @admin.email, password: "password123" }
     assert_redirected_to admin_posts_path
 
-    get post_path(@post.slug)
+    get "/en/posts/terraform-remote-state"
     assert_response :success
     assert_select "h1", text: @post.title
-    assert_select ".article-content > h1 + .article-admin-actions .admin-edit-link[href='#{edit_admin_post_path(@post.slug)}']", text: "Edit"
+    assert_select ".article-content > h1 + .article-admin-actions .admin-edit-link[href^='/admin/posts/terraform-remote-state/edit']", text: "Edit"
 
     get edit_admin_post_path(@post.slug)
     assert_response :success
@@ -100,7 +100,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
   test "public post markdown images are wired for in-page lightbox" do
     @post.update!(body: "## 構成例\n\n![構成図](/icon.png)")
 
-    get post_path(@post.slug)
+    get "/en/posts/terraform-remote-state"
     assert_response :success
 
     assert_select ".markdown-body[data-image-lightbox]"
@@ -108,7 +108,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
   end
 
   test "post filters tolerate invalid month and experiment search stays on experiments path" do
-    get posts_path(month: "not-a-month")
+    get "/en/posts", params: { month: "not-a-month" }
     assert_response :success
     assert_includes response.body, @post.title
 
@@ -124,12 +124,12 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       published_at: Time.current
     )
 
-    get experiments_path(q: "実験ログ検索対象")
+    get "/en/experiments", params: { q: "実験ログ検索対象" }
     assert_response :success
     assert_includes response.body, experiment.title
-    assert_select "form[action='#{experiments_path}']"
+    assert_select "form[action='/en/experiments']"
     assert_select ".global-nav a.active", text: "Experiments"
-    assert_select ".filter-tabs a[href^='#{experiments_path}'][href*='category=#{@category.slug}']", text: @category.name
+    assert_select ".filter-tabs a[href^='/en/experiments'][href*='category=aws']", text: @category.name
   end
 
   test "public post list can change sort order and reset filters" do
@@ -145,20 +145,20 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       published_at: 3.days.ago
     )
 
-    get posts_path(sort: "oldest")
+    get "/en/posts", params: { sort: "oldest" }
 
     assert_response :success
     assert_operator response.body.index(older.title), :<, response.body.index(@post.title)
     assert_select "input[name='q'][aria-label='Search by title']"
     assert_select "select[name='sort'][aria-label='Sort order']"
     assert_select "select[name='sort'] option[selected='selected'][value='oldest']"
-    assert_select "a.secondary-button[href='#{posts_path}']", text: "Reset"
+    assert_select "a.secondary-button[href='/en/posts']", text: "Reset"
   end
 
   test "public pagination clamps pages beyond the last page" do
     @setting.update!(posts_per_page: 5)
 
-    get posts_path(page: 99)
+    get "/en/posts", params: { page: 99 }
 
     assert_response :success
     assert_includes response.body, @post.title
@@ -190,7 +190,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       published_at: Time.current
     )
 
-    get root_path
+    get "/en"
 
     assert_response :success
     assert_select ".daily-card h2", text: experiment.title
@@ -208,7 +208,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       kind: :experiment
     )
 
-    get root_path
+    get "/en"
 
     assert_response :success
     assert_not_includes response.body, "非公開の実験ログ"
@@ -228,9 +228,9 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       published_at: Time.current
     )
 
-    get root_path
+    get "/en"
     assert_response :success
-    assert_select ".experiment-card[href='#{post_path(experiment.slug)}']" do
+    assert_select ".experiment-card[href='#{post_path(experiment)}']" do
       assert_select "time", text: experiment.display_date.strftime("%Y-%m-%d")
       assert_select "h3", text: experiment.title
       assert_select ".experiment-card-preview img.experiment-card-image[src='https://example.com/diagram.png'][alt='構成図']"
@@ -251,9 +251,9 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       published_at: Time.current
     )
 
-    get root_path
+    get "/en"
     assert_response :success
-    assert_select ".experiment-card[href='#{post_path(experiment.slug)}']" do
+    assert_select ".experiment-card[href='#{post_path(experiment)}']" do
       assert_select "time", text: experiment.display_date.strftime("%Y-%m-%d")
       assert_select "h3", text: experiment.title
       assert_select ".experiment-card-preview pre.experiment-card-code"
@@ -274,9 +274,9 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       published_at: Time.current
     )
 
-    get root_path
+    get "/en"
     assert_response :success
-    assert_select ".experiment-card[href='#{post_path(experiment.slug)}']" do
+    assert_select ".experiment-card[href='#{post_path(experiment)}']" do
       assert_select "h3", text: experiment.title
       assert_select ".experiment-card-preview", count: 0
     end
@@ -347,16 +347,16 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     )
     draft.tags << draft_tag
 
-    get root_path
+    get "/en"
     assert_response :success
-    assert_select "a[href='#{posts_path(category: @category.slug)}'] strong", text: "1"
+    assert_select "a[href='/en/posts?category=aws'] strong", text: "1"
 
-    get tags_path
+    get "/en/tags"
     assert_response :success
     assert_includes response.body, @tag.name
     assert_not_includes response.body, draft_tag.name
 
-    get categories_path
+    get "/en/categories"
     assert_response :success
     assert_includes response.body, @category.name
     assert_not_includes response.body, draft_category.name
@@ -365,25 +365,25 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
   test "profile visibility setting hides public profile navigation and page" do
     @setting.update!(profile_visible: false)
 
-    get root_path
+    get "/en"
     assert_response :success
     assert_select ".global-nav a", text: "Profile", count: 0
     assert_not_includes response.body, "profile-card"
 
-    get profile_path
+    get "/en/profile"
     assert_redirected_to root_path
   end
 
   test "sns visibility and blank urls do not render placeholder public links" do
     @setting.update!(github_url: "", x_url: "", zenn_url: "", note_url: "", sns_visible: true)
 
-    get profile_path
+    get "/en/profile"
     assert_response :success
     assert_select ".profile-links a[href='#']", count: 0
     assert_select ".profile-links a", text: "RSS"
 
     @setting.update!(sns_visible: false)
-    get profile_path
+    get "/en/profile"
     assert_response :success
     assert_select ".profile-links", count: 0
   end
@@ -417,7 +417,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_includes response.body, I18n.t("admin.posts.index.title")
     assert_includes response.body, I18n.t("shared.header.logout")
 
-    get root_path
+    get "/en"
     assert_response :success
     assert_not_includes response.body, "ログアウト"
     assert_not_includes response.body, admin_posts_path
@@ -914,7 +914,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
   end
 
   test "rss feed renders published posts" do
-    get feed_path(format: :xml)
+    get "/en/feed.xml"
 
     assert_response :success
     assert_equal "application/xml", response.media_type
@@ -941,7 +941,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       MARKDOWN
     )
 
-    get post_path(@post.slug)
+    get "/en/posts/terraform-remote-state"
 
     assert_response :success
     assert_includes response.body, "article-diagram"
@@ -1045,7 +1045,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
   test "article table of contents links to generated markdown heading ids" do
     @post.update!(body: "## 日本語の見出し\n本文です。")
 
-    get post_path(@post.slug)
+    get "/en/posts/terraform-remote-state"
 
     assert_response :success
     heading_id = "heading-#{Digest::SHA1.hexdigest("日本語の見出し")[0, 10]}"
@@ -1063,7 +1063,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       MARKDOWN
     )
 
-    get post_path(@post.slug)
+    get "/en/posts/terraform-remote-state"
 
     assert_response :success
     assert_select ".toc-list a", text: "コード内の見出し", count: 0
@@ -1080,7 +1080,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       MARKDOWN
     )
 
-    get post_path(@post.slug)
+    get "/en/posts/terraform-remote-state"
 
     assert_response :success
     assert_includes response.body, "<pre class=\"code-block\"><code>"
@@ -1103,7 +1103,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       MARKDOWN
     )
 
-    get post_path(@post.slug)
+    get "/en/posts/terraform-remote-state"
 
     assert_response :success
     assert_includes response.body, "code-block"
@@ -1181,11 +1181,11 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert scheduled.published?
     assert_operator scheduled.published_at, :>, Time.current
 
-    get posts_path
+    get "/en/posts"
     assert_response :success
     assert_not_includes response.body, scheduled.title
 
-    get post_path(scheduled.slug)
+    get "/en/posts/scheduled-post"
     assert_response :not_found
 
     get preview_admin_post_path(scheduled.slug)
@@ -1366,7 +1366,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
   end
 
   test "article show page has comments section" do
-    get post_path(@post.slug)
+    get "/en/posts/terraform-remote-state"
     assert_response :success
     assert_select "#comments"
     assert_select ".comment-form-wrap form"
@@ -1376,21 +1376,21 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
   end
 
   test "visitor can post a comment with valid turnstile" do
-    post post_comments_path(@post.slug), params: {
+    post "/en/posts/terraform-remote-state/comments", params: {
       comment: { author_name: "テスト太郎", body: "参考になりました！" },
       "cf-turnstile-response" => "dummy-token"
     }
-    assert_redirected_to post_path(@post.slug, anchor: "comments")
+    assert_redirected_to post_path(@post, anchor: "comments")
     follow_redirect!
     assert_includes response.body, "Comment posted"
 
-    get post_path(@post.slug)
+    get "/en/posts/terraform-remote-state"
     assert_includes response.body, "テスト太郎"
     assert_includes response.body, "参考になりました！"
   end
 
   test "visitor cannot post comment without turnstile" do
-    post post_comments_path(@post.slug), params: {
+    post "/en/posts/terraform-remote-state/comments", params: {
       comment: { author_name: "テスト太郎", body: "参考になりました！" }
     },
     as: :html
@@ -1399,7 +1399,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
   end
 
   test "visitor cannot post comment with empty name" do
-    post post_comments_path(@post.slug), params: {
+    post "/en/posts/terraform-remote-state/comments", params: {
       comment: { author_name: "", body: "参考になりました！" },
       "cf-turnstile-response" => "dummy-token"
     }
@@ -1408,7 +1408,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
   end
 
   test "visitor cannot post comment with empty body" do
-    post post_comments_path(@post.slug), params: {
+    post "/en/posts/terraform-remote-state/comments", params: {
       comment: { author_name: "テスト太郎", body: "" },
       "cf-turnstile-response" => "dummy-token"
     }
@@ -1425,7 +1425,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "テスト太郎"
     assert_includes response.body, "参考になりました！"
-    assert_select "a[href='#{post_path(@post.slug)}']", text: @post.title
+    assert_select "a[href='/en/posts/terraform-remote-state']", text: @post.title
   end
 
   test "admin can delete a comment" do

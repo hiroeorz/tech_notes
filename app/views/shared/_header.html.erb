@@ -25,14 +25,14 @@
       <%= link_to t("shared.header.admin_settings"), admin_settings_path, class: "admin-link" %>
       <%= button_to t("shared.header.logout"), admin_logout_path, method: :delete, class: "logout-link" %>
     <% end %>
-    <%= form_tag locale_path, method: :post, class: "locale-switch", data: { controller: "locale" } do %>
+    <div class="locale-switch">
       <label class="locale-label" aria-label="<%= t("shared.header.language_select") %>">
-        <select data-action="locale#change" class="locale-select">
+        <select data-controller="locale" data-action="locale#change" class="locale-select">
           <option value="en" <%= "selected" if I18n.locale == :en %>><%= t("shared.header.language_en") %></option>
           <option value="ja" <%= "selected" if I18n.locale == :ja %>><%= t("shared.header.language_ja") %></option>
         </select>
       </label>
-    <% end %>
+    </div>
     <button class="menu-toggle" type="button" data-menu-toggle aria-label="<%= t("shared.header.menu") %>" aria-expanded="false">☰</button>
     <button class="icon-button" type="button" data-theme-toggle aria-label="<%= t("shared.header.theme_toggle") %>" aria-pressed="<%= current_site_setting.default_theme == "dark" %>">☾</button>
     <button class="icon-button" type="button" data-search-toggle aria-label="<%= t("shared.header.search") %>">⌕</button>
