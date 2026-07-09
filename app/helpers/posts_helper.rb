@@ -1,10 +1,10 @@
 module PostsHelper
   def status_label(status)
-    { "published" => "公開", "draft" => "下書き", "reviewing" => "レビュー中" }.fetch(status, status)
+    t("helpers.post.status_#{status}", default: status)
   end
 
   def kind_label(kind)
-    { "article" => "記事", "experiment" => "実験ログ" }.fetch(kind, kind)
+    t("helpers.post.kind_#{kind}", default: kind)
   end
 
   def extract_headings(markdown)

@@ -11,6 +11,6 @@ class SiteSettingTest < ActiveSupport::TestCase
     setting = SiteSetting.current
     setting.site_url = "invalid-url"
     assert_not setting.valid?
-    assert_includes setting.errors[:site_url], "はhttpまたはhttpsのURLを入力してください"
+    assert_includes setting.errors[:site_url], "must be an http or https URL"
   end
 end

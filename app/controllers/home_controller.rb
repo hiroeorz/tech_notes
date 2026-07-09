@@ -8,7 +8,7 @@ class HomeController < ApplicationController
   end
 
   def profile
-    return redirect_to root_path, alert: "プロフィールは現在公開されていません。" unless current_site_setting.profile_visible?
+    return redirect_to root_path, alert: t("flash.profile.not_visible") unless current_site_setting.profile_visible?
 
     load_sidebar
   end

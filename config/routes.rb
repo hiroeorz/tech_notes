@@ -15,6 +15,8 @@ Rails.application.routes.draw do
   get "profile", to: "home#profile", as: :profile
   get "about", to: "home#about", as: :about
 
+  post "locale", to: "locale#update"
+
   namespace :admin do
     get "login", to: "sessions#new", as: :login
     post "login", to: "sessions#create"

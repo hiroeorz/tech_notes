@@ -5,7 +5,7 @@ class AdminUser < ApplicationRecord
   has_many :posts, dependent: :restrict_with_exception
 
   validates :email, presence: true, uniqueness: true
-  validates :email, format: { with: URI::MailTo::EMAIL_REGEXP, message: "の形式が正しくありません" }
+  validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :password_digest, :password_salt, presence: true
 
   before_validation :normalize_email

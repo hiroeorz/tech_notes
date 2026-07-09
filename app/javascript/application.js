@@ -47,7 +47,9 @@ const updatePasswordToggle = (button, visible) => {
   const label = button.dataset.passwordToggleLabel || "パスワード"
   input.type = visible ? "text" : "password"
   button.setAttribute("aria-pressed", visible ? "true" : "false")
-  button.setAttribute("aria-label", `${label}を${visible ? "非表示にする" : "表示する"}`)
+  const showLabel = button.dataset.passwordToggleShow || window.I18n.password_toggle.show
+  const hideLabel = button.dataset.passwordToggleHide || window.I18n.password_toggle.hide
+  button.setAttribute("aria-label", visible ? hideLabel : showLabel)
   button.textContent = visible ? "◉" : "◎"
 }
 
@@ -78,7 +80,7 @@ const openImageLightbox = (image) => {
   overlay.className = "image-lightbox"
   overlay.setAttribute("role", "dialog")
   overlay.setAttribute("aria-modal", "true")
-  overlay.setAttribute("aria-label", image.alt || "記事画像の拡大表示")
+  overlay.setAttribute("aria-label", image.alt || window.I18n.image_lightbox.aria_expand)
   overlay.dataset.imageLightboxOverlay = "true"
 
   const frame = document.createElement("div")
@@ -87,7 +89,7 @@ const openImageLightbox = (image) => {
   const closeButton = document.createElement("button")
   closeButton.type = "button"
   closeButton.className = "image-lightbox-close"
-  closeButton.setAttribute("aria-label", "拡大画像を閉じる")
+  closeButton.setAttribute("aria-label", window.I18n.image_lightbox.aria_close)
   closeButton.textContent = "×"
 
   const expandedImage = document.createElement("img")
@@ -339,7 +341,7 @@ document.addEventListener("turbo:load", () => {
         if (line.startsWith("# ")) html.push(`<h1>${inlineMarkdown(line.slice(2))}</h1>`)
         else if (line.startsWith("## ")) html.push(`<h2>${inlineMarkdown(line.slice(3))}</h2>`)
         else if (line.startsWith("### ")) html.push(`<h3>${inlineMarkdown(line.slice(4))}</h3>`)
-        else if (line.startsWith("> ")) html.push(`<aside class="note-box"><strong>ポイント:</strong> ${inlineMarkdown(line.slice(2))}</aside>`)
+        else if (line.startsWith("> ")) html.push(`<aside class="note-box"><strong>${window.I18n.note_box.point}</strong> ${inlineMarkdown(line.slice(2))}</aside>`)
         else if (line.trim() === "") html.push("")
         else html.push(`<p>${inlineMarkdown(line)}</p>`)
       })
@@ -395,17 +397,18 @@ document.addEventListener("turbo:load", () => {
       previewTab.classList.remove("active")
     })
 
+    const I = window.I18n.markdown
     const snippets = {
-      bold: ["**", "**", "太字"],
-      italic: ["*", "*", "斜体"],
-      code: ["`", "`", "code"],
-      list: ["- ", "", "リスト項目"],
-      ordered: ["1. ", "", "番号付き項目"],
-      quote: ["> ", "", "引用"],
-      check: ["- [ ] ", "", "確認項目"],
-      image: ["![説明](", ")", "images/example.png"],
-      table: ["| 項目 | 内容 |\n| --- | --- |\n| ", " |  |\n", "値"],
-      link: ["[リンクテキスト](", ")", "https://example.com"]
+      bold: ["**", "**", I.bold_placeholder],
+      italic: ["*", "*", I.italic_placeholder],
+      code: ["`", "`", I.code_placeholder],
+      list: ["- ", "", I.list_placeholder],
+      ordered: ["1. ", "", I.ordered_placeholder],
+      quote: ["> ", "", I.quote_placeholder],
+      check: ["- [ ] ", "", I.check_placeholder],
+      image: ["![説明](", ")", I.image_placeholder],
+      table: [`| ${I.table_placeholder_h} | ${I.table_placeholder_v} |\n| --- | --- |\n| `, " |  |\n", I.table_placeholder_v],
+      link: [`[${I.link_placeholder_text}](`, ")", I.link_placeholder_url]
     }
 
     document.querySelectorAll("[data-md-action]").forEach((button) => {
@@ -439,7 +442,7 @@ document.addEventListener("turbo:load", () => {
         const body = new FormData()
         body.append("image", file)
         input.disabled = true
-        if (message) message.textContent = "アップロードしています..."
+        if (message) message.textContent = window.I18n.editor.uploading
 
         try {
           const response = await fetch(uploadUrl, {
@@ -456,15 +459,15 @@ document.addEventListener("turbo:load", () => {
             try {
               payload = await response.json()
             } catch (_error) {
-              payload = { error: "サーバーから不正なJSONレスポンスが返りました。サーバーログを確認してください。" }
+              payload = { error: window.I18n.editor.upload_error_json }
             }
           } else {
-            payload = { error: response.status === 401 ? "ログインし直してから画像をアップロードしてください。" : "サーバーからHTMLエラーページが返りました。ログイン状態やサーバーログを確認してください。" }
+            payload = { error: response.status === 401 ? window.I18n.editor.upload_error_401 : window.I18n.editor.upload_error_html }
           }
-          if (!response.ok) throw new Error(payload.error || "画像をアップロードできませんでした。")
+          if (!response.ok) throw new Error(payload.error || window.I18n.editor.upload_error)
 
           insertAtCursor(payload.markdown)
-          if (message) message.textContent = "画像をアップロードし、Markdownを挿入しました。ページを再読み込みすると添付一覧に反映されます。"
+          if (message) message.textContent = window.I18n.editor.upload_success
           input.value = ""
         } catch (error) {
           if (message) message.textContent = error.message
@@ -485,9 +488,9 @@ document.addEventListener("turbo:load", () => {
     const updateBodyStats = () => {
       const value = bodyStatsSource.value
       const lineCount = value.length === 0 ? 1 : value.split("\n").length
-      if (linesOutput) linesOutput.textContent = `Lines: ${lineCount}`
-      if (wordsOutput) wordsOutput.textContent = `Words: ${value.trim() ? value.trim().split(/\s+/).length : 0}`
-      if (charsOutput) charsOutput.textContent = `文字数: ${value.length}`
+      if (linesOutput) linesOutput.textContent = `${window.I18n.body_stats.lines} ${lineCount}`
+      if (wordsOutput) wordsOutput.textContent = `${window.I18n.body_stats.words} ${value.trim() ? value.trim().split(/\s+/).length : 0}`
+      if (charsOutput) charsOutput.textContent = `${window.I18n.body_stats.chars} ${value.length}`
 
       if (lineNumbers) {
         const targetCount = Math.max(lineCount + 5, 44)

@@ -1,14 +1,14 @@
 <main class="page-grid archives-page">
   <section class="content-area">
     <nav class="breadcrumbs">
-      <%= link_to "ホーム", root_path %>
+      <%= link_to t("posts.archives.home"), root_path %>
       <span>›</span>
-      <span>アーカイブ</span>
+      <span><%= t("posts.archives.title") %></span>
     </nav>
 
     <div class="page-title-row">
-      <h1>アーカイブ</h1>
-      <%= link_to "記事一覧へ →", posts_path, class: "secondary-button" %>
+      <h1><%= t("posts.archives.title") %></h1>
+      <%= link_to t("posts.archives.view_articles"), posts_path, class: "secondary-button" %>
     </div>
 
     <div class="archive-groups">

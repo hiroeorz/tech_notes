@@ -16,13 +16,13 @@ class PostSummaryGeneratorTest < ActiveSupport::TestCase
 
   class FailingClient
     def run(messages:)
-      raise CloudflareAiClient::RequestError, "Cloudflare Workers AIへの接続がタイムアウトしました。"
+      raise CloudflareAiClient::RequestError, "Connection to Cloudflare Workers AI timed out."
     end
   end
 
   class RateLimitedClient
     def run(messages:)
-      raise CloudflareAiClient::RateLimitError, "レート制限に達しました。"
+      raise CloudflareAiClient::RateLimitError, "Rate limit reached."
     end
   end
 
@@ -32,7 +32,7 @@ class PostSummaryGeneratorTest < ActiveSupport::TestCase
     end
   end
 
-  test "generates a normalized Japanese summary from title and body" do
+  test "generates a normalized summary from title and body" do
     client = CapturingClient.new(response: " 要約：Terraform のリモートステート設計について、構成例と運用時の注意点を整理した記事です。 ")
     summary = PostSummaryGenerator.new(client: client).generate(
       title: "Terraformのリモートステート設計",
@@ -40,10 +40,10 @@ class PostSummaryGeneratorTest < ActiveSupport::TestCase
     )
 
     assert_equal "Terraform のリモートステート設計について、構成例と運用時の注意点を整理した記事です。", summary
-    assert_includes client.messages.dig(0, :content), "本文にない事実は追加しない"
-    assert_includes client.messages.dig(1, :content), "[タイトル]"
+    assert_includes client.messages.dig(0, :content), "Do not add facts not present in the body"
+    assert_includes client.messages.dig(1, :content), "[Title]"
     assert_includes client.messages.dig(1, :content), "Terraformのリモートステート設計"
-    assert_includes client.messages.dig(1, :content), "[本文]"
+    assert_includes client.messages.dig(1, :content), "[Body]"
   end
 
   test "rejects blank body before calling the ai client" do
@@ -58,7 +58,7 @@ class PostSummaryGeneratorTest < ActiveSupport::TestCase
 
     PostSummaryGenerator.new(client: client).generate(title: "長文", body: long_body)
 
-    sent_body = client.messages.dig(1, :content).split("[本文]", 2).last
+    sent_body = client.messages.dig(1, :content).split("[Body]", 2).last
     assert_operator sent_body.length, :<=, PostSummaryGenerator::MAX_BODY_CHARS + 10
   end
 
@@ -67,7 +67,7 @@ class PostSummaryGeneratorTest < ActiveSupport::TestCase
       PostSummaryGenerator.new(client: FailingClient.new).generate(title: "タイトル", body: "本文")
     end
 
-    assert_includes error.message, "タイムアウト"
+    assert_includes error.message, "timed out"
   end
 
   test "preserves cloudflare rate limit errors" do
@@ -75,7 +75,7 @@ class PostSummaryGeneratorTest < ActiveSupport::TestCase
       PostSummaryGenerator.new(client: RateLimitedClient.new).generate(title: "タイトル", body: "本文")
     end
 
-    assert_includes error.message, "レート制限"
+    assert_includes error.message, "Rate limit"
   end
 
   test "truncates generated summaries at sentence boundary under one hundred characters" do
@@ -90,7 +90,7 @@ class PostSummaryGeneratorTest < ActiveSupport::TestCase
       PostSummaryGenerator.new(client: CapturingClient.new(response: "あ" * 120)).generate(title: "タイトル", body: "本文")
     end
 
-    assert_includes error.message, "短く生成"
+    assert_includes error.message, "short enough summary"
   end
 
   test "rejects html output" do

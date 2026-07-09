@@ -6,7 +6,7 @@ module Admin
       upload = params[:image]
 
       unless ActiveStoragePublicUrl.configured?
-        render json: { error: "CDN URLが設定されていません。" }, status: :unprocessable_entity
+        render json: { error: t("flash.admin.post_images.cdn_not_configured") }, status: :unprocessable_entity
         return
       end
 
@@ -34,7 +34,7 @@ module Admin
       attachment.purge
 
       respond_to do |format|
-        format.html { redirect_to edit_admin_post_path(@post.slug), notice: "画像を削除しました。" }
+        format.html { redirect_to edit_admin_post_path(@post.slug), notice: t("flash.admin.post_images.destroyed") }
         format.json { head :no_content }
       end
     end
@@ -64,11 +64,11 @@ module Admin
     end
 
     def image_upload_error(upload)
-      return "画像ファイルを選択してください。" if upload.blank?
-      return "画像はJPG、PNG、WebP、GIFでアップロードしてください。" unless upload.content_type.in?(Post::IMAGE_CONTENT_TYPES)
-      return "画像は10MB以下でアップロードしてください。" if upload.size > Post::IMAGE_MAX_SIZE
+      return t("flash.admin.post_images.no_file") if upload.blank?
+      return t("flash.admin.post_images.invalid_type") unless upload.content_type.in?(Post::IMAGE_CONTENT_TYPES)
+      return t("flash.admin.post_images.too_large") if upload.size > Post::IMAGE_MAX_SIZE
 
-      "画像をアップロードできませんでした。"
+      t("flash.admin.post_images.upload_failed")
     end
   end
 end

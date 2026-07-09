@@ -1,7 +1,7 @@
 <main class="page-grid">
   <section class="content-area prose-panel">
-    <nav class="breadcrumbs"><%= link_to "ホーム", root_path %><span>›</span><span>プロフィール</span></nav>
-    <h1>プロフィール</h1>
+    <nav class="breadcrumbs"><%= link_to t("home.profile.home"), root_path %><span>›</span><span><%= t("home.profile.title") %></span></nav>
+    <h1><%= t("home.profile.title") %></h1>
     <div class="profile-page-card">
       <% if current_site_setting.profile_image.attached? %>
         <%= image_tag current_site_setting.profile_image, alt: current_site_setting.profile_name, class: "avatar-image" %>
@@ -17,12 +17,12 @@
       </div>
     </div>
     <p><%= current_site_setting.profile_bio %></p>
-    <p>AWS、IaC、自動化、SRE、Observabilityを中心に、日々の業務と個人実験で学んだことを記録しています。</p>
+    <p><%= t("home.profile.bio_suffix") %></p>
     <% if current_site_setting.sns_visible? %>
       <div class="social-icons profile-links">
-        <%= social_link "GitHub", current_site_setting.github_url, aria: { label: "GitHub" } %>
-        <%= social_link "X", current_site_setting.x_url, aria: { label: "X" } %>
-        <%= link_to "RSS", current_site_setting.rss_url.presence || feed_path(format: :xml), aria: { label: "RSS" } %>
+        <%= social_link "GitHub", current_site_setting.github_url, aria: { label: t("shared.sidebar.aria_github") } %>
+        <%= social_link "X", current_site_setting.x_url, aria: { label: t("shared.sidebar.aria_x") } %>
+        <%= link_to "RSS", current_site_setting.rss_url.presence || feed_path(format: :xml), aria: { label: t("shared.sidebar.aria_rss") } %>
         <%= social_link "Zenn", current_site_setting.zenn_url, aria: { label: "Zenn" } %>
         <%= social_link "note", current_site_setting.note_url, aria: { label: "note" } %>
       </div>

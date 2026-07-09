@@ -2,16 +2,30 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["title", "body", "excerpt", "slug", "button", "slugButton", "message", "slugMessage"]
-  static values = { url: String, slugUrl: String }
+  static values = {
+    url: String,
+    slugUrl: String,
+    confirmOverwriteExcerpt: String,
+    generatingExcerpt: String,
+    excerptSuccess: String,
+    excerptError: String,
+    confirmOverwriteSlug: String,
+    generatingSlug: String,
+    slugSuccess: String,
+    slugError: String,
+    errorJson: String,
+    error401: String,
+    errorHtml: String
+  }
 
   async generate() {
     if (!this.hasUrlValue || !this.hasBodyTarget || !this.hasExcerptTarget) return
 
-    if (this.excerptTarget.value.trim() !== "" && !window.confirm("現在の要約をAI生成結果で上書きしますか？")) {
+    if (this.excerptTarget.value.trim() !== "" && !window.confirm(this.confirmOverwriteExcerptValue)) {
       return
     }
 
-    this.setMessage("要約を生成しています...", false)
+    this.setMessage(this.generatingExcerptValue, false)
     this.buttonTarget.disabled = true
 
     try {
@@ -28,11 +42,11 @@ export default class extends Controller {
         })
       })
       const payload = await this.parseResponse(response)
-      if (!response.ok) throw new Error(payload.error || "要約を生成できませんでした。")
+      if (!response.ok) throw new Error(payload.error || this.excerptErrorValue)
 
       this.excerptTarget.value = payload.summary || ""
       this.excerptTarget.dispatchEvent(new Event("input", { bubbles: true }))
-      this.setMessage("AI要約を反映しました。保存前に内容を確認してください。", false)
+      this.setMessage(this.excerptSuccessValue, false)
     } catch (error) {
       this.setMessage(error.message, true)
     } finally {
@@ -43,11 +57,11 @@ export default class extends Controller {
   async generateSlug() {
     if (!this.hasSlugUrlValue || !this.hasSlugTarget) return
 
-    if (this.slugTarget.value.trim() !== "" && !window.confirm("現在のスラッグをAI生成結果で上書きしますか？")) {
+    if (this.slugTarget.value.trim() !== "" && !window.confirm(this.confirmOverwriteSlugValue)) {
       return
     }
 
-    this.setMessageFor(this.slugMessageTarget, "スラッグを生成しています...", false)
+    this.setMessageFor(this.slugMessageTarget, this.generatingSlugValue, false)
     this.slugButtonTarget.disabled = true
 
     try {
@@ -63,12 +77,12 @@ export default class extends Controller {
           body: this.hasBodyTarget ? this.bodyTarget.value : ""
         })
       })
-      const payload = await this.parseResponse(response, "スラッグを生成できませんでした。")
-      if (!response.ok) throw new Error(payload.error || "スラッグを生成できませんでした。")
+      const payload = await this.parseResponse(response, this.slugErrorValue)
+      if (!response.ok) throw new Error(payload.error || this.slugErrorValue)
 
       this.slugTarget.value = payload.slug || ""
       this.slugTarget.dispatchEvent(new Event("input", { bubbles: true }))
-      this.setMessageFor(this.slugMessageTarget, "AIスラッグを反映しました。保存前に内容を確認してください。", false)
+      this.setMessageFor(this.slugMessageTarget, this.slugSuccessValue, false)
     } catch (error) {
       this.setMessageFor(this.slugMessageTarget, error.message, true)
     } finally {
@@ -90,22 +104,22 @@ export default class extends Controller {
     target.classList.toggle("error", error)
   }
 
-  async parseResponse(response, fallbackMessage = "要約を生成できませんでした。") {
+  async parseResponse(response, fallbackMessage = null) {
     const contentType = response.headers.get("Content-Type") || ""
     if (contentType.includes("application/json")) {
       try {
         return await response.json()
       } catch (_error) {
-        return { error: "サーバーから不正なJSONレスポンスが返りました。サーバーログを確認してください。" }
+        return { error: this.errorJsonValue }
       }
     }
 
     const text = await response.text()
-    if (response.status === 401) return { error: "ログインし直してから実行してください。" }
+    if (response.status === 401) return { error: this.error401Value }
     if (text.includes("<!doctype") || text.includes("<html")) {
-      return { error: "サーバーからHTMLエラーページが返りました。ログイン状態やサーバーログを確認してください。" }
+      return { error: this.errorHtmlValue }
     }
 
-    return { error: text.trim() || fallbackMessage }
+    return { error: text.trim() || fallbackMessage || this.excerptErrorValue }
   }
 }

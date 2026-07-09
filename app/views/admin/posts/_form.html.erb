@@ -1,62 +1,62 @@
 <main class="editor-page">
   <nav class="breadcrumbs">
-    <%= link_to "ホーム", root_path %>
+    <%= link_to t("admin.posts.form.home"), root_path %>
     <span>›</span>
-    <%= link_to "記事", admin_posts_path %>
+    <%= link_to t("admin.posts.form.posts"), admin_posts_path %>
     <span>›</span>
-    <span><%= post.persisted? ? "編集" : "新規作成" %></span>
+    <span><%= post.persisted? ? t("admin.posts.form.edit") : t("admin.posts.form.new") %></span>
   </nav>
 
-  <%= form_with model: [ :admin, post ], class: "editor-form", data: { controller: "post-summary", post_summary_url_value: admin_post_summaries_path, post_summary_slug_url_value: admin_post_slugs_path } do |form| %>
+  <%= form_with model: [ :admin, post ], class: "editor-form", data: { controller: "post-summary", post_summary_url_value: admin_post_summaries_path, post_summary_slug_url_value: admin_post_slugs_path, post_summary_confirm_overwrite_excerpt_value: t("js.post_summary.confirm_overwrite_excerpt"), post_summary_generating_excerpt_value: t("js.post_summary.generating_excerpt"), post_summary_excerpt_success_value: t("js.post_summary.excerpt_success"), post_summary_excerpt_error_value: t("js.post_summary.excerpt_error"), post_summary_confirm_overwrite_slug_value: t("js.post_summary.confirm_overwrite_slug"), post_summary_generating_slug_value: t("js.post_summary.generating_slug"), post_summary_slug_success_value: t("js.post_summary.slug_success"), post_summary_slug_error_value: t("js.post_summary.slug_error"), post_summary_error_json_value: t("js.post_summary.error_json"), post_summary_error_401_value: t("js.post_summary.error_401"), post_summary_error_html_value: t("js.post_summary.error_html") } do |form| %>
     <% if post.errors.any? %>
       <div class="error-box"><%= post.errors.full_messages.join(" / ") %></div>
     <% end %>
 
     <div class="editor-title-row">
       <label class="editor-title-field">
-        <span>タイトル <b>*</b></span>
+        <span><%= t("admin.posts.form.title_label").html_safe %></span>
         <%= form.text_field :title, maxlength: 100, required: true, data: { live_count_input: "title", live_count_max: 100, post_summary_target: "title" } %>
         <em data-live-count-output="title"><%= post.title.to_s.length %> / 100</em>
       </label>
 
       <div class="editor-actions">
-        <button type="submit" name="commit_status" value="draft" class="secondary-button" formnovalidate>下書き保存</button>
+        <button type="submit" name="commit_status" value="draft" class="secondary-button" formnovalidate><%= t("admin.posts.form.draft_save") %></button>
         <% if post.persisted? %>
-          <%= link_to "プレビュー", preview_admin_post_path(post.slug), class: "secondary-button" %>
+          <%= link_to t("admin.posts.form.preview"), preview_admin_post_path(post.slug), class: "secondary-button" %>
         <% else %>
-          <button type="button" class="secondary-button" data-open-editor-preview>プレビュー</button>
+          <button type="button" class="secondary-button" data-open-editor-preview><%= t("admin.posts.form.preview") %></button>
         <% end %>
-        <button type="button" class="primary-button" data-open-publish-modal>公開 ▾</button>
+        <button type="button" class="primary-button" data-open-publish-modal><%= t("admin.posts.form.publish") %></button>
       </div>
     </div>
 
     <section class="markdown-editor" data-markdown-preview-url="<%= markdown_preview_admin_posts_path %>">
       <div class="editor-tabs">
-        <button type="button" class="active" data-editor-tab="markdown">Markdown</button>
-        <button type="button" data-editor-tab="preview">プレビュー</button>
-        <a href="https://www.markdownguide.org/basic-syntax/" target="_blank" rel="noreferrer">Markdownガイド ↗</a>
+        <button type="button" class="active" data-editor-tab="markdown"><%= t("admin.posts.form.tab_markdown") %></button>
+        <button type="button" data-editor-tab="preview"><%= t("admin.posts.form.tab_preview") %></button>
+        <a href="https://www.markdownguide.org/basic-syntax/" target="_blank" rel="noreferrer"><%= t("admin.posts.form.markdown_guide") %></a>
       </div>
-      <div class="toolbar" aria-label="Markdownツールバー">
-        <button type="button" data-md-action="bold" aria-label="太字を挿入"><b>B</b></button>
-        <button type="button" data-md-action="italic" aria-label="斜体を挿入"><i>I</i></button>
-        <button type="button" data-md-action="code" aria-label="コードを挿入">&lt;/&gt;</button>
-        <button type="button" data-md-action="list" aria-label="箇条書きを挿入">☷</button>
-        <button type="button" data-md-action="quote" aria-label="引用を挿入">❞</button>
-        <button type="button" data-md-action="ordered" aria-label="番号付きリストを挿入">1.</button>
-        <button type="button" data-md-action="check" aria-label="チェックボックスを挿入">☑</button>
-        <button type="button" data-md-action="image" aria-label="画像を挿入">▧</button>
-        <button type="button" data-md-action="table" aria-label="テーブルを挿入">▦</button>
-        <button type="button" data-md-action="link" aria-label="リンクを挿入">↗</button>
-      </div>
+      <%= tag.div class: "toolbar", aria: { label: t("admin.posts.form.toolbar_aria") } do %>
+        <%= button_tag type: "button", data: { md_action: "bold" }, aria: { label: t("admin.posts.form.bold_aria") } do %><b>B</b><% end %>
+        <%= button_tag type: "button", data: { md_action: "italic" }, aria: { label: t("admin.posts.form.italic_aria") } do %><i>I</i><% end %>
+        <%= button_tag type: "button", data: { md_action: "code" }, aria: { label: t("admin.posts.form.code_aria") } do %>&lt;/&gt;<% end %>
+        <%= button_tag type: "button", data: { md_action: "list" }, aria: { label: t("admin.posts.form.list_aria") } do %>☷<% end %>
+        <%= button_tag type: "button", data: { md_action: "quote" }, aria: { label: t("admin.posts.form.quote_aria") } do %>❞<% end %>
+        <%= button_tag type: "button", data: { md_action: "ordered" }, aria: { label: t("admin.posts.form.ordered_aria") } do %>1.<% end %>
+        <%= button_tag type: "button", data: { md_action: "check" }, aria: { label: t("admin.posts.form.check_aria") } do %>☑<% end %>
+        <%= button_tag type: "button", data: { md_action: "image" }, aria: { label: t("admin.posts.form.image_aria") } do %>▧<% end %>
+        <%= button_tag type: "button", data: { md_action: "table" }, aria: { label: t("admin.posts.form.table_aria") } do %>▦<% end %>
+        <%= button_tag type: "button", data: { md_action: "link" }, aria: { label: t("admin.posts.form.link_aria") } do %>↗<% end %>
+      <% end %>
       <div class="post-image-uploader" data-post-image-panel>
         <% if post.persisted? %>
           <label>
-            <span>記事画像</span>
+            <span><%= t("admin.posts.form.image_section") %></span>
             <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" data-post-image-input data-upload-url="<%= admin_post_images_path(post) %>">
           </label>
-          <p data-post-image-message>画像を選択するとアップロードし、カーソル位置に Markdown を挿入します。</p>
+          <p data-post-image-message><%= t("admin.posts.form.image_help") %></p>
         <% else %>
-          <p>画像を追加するには、先に下書き保存してください。</p>
+          <p><%= t("admin.posts.form.image_help_draft") %></p>
         <% end %>
       </div>
       <div class="textarea-shell">
@@ -65,18 +65,18 @@
         <div class="markdown-preview" data-markdown-preview hidden></div>
       </div>
       <footer class="editor-footer">
-        <span data-body-stat="lines">Lines: <%= post.body.to_s.lines.count %></span>
-        <span data-body-stat="words">Words: <%= post.body.to_s.split.size %></span>
-        <span data-body-stat="chars">文字数: <%= post.body.to_s.length %></span>
-        <a href="https://www.markdownguide.org/basic-syntax/" target="_blank" rel="noreferrer">Markdown Guide ↗</a>
+        <span data-body-stat="lines"><%= t("admin.posts.form.lines_label") %> <%= post.body.to_s.lines.count %></span>
+        <span data-body-stat="words"><%= t("admin.posts.form.words_label") %> <%= post.body.to_s.split.size %></span>
+        <span data-body-stat="chars"><%= t("admin.posts.form.chars_label") %> <%= post.body.to_s.length %></span>
+        <a href="https://www.markdownguide.org/basic-syntax/" target="_blank" rel="noreferrer"><%= t("admin.posts.form.markdown_guide_footer") %></a>
       </footer>
     </section>
 
     <% if post.persisted? %>
       <section class="post-image-list" aria-labelledby="post-images-title">
         <div class="post-image-list-header">
-          <h2 id="post-images-title">添付画像</h2>
-          <p>本文から Markdown を削除しても画像は残ります。不要な画像はここから削除してください。</p>
+          <h2 id="post-images-title"><%= t("admin.posts.form.attached_images") %></h2>
+          <p><%= t("admin.posts.form.attached_images_help") %></p>
         </div>
         <% if post.images.attached? %>
           <div class="post-image-grid">
@@ -91,18 +91,18 @@
                   <% if public_url.present? %>
                     <code><%= public_url %></code>
                   <% else %>
-                    <em>CDN URL未設定</em>
+                    <em><%= t("admin.posts.form.cdn_unconfigured") %></em>
                   <% end %>
                 </div>
                 <div class="post-image-actions">
-                  <button type="button" class="secondary-button" data-insert-markdown="<%= markdown %>" <%= "disabled" if markdown.blank? %>>挿入</button>
-                  <%= link_to "削除", admin_post_image_path(post, image), class: "outline-danger", data: { turbo_method: :delete, turbo_confirm: "この画像を削除します。本文にURLが残っている場合は画像切れになります。" } %>
+                  <button type="button" class="secondary-button" data-insert-markdown="<%= markdown %>" <%= "disabled" if markdown.blank? %>><%= t("admin.posts.form.insert") %></button>
+                  <%= link_to t("admin.posts.form.delete"), admin_post_image_path(post, image), class: "outline-danger", data: { turbo_method: :delete, turbo_confirm: t("admin.posts.form.delete_image_confirm") } %>
                 </div>
               </article>
             <% end %>
           </div>
         <% else %>
-          <p class="empty-note">添付画像はありません。</p>
+          <p class="empty-note"><%= t("admin.posts.form.no_images") %></p>
         <% end %>
       </section>
     <% end %>
@@ -110,29 +110,29 @@
     <div class="modal-backdrop" data-publish-modal-backdrop hidden>
       <div class="publish-modal-card" role="dialog" aria-labelledby="modal-title" aria-modal="true">
         <div class="modal-header">
-          <h2 id="modal-title">公開設定</h2>
-          <button type="button" class="close-button" data-close-publish-modal aria-label="閉じる">✕</button>
+          <h2 id="modal-title"><%= t("admin.posts.form.modal_title") %></h2>
+          <%= button_tag type: "button", class: "close-button", data: { close_publish_modal: true }, aria: { label: t("admin.posts.form.close_aria") } do %>✕<% end %>
         </div>
         <div class="modal-body editor-fields">
           <label>
-            <span>スラッグ <b>*</b></span>
+            <span><%= t("admin.posts.form.slug_label").html_safe %></span>
             <div class="ai-summary-controls">
-              <button type="button" class="ai-icon-button" data-action="post-summary#generateSlug" data-post-summary-target="slugButton" aria-label="AIでスラッグを生成" data-tooltip="タイトルと本文から英語のURL用スラッグを生成します。">🧠</button>
+              <%= button_tag type: "button", class: "ai-icon-button", data: { action: "post-summary#generateSlug", post_summary_target: "slugButton", tooltip: t("admin.posts.form.slug_ai_tooltip") }, aria: { label: t("admin.posts.form.slug_ai_aria") } do %>🧠<% end %>
             </div>
-            <%= form.text_field :slug, required: true, pattern: "[a-z0-9]+(-[a-z0-9]+)*", title: "半角英数字とハイフンで入力してください", data: { post_summary_target: "slug" } %>
+            <%= form.text_field :slug, required: true, pattern: "[a-z0-9]+(-[a-z0-9]+)*", title: t("admin.posts.form.slug_pattern_title"), data: { post_summary_target: "slug" } %>
             <strong class="ai-summary-message" data-post-summary-target="slugMessage" hidden></strong>
           </label>
           <label>
-            <span>カテゴリー</span>
+            <span><%= t("admin.posts.form.category_label") %></span>
             <%= form.collection_select :category_id, categories, :id, :name %>
           </label>
           <label>
-            <span>種別</span>
+            <span><%= t("admin.posts.form.kind_label") %></span>
             <%= form.select :kind, options_for_select(Post.kinds.keys.map { |kind| [ kind_label(kind), kind ] }, post.kind) %>
           </label>
           <label class="span-full">
-            <span>タグ（カンマ区切りで入力）</span>
-            <%= form.text_field :tag_names, value: post.tag_names, placeholder: "Terraform, IaC, AWS", data: { tag_input: true } %>
+            <span><%= t("admin.posts.form.tags_label") %></span>
+            <%= form.text_field :tag_names, value: post.tag_names, placeholder: t("admin.posts.form.tags_placeholder"), data: { tag_input: true } %>
             <span class="tag-preview chip-list" data-tag-preview>
               <% post.tag_names.split(",").map(&:strip).reject(&:blank?).each do |tag_name| %>
                 <span class="chip"><%= tag_name %></span>
@@ -140,28 +140,28 @@
             </span>
           </label>
           <label class="span-full">
-            <span>記事の要約（エクサープト）</span>
+            <span><%= t("admin.posts.form.excerpt_label") %></span>
             <div class="ai-summary-controls">
-              <button type="button" class="ai-icon-button" data-action="post-summary#generate" data-post-summary-target="button" aria-label="AIで要約を生成" data-tooltip="現在のタイトルと本文を外部AIに送信し、生成結果を要約欄に反映します。">🧠</button>
+              <%= button_tag type: "button", class: "ai-icon-button", data: { action: "post-summary#generate", post_summary_target: "button", tooltip: t("admin.posts.form.excerpt_ai_tooltip") }, aria: { label: t("admin.posts.form.excerpt_ai_aria") } do %>🧠<% end %>
             </div>
             <%= form.text_area :excerpt, rows: 3, maxlength: 100, data: { live_count_input: "excerpt", live_count_max: 100, post_summary_target: "excerpt" } %>
             <em data-live-count-output="excerpt"><%= post.excerpt.to_s.length %> / 100</em>
             <strong class="ai-summary-message" data-post-summary-target="message" hidden></strong>
           </label>
           <label>
-            <span>ステータス</span>
+            <span><%= t("admin.posts.form.status_label") %></span>
             <%= form.select :status, options_for_select(Post.statuses.keys.map { |status| [ status_label(status), status ] }, post.status) %>
           </label>
           <label>
-            <span>公開日時</span>
+            <span><%= t("admin.posts.form.published_at_label") %></span>
             <%= form.datetime_local_field :published_at %>
           </label>
         </div>
         <div class="modal-footer">
-          <button type="button" class="secondary-button" data-close-publish-modal>キャンセル</button>
-          <button type="button" class="secondary-button" disabled>公開予約（準備中）</button>
-          <button type="submit" name="commit_status" value="draft" class="secondary-button" formnovalidate>下書き保存</button>
-          <button type="submit" name="commit_status" value="published" class="primary-button">投稿を公開する</button>
+          <button type="button" class="secondary-button" data-close-publish-modal><%= t("admin.posts.form.cancel") %></button>
+          <button type="button" class="secondary-button" disabled><%= t("admin.posts.form.schedule") %></button>
+          <button type="submit" name="commit_status" value="draft" class="secondary-button" formnovalidate><%= t("admin.posts.form.draft_save_modal") %></button>
+          <button type="submit" name="commit_status" value="published" class="primary-button"><%= t("admin.posts.form.publish_submit") %></button>
         </div>
       </div>
     </div>

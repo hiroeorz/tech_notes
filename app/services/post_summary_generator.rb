@@ -11,7 +11,7 @@ class PostSummaryGenerator
   end
 
   def generate(title:, body:)
-    raise InvalidInput, "本文を入力してから要約を生成してください。" if body.to_s.strip.blank?
+    raise InvalidInput, "Please enter body text before generating a summary." if body.to_s.strip.blank?
 
     normalize_summary(@client.run(messages: messages(title: title, body: body)))
   rescue CloudflareAiClient::RateLimitError => error
@@ -29,24 +29,24 @@ class PostSummaryGenerator
       {
         role: "system",
         content: <<~PROMPT.squish
-          あなたは Hiroe Tech Notes の技術記事編集を補助する日本語編集者です。
-          与えられたタイトルと本文だけを根拠に、記事の要約を作成してください。
-          本文にない事実は追加しないでください。
-          Markdown、HTML、箇条書き、見出し、引用符、前置き文は使わないでください。
-          要約は必ず句点「。」で終えてください。
-          出力は要約本文のみとしてください。
+          You are an assistant that helps edit technical articles for Hiroe Tech Notes.
+          Create a summary of the article based only on the given title and body.
+          Do not add facts not present in the body.
+          Do not use Markdown, HTML, bullet points, headings, quotes, or introductory text.
+          End the summary with a period.
+          Output only the summary text.
         PROMPT
       },
       {
         role: "user",
         content: <<~PROMPT
-          次の記事を日本語で70から90字程度の1段落に要約してください。
-          URLの羅列、コードの詳細、Markdown記法は要約に含めないでください。
+          Summarize the following article in one paragraph of 70 to 90 characters.
+          Do not include URLs, code details, or Markdown syntax.
 
-          [タイトル]
-          #{title.to_s.strip.presence || "無題"}
+          [Title]
+          #{title.to_s.strip.presence || "Untitled"}
 
-          [本文]
+          [Body]
           #{body.to_s.first(MAX_BODY_CHARS)}
         PROMPT
       }
@@ -58,8 +58,8 @@ class PostSummaryGenerator
     summary = summary.delete_prefix("要約:").delete_prefix("要約：").strip
     summary = summary[1...-1].strip if wrapped_with_quote?(summary)
 
-    raise GenerationError, "Cloudflare Workers AIから要約を取得できませんでした。" if summary.blank?
-    raise GenerationError, "AIが想定外のHTMLを返しました。" if summary.match?(/<[^>]+>/)
+    raise GenerationError, "Could not get a summary from the AI." if summary.blank?
+    raise GenerationError, "AI returned unexpected HTML." if summary.match?(/<[^>]+>/)
 
     truncate_at_sentence_boundary(summary)
   end
@@ -72,9 +72,9 @@ class PostSummaryGenerator
   def truncate_at_sentence_boundary(summary)
     return summary if summary.length <= MAX_SUMMARY_CHARS
 
-    boundary_index = summary.first(MAX_SUMMARY_CHARS).rindex(/[。！？]/)
+    boundary_index = summary.first(MAX_SUMMARY_CHARS).rindex(/[.!?。！？]/)
     return summary.first(boundary_index + 1) if boundary_index
 
-    raise GenerationError, "AIが要約を短く生成できませんでした。もう一度実行してください。"
+    raise GenerationError, "AI could not generate a short enough summary. Please try again."
   end
 end

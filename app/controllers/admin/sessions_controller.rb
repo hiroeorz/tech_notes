@@ -6,15 +6,15 @@ module Admin
     def create
       if params[:email].blank? || params[:password].blank?
         @login_errors = []
-        @login_errors << "メールアドレスを入力してください。" if params[:email].blank?
-        @login_errors << "パスワードを入力してください。" if params[:password].blank?
+        @login_errors << t("flash.admin.sessions.email_blank") if params[:email].blank?
+        @login_errors << t("flash.admin.sessions.password_blank") if params[:password].blank?
         flash.now[:alert] = @login_errors.join(" ")
         render :new, status: :unprocessable_entity
         return
       end
 
       unless turnstile_valid?
-        flash.now[:alert] = "スパム判定されました。もう一度お試しください。"
+        flash.now[:alert] = t("flash.admin.sessions.spam")
         render :new, status: :unprocessable_entity
         return
       end
@@ -24,9 +24,9 @@ module Admin
       if admin&.authenticate(params[:password].to_s)
         session[:admin_user_id] = admin.id
         remember_admin(admin) if params[:remember_me] == "1"
-        redirect_to admin_posts_path, notice: "ログインしました。"
+        redirect_to admin_posts_path, notice: t("flash.admin.sessions.login_success")
       else
-        flash.now[:alert] = "メールアドレスまたはパスワードが正しくありません。"
+        flash.now[:alert] = t("flash.admin.sessions.login_failure")
         render :new, status: :unprocessable_entity
       end
     end
@@ -34,7 +34,7 @@ module Admin
     def destroy
       reset_session
       cookies.delete(:admin_user_id)
-      redirect_to root_path, notice: "ログアウトしました。"
+      redirect_to root_path, notice: t("flash.admin.sessions.logout_success")
     end
 
     private

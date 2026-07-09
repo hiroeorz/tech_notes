@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="<%= "theme-dark" if current_site_setting.default_theme == "dark" %>" data-default-theme="<%= current_site_setting.default_theme %>">
   <head>
-    <title><%= @page_title || content_for(:title) || "Hiroe Tech Notes" %></title>
+    <title><%= @page_title || content_for(:title) || t("layouts.application.title") %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="description" content="<%= @page_description || content_for(:description) || current_site_setting.description %>">
     <% if ENV["GOOGLE_SITE_VERIFICATION"].present? %>
@@ -16,9 +16,9 @@
     <% if current_site_setting.ogp_image.attached? && current_site_setting.ogp_image.blob.persisted? %>
       <meta property="og:image" content="<%= url_for(current_site_setting.ogp_image) %>">
     <% end %>
-    <%= tag.link rel: "alternate", type: "application/rss+xml", title: "#{current_site_setting.blog_title} RSS", href: feed_url(format: :xml) %>
+    <%= tag.link rel: "alternate", type: "application/rss+xml", title: t("layouts.application.rss_title"), href: feed_url(format: :xml) %>
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Hiroe Tech Notes">
+    <meta name="application-name" content="<%= t("layouts.application.title") %>">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -35,6 +35,48 @@
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+    <script>
+window.I18n = {
+  markdown: {
+    bold_placeholder: "<%= j t('js.markdown.bold_placeholder') %>",
+    italic_placeholder: "<%= j t('js.markdown.italic_placeholder') %>",
+    code_placeholder: "<%= j t('js.markdown.code_placeholder') %>",
+    list_placeholder: "<%= j t('js.markdown.list_placeholder') %>",
+    ordered_placeholder: "<%= j t('js.markdown.ordered_placeholder') %>",
+    quote_placeholder: "<%= j t('js.markdown.quote_placeholder') %>",
+    check_placeholder: "<%= j t('js.markdown.check_placeholder') %>",
+    image_placeholder: "<%= j t('js.markdown.image_placeholder') %>",
+    table_placeholder_h: "<%= j t('js.markdown.table_placeholder_h') %>",
+    table_placeholder_v: "<%= j t('js.markdown.table_placeholder_v') %>",
+    link_placeholder_text: "<%= j t('js.markdown.link_placeholder_text') %>",
+    link_placeholder_url: "<%= j t('js.markdown.link_placeholder_url') %>"
+  },
+  editor: {
+    uploading: "<%= j t('js.editor.uploading') %>",
+    upload_success: "<%= j t('js.editor.upload_success') %>",
+    upload_error: "<%= j t('js.editor.upload_error') %>",
+    upload_error_json: "<%= j t('js.editor.upload_error_json') %>",
+    upload_error_401: "<%= j t('js.editor.upload_error_401') %>",
+    upload_error_html: "<%= j t('js.editor.upload_error_html') %>"
+  },
+  image_lightbox: {
+    aria_expand: "<%= j t('js.image_lightbox.aria_expand') %>",
+    aria_close: "<%= j t('js.image_lightbox.aria_close') %>"
+  },
+  password_toggle: {
+    show: "<%= j t('js.password_toggle.show') %>",
+    hide: "<%= j t('js.password_toggle.hide') %>"
+  },
+  body_stats: {
+    lines: "<%= j t('js.body_stats.lines') %>",
+    words: "<%= j t('js.body_stats.words') %>",
+    chars: "<%= j t('js.body_stats.chars') %>"
+  },
+  note_box: {
+    point: "<%= j t('js.note_box.point') %>"
+  }
+}
+</script>
   </head>
 
   <body class="<%= controller_path.tr('/', '-') %> <%= action_name %>">

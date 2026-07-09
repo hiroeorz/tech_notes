@@ -13,7 +13,7 @@ module Admin
       render json: { error: error.message }, status: :bad_gateway
     rescue StandardError => error
       Rails.logger.error("post_slug_generation_unexpected_error: #{error.class}: #{error.message}")
-      render json: { error: "スラッグを生成できませんでした。サーバーログを確認してください。" }, status: :internal_server_error
+      render json: { error: t("flash.admin.post_slugs.generation_failed") }, status: :internal_server_error
     end
 
     private

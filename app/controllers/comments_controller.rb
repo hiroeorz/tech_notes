@@ -7,11 +7,11 @@ class CommentsController < ApplicationController
     @comment.ip_address = request.remote_ip
 
     if turnstile_valid? && @comment.save
-      redirect_to post_path(@post.slug, anchor: "comments"), notice: "コメントを投稿しました。ありがとうございます。"
+      redirect_to post_path(@post.slug, anchor: "comments"), notice: t("flash.comments.created")
     else
       @comments = @post.comments.oldest
       flash.now[:alert] = @comment.errors.full_messages.first if @comment.errors.any?
-      flash.now[:alert] = "スパム判定されました。もう一度お試しください。" unless turnstile_valid?
+      flash.now[:alert] = t("flash.comments.spam") unless turnstile_valid?
       set_post_meta(@post)
       @related_posts = Post.publicly_visible.where(category: @post.category).where.not(id: @post.id).recent.limit(3)
       @toc = helpers.extract_headings(@post.body)
@@ -44,6 +44,6 @@ class CommentsController < ApplicationController
 
   def render_too_many_requests
     slug = @post&.slug || params[:post_slug]
-    redirect_to post_path(slug, anchor: "comments"), alert: "短時間に多数の投稿がありました。しばらく待ってからもう一度お試しください。"
+    redirect_to post_path(slug, anchor: "comments"), alert: t("flash.comments.rate_limit")
   end
 end

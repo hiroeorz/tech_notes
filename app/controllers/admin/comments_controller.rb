@@ -8,7 +8,7 @@ module Admin
     def destroy
       @comment = Comment.find(params[:id])
       @comment.destroy!
-      redirect_to admin_comments_path, notice: "コメントを削除しました。"
+      redirect_to admin_comments_path, notice: t("flash.comments.destroyed")
     end
   end
 end

@@ -54,7 +54,7 @@ module Admin
       assign_tag_names
 
       if @post.save
-        redirect_to edit_admin_post_path(@post.slug), notice: "記事を保存しました。"
+        redirect_to edit_admin_post_path(@post.slug), notice: t("flash.admin.posts.saved")
       else
         @categories = Category.ordered
         render :new, status: :unprocessable_entity
@@ -66,7 +66,7 @@ module Admin
       assign_tag_names
 
       if @post.save
-        redirect_to edit_admin_post_path(@post.slug), notice: "記事を保存しました。"
+        redirect_to edit_admin_post_path(@post.slug), notice: t("flash.admin.posts.saved")
       else
         @categories = Category.ordered
         render :edit, status: :unprocessable_entity
@@ -75,7 +75,7 @@ module Admin
 
     def destroy
       @post.destroy
-      redirect_to admin_posts_path, notice: "記事を削除しました。"
+      redirect_to admin_posts_path, notice: t("flash.admin.posts.destroyed")
     end
 
     private

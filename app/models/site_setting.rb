@@ -5,7 +5,7 @@ class SiteSetting < ApplicationRecord
   has_one_attached :profile_image
 
   validates :blog_title, :tagline, :site_url, :description, :profile_name, :profile_title, :profile_bio, presence: true
-  validates :profile_email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP, message: "の形式が正しくありません" }
+  validates :profile_email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :default_theme, inclusion: { in: %w[light dark] }
   validates :posts_per_page, numericality: { only_integer: true, greater_than_or_equal_to: 5, less_than_or_equal_to: 50 }
   validate :validate_site_url
@@ -38,7 +38,7 @@ class SiteSetting < ApplicationRecord
   def validate_site_url
     return if valid_http_url?(site_url)
 
-    errors.add(:site_url, "はhttpまたはhttpsのURLを入力してください")
+    errors.add(:site_url, :format)
   end
 
   def validate_external_urls
@@ -46,7 +46,7 @@ class SiteSetting < ApplicationRecord
       value = public_send(attribute)
       next if value.blank? || valid_http_url?(value)
 
-      errors.add(attribute, "はhttpまたはhttpsのURLを入力してください")
+      errors.add(attribute, :format)
     end
   end
 
@@ -61,11 +61,11 @@ class SiteSetting < ApplicationRecord
     return unless attachment.attached?
 
     unless attachment.blob.content_type.in?(%w[image/jpeg image/png])
-      errors.add(attachment.name, "#{label}はJPGまたはPNGでアップロードしてください。")
+      errors.add(attachment.name, :invalid_type, label: label)
     end
 
     return unless attachment.blob.byte_size > max_size
 
-    errors.add(attachment.name, "#{label}は#{max_size / 1.megabyte}MB以下でアップロードしてください。")
+    errors.add(attachment.name, :too_large, label: label, max_size: max_size / 1.megabyte)
   end
 end

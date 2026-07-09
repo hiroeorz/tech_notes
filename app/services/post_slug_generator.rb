@@ -11,7 +11,7 @@ class PostSlugGenerator
   end
 
   def generate(title:, body:)
-    raise InvalidInput, "タイトルまたは本文を入力してからスラッグを生成してください。" if title.to_s.strip.blank? && body.to_s.strip.blank?
+    raise InvalidInput, "Please enter a title or body before generating a slug." if title.to_s.strip.blank? && body.to_s.strip.blank?
 
     normalize_slug(@client.run(messages: messages(title: title, body: body)))
   rescue CloudflareAiClient::RateLimitError => error
@@ -58,7 +58,7 @@ class PostSlugGenerator
     slug = slug.gsub(/[^a-z0-9-]+/, "-").gsub(/-+/, "-").delete_prefix("-").delete_suffix("-")
     slug = slug.first(MAX_SLUG_CHARS).delete_suffix("-")
 
-    raise GenerationError, "AIから有効な英語スラッグを取得できませんでした。" unless slug.match?(/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/)
+    raise GenerationError, "Could not get a valid English slug from the AI." unless slug.match?(/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/)
 
     slug
   end

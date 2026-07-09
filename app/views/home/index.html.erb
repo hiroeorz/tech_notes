@@ -2,18 +2,18 @@
   <section class="content-area">
     <section class="hero-section">
       <div class="hero-copy">
-        <h1>コードとインフラを、<br>動かしながら学ぶ。</h1>
-        <p>インフラとコードのあいだで揺れながら、学んだことや試したことをノートに残しています。</p>
+        <h1><%= t("home.index.hero").html_safe %></h1>
+        <p><%= t("home.index.hero_sub") %></p>
         <ul class="check-list">
-          <li>クラウド / インフラ / 自動化が中心</li>
-          <li>小さな実験と、そこから得た学びを記録</li>
-          <li>誰かのヒントになればうれしいです</li>
+          <li><%= t("home.index.feature_1") %></li>
+          <li><%= t("home.index.feature_2") %></li>
+          <li><%= t("home.index.feature_3") %></li>
         </ul>
       </div>
 
       <article class="daily-card">
         <div class="paperclip" aria-hidden="true"></div>
-        <p class="section-kicker"># 今日のひとことログ</p>
+        <p class="section-kicker"><%= t("home.index.daily_log") %></p>
         <% if @daily_log.present? %>
           <time><%= @daily_log.display_date.strftime("%Y-%m-%d") %></time>
           <h2><%= @daily_log.title %></h2>
@@ -31,16 +31,16 @@
           "}"
         ].join("\n") %>
         <pre class="code-card highlight language-terraform"><code class="highlight"><%= highlight_code(daily_code, language: "terraform") %></code></pre>
-        <p class="memo"># メモ: バージョニングも有効化しておく<br># → 実験ログに続く...</p>
-        <%= link_to "実験ログに続く →", experiments_path, class: "daily-link" %>
+        <p class="memo"><%= t("home.index.memo").html_safe %></p>
+        <%= link_to t("home.index.continue_to_experiments"), experiments_path, class: "daily-link" %>
       </article>
     </section>
 
     <section class="note-section latest-posts">
       <div class="section-heading">
-        <h2>最新の記事</h2>
+        <h2><%= t("home.index.latest_posts") %></h2>
         <div class="filter-tabs">
-          <%= link_to "すべて", posts_path, class: "active" %>
+          <%= link_to t("home.index.all"), posts_path, class: "active" %>
           <% %w[infrastructure aws automation programming security ai-development].each do |slug| %>
             <% if (category = @top_filter_categories[slug]) %>
               <%= link_to category.name, posts_path(category: category.slug) %>
@@ -62,12 +62,12 @@
           <% end %>
         <% end %>
       </div>
-      <%= link_to "記事一覧へ →", posts_path, class: "text-link align-right" %>
+      <%= link_to t("home.index.view_all_articles"), posts_path, class: "text-link align-right" %>
     </section>
 
     <section class="note-section experiments-section">
       <div class="section-heading">
-        <h2>実験ログ <span>（ミニ実験と検証の記事）</span></h2>
+        <h2><%= t("home.index.experiments") %> <span><%= t("home.index.experiments_sub") %></span></h2>
       </div>
       <div class="experiment-cards">
         <% @experiments.each do |post| %>
@@ -86,12 +86,12 @@
             <p><%= post.excerpt %></p>
             <footer>
               <span>#<%= post.tags.first&.name || post.category.name %></span>
-              <span>◷ <%= post.reading_minutes * 15 %>分</span>
+              <span>◷ <%= post.reading_minutes * 15 %><%= t("home.index.minutes") %></span>
             </footer>
           <% end %>
         <% end %>
       </div>
-      <%= link_to "実験ログ一覧へ →", experiments_path, class: "text-link align-right" %>
+      <%= link_to t("home.index.view_all_experiments"), experiments_path, class: "text-link align-right" %>
     </section>
   </section>
 

@@ -16,13 +16,13 @@ class PostSlugGeneratorTest < ActiveSupport::TestCase
 
   class FailingClient
     def run(messages:)
-      raise CloudflareAiClient::RequestError, "Cloudflare Workers AIへの接続がタイムアウトしました。"
+      raise CloudflareAiClient::RequestError, "Connection to Cloudflare Workers AI timed out."
     end
   end
 
   class RateLimitedClient
     def run(messages:)
-      raise CloudflareAiClient::RateLimitError, "レート制限に達しました。"
+      raise CloudflareAiClient::RateLimitError, "Rate limit reached."
     end
   end
 
@@ -57,7 +57,7 @@ class PostSlugGeneratorTest < ActiveSupport::TestCase
       PostSlugGenerator.new(client: CapturingClient.new(response: "日本語のスラッグ")).generate(title: "タイトル", body: "本文")
     end
 
-    assert_includes error.message, "英語スラッグ"
+    assert_includes error.message, "valid English slug"
   end
 
   test "limits generated slug length and preserves slug format" do
@@ -72,7 +72,7 @@ class PostSlugGeneratorTest < ActiveSupport::TestCase
       PostSlugGenerator.new(client: FailingClient.new).generate(title: "タイトル", body: "本文")
     end
 
-    assert_includes error.message, "タイムアウト"
+    assert_includes error.message, "timed out"
   end
 
   test "preserves cloudflare rate limit errors" do
@@ -80,6 +80,6 @@ class PostSlugGeneratorTest < ActiveSupport::TestCase
       PostSlugGenerator.new(client: RateLimitedClient.new).generate(title: "タイトル", body: "本文")
     end
 
-    assert_includes error.message, "レート制限"
+    assert_includes error.message, "Rate limit"
   end
 end

@@ -46,6 +46,9 @@ gem "image_processing", "~> 1.2"
 # Use Cloudflare R2 through Active Storage's S3-compatible service.
 gem "aws-sdk-s3", require: false
 
+# Rails internationalization (i18n) translations for built-in validation messages
+gem "rails-i18n"
+
 # Render CommonMark/GitHub Flavored Markdown for public articles and admin previews.
 gem "commonmarker"
 gem "rouge"

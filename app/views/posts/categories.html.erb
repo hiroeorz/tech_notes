@@ -1,11 +1,11 @@
 <main class="single-page">
   <nav class="breadcrumbs">
-    <%= link_to "ホーム", root_path %>
+    <%= link_to t("posts.categories.home"), root_path %>
     <span>›</span>
-    <span>カテゴリ一覧</span>
+    <span><%= t("posts.categories.title") %></span>
   </nav>
 
-  <h1>カテゴリ一覧</h1>
+  <h1><%= t("posts.categories.title") %></h1>
 
   <div class="tag-cloud category-cloud">
     <% @categories.each do |category| %>

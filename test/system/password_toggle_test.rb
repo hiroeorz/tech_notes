@@ -9,16 +9,16 @@ class PasswordToggleTest < ApplicationSystemTestCase
 
     assert_equal "password", password[:type]
     assert_equal "false", toggle["aria-pressed"]
-    assert_equal "パスワードを表示する", toggle["aria-label"]
+    assert_equal "Show password", toggle["aria-label"]
 
     toggle.click
     assert_equal "text", password[:type]
     assert_equal "true", toggle["aria-pressed"]
-    assert_equal "パスワードを非表示にする", toggle["aria-label"]
+    assert_equal "Hide password", toggle["aria-label"]
 
     toggle.click
     assert_equal "password", password[:type]
     assert_equal "false", toggle["aria-pressed"]
-    assert_equal "パスワードを表示する", toggle["aria-label"]
+    assert_equal "Show password", toggle["aria-label"]
   end
 end

@@ -16,7 +16,7 @@ class Post < ApplicationRecord
 
   validates :title, :slug, :excerpt, :body, presence: true
   validates :slug, uniqueness: true
-  validates :slug, format: { with: /\A[a-z0-9]+(?:-[a-z0-9]+)*\z/, message: "は半角英数字とハイフンで入力してください" }
+  validates :slug, format: { with: /\A[a-z0-9]+(?:-[a-z0-9]+)*\z/ }
   validates :reading_minutes, numericality: { greater_than: 0 }
   validate :validate_images
 
@@ -65,12 +65,12 @@ class Post < ApplicationRecord
   def validate_images
     images.each do |image|
       unless image.blob.content_type.in?(IMAGE_CONTENT_TYPES)
-        errors.add(:images, "はJPG、PNG、WebP、GIFでアップロードしてください。")
+        errors.add(:images, :invalid_type)
       end
 
       next unless image.blob.byte_size > IMAGE_MAX_SIZE
 
-      errors.add(:images, "は10MB以下でアップロードしてください。")
+      errors.add(:images, :too_large)
     end
   end
 

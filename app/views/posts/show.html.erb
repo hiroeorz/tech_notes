@@ -6,9 +6,9 @@
 <main class="page-grid show-page">
   <article class="content-area article-content">
     <nav class="breadcrumbs">
-      <%= link_to "ホーム", root_path %>
+      <%= link_to t("posts.show.home"), root_path %>
       <span>›</span>
-      <%= link_to "記事一覧", posts_path %>
+      <%= link_to t("posts.show.articles"), posts_path %>
       <span>›</span>
       <span><%= @post.category.name %></span>
     </nav>
@@ -17,13 +17,13 @@
     <h1><%= @post.title %></h1>
     <% if admin_signed_in? %>
       <div class="article-admin-actions">
-        <%= link_to "Edit", edit_admin_post_path(@post.slug), class: "admin-edit-link" %>
+        <%= link_to t("posts.show.edit"), edit_admin_post_path(@post.slug), class: "admin-edit-link" %>
       </div>
     <% end %>
     <div class="article-meta">
       <span>▦ <%= @post.display_date.strftime("%Y-%m-%d") %></span>
-      <span>↻ 更新 <%= @post.updated_at.strftime("%Y-%m-%d") %></span>
-      <span>◷ <%= @post.reading_minutes %>分</span>
+      <span>↻ <%= t("posts.show.updated") %> <%= @post.updated_at.strftime("%Y-%m-%d") %></span>
+      <span>◷ <%= @post.reading_minutes %><%= t("posts.show.minutes") %></span>
       <span>♙ <%= current_site_setting.profile_name %></span>
       <% @post.tags.each do |tag| %>
         <%= link_to tag.name, posts_path(tag: tag.slug), class: "chip" %>
@@ -34,7 +34,7 @@
       <div class="mobile-toc-box mobile-only" data-controller="toc-toggle">
         <div class="mobile-toc-header" role="button" tabindex="0" aria-expanded="false" data-action="click->toc-toggle#toggle keydown.enter->toc-toggle#toggle keydown.space->toc-toggle#toggle">
           <span>☰</span>
-          <span>目次</span>
+          <span><%= t("posts.show.mobile_toc") %></span>
           <span class="toc-toggle-icon">▾</span>
         </div>
         <div class="mobile-toc-body" hidden data-toc-toggle-target="body">
@@ -53,7 +53,7 @@
 
     <% if @related_posts.present? %>
       <div class="mobile-related-posts mobile-only">
-        <h3>関連記事</h3>
+        <h3><%= t("posts.show.related_posts") %></h3>
         <% @related_posts.each do |post| %>
           <%= link_to post_path(post.slug), class: "mobile-related-item" do %>
             <span><%= post.title %></span>
@@ -64,13 +64,13 @@
     <% end %>
 
     <div class="mobile-share mobile-only">
-      <span>シェア:</span>
+      <span><%= t("posts.show.share") %></span>
       <%= link_to "GitHub", current_site_setting.github_url, aria: { label: "GitHub" } if current_site_setting.github_url.present? %>
-      <%= link_to "𝕏", "https://x.com/intent/tweet?url=#{ERB::Util.url_encode(request.original_url)}&text=#{ERB::Util.url_encode(@post.title)}", aria: { label: "Xでシェア" } %>
+      <%= link_to "𝕏", "https://x.com/intent/tweet?url=#{ERB::Util.url_encode(request.original_url)}&text=#{ERB::Util.url_encode(@post.title)}", aria: { label: t("posts.show.aria_share_x") } %>
       <%= link_to "RSS", feed_path(format: :xml), aria: { label: "RSS" } %>
     </div>
 
-    <footer class="article-footer">© 2025 Hiroe Tech Notes. All rights reserved.</footer>
+    <footer class="article-footer"><%= t("posts.show.copyright") %></footer>
 
     <%= render "posts/comments" %>
   </article>

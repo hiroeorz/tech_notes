@@ -12,8 +12,8 @@
   </div>
 
   <section class="login-card">
-    <h1>ログイン</h1>
-    <p>記事の作成・編集を行うためにサインインしてください。</p>
+    <h1><%= t("admin.sessions.new.title") %></h1>
+    <p><%= t("admin.sessions.new.description") %></p>
 
     <% if @login_errors.present? %>
       <div class="error-box">
@@ -28,27 +28,29 @@
     <% html_opts["data-login-form-site-key-value"] = turnstile_site_key if turnstile_enabled? %>
     <%= form_with url: admin_login_path, html: html_opts do |form| %>
       <label>
-        <span>メールアドレス</span>
-        <%= form.email_field :email, placeholder: "例）hiroe@example.com", required: true %>
+        <span><%= t("admin.sessions.new.email_label") %></span>
+        <%= form.email_field :email, placeholder: t("admin.sessions.new.email_placeholder"), required: true %>
       </label>
       <label>
-        <span>パスワード</span>
+        <span><%= t("admin.sessions.new.password_label") %></span>
         <div class="password-field">
-          <%= form.password_field :password, placeholder: "パスワードを入力", required: true %>
-          <button type="button" data-password-toggle data-password-toggle-label="パスワード" aria-label="パスワードを表示する" aria-pressed="false">◎</button>
+          <%= form.password_field :password, placeholder: t("admin.sessions.new.password_placeholder"), required: true %>
+          <%= button_tag type: "button", data: { password_toggle: true, password_toggle_label: t("admin.sessions.new.password_label"), password_toggle_show: t("js.password_toggle.show"), password_toggle_hide: t("js.password_toggle.hide") }, aria: { label: t("js.password_toggle.show"), pressed: "false" } do %>
+            ◎
+          <% end %>
         </div>
       </label>
       <div class="login-options">
-        <label><%= form.check_box :remember_me %> ログイン状態を保持する</label>
-        <%= mail_to current_site_setting.profile_email, "パスワードを忘れた場合", subject: "Hiroe Tech Notes パスワード再設定依頼" %>
+        <label><%= form.check_box :remember_me %> <%= t("admin.sessions.new.remember_me") %></label>
+        <%= mail_to current_site_setting.profile_email, t("admin.sessions.new.forgot_password"), subject: "Hiroe Tech Notes パスワード再設定依頼" %>
       </div>
       <% if turnstile_enabled? %>
         <div class="turnstile-wrap" data-login-form-target="turnstile"></div>
       <% end %>
 
-      <%= form.submit "ログイン", class: "primary-button wide", data: (turnstile_enabled? ? { "login-form-target" => "submit" } : {}) %>
+      <%= form.submit t("admin.sessions.new.submit"), class: "primary-button wide", data: (turnstile_enabled? ? { "login-form-target" => "submit" } : {}) %>
     <% end %>
   </section>
 
-  <p class="admin-note">▣ 管理者専用ページです</p>
+  <p class="admin-note"><%= t("admin.sessions.new.admin_note") %></p>
 </main>

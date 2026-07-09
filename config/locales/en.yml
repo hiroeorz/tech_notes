@@ -1,31 +1,415 @@
-# Files in the config/locales directory are used for internationalization and
-# are automatically loaded by Rails. If you want to use locales other than
-# English, add the necessary files in this directory.
-#
-# To use the locales, use `I18n.t`:
-#
-#     I18n.t "hello"
-#
-# In views, this is aliased to just `t`:
-#
-#     <%= t("hello") %>
-#
-# To use a different locale, set it with `I18n.locale`:
-#
-#     I18n.locale = :es
-#
-# This would use the information in config/locales/es.yml.
-#
-# To learn more about the API, please read the Rails Internationalization guide
-# at https://guides.rubyonrails.org/i18n.html.
-#
-# Be aware that YAML interprets the following case-insensitive strings as
-# booleans: `true`, `false`, `on`, `off`, `yes`, `no`. Therefore, these strings
-# must be quoted to be interpreted as strings. For example:
-#
-#     en:
-#       "yes": yup
-#       enabled: "ON"
-
 en:
-  hello: "Hello world"
+  layouts:
+    application:
+      title: "Hiroe Tech Notes"
+      rss_title: "Hiroe Tech Notes RSS"
+  shared:
+    header:
+      nav_aria: "Global Navigation"
+      home: "Home"
+      articles: "Articles"
+      experiments: "Experiments"
+      tags: "Tags"
+      profile: "Profile"
+      about: "About"
+      admin_posts: "Posts"
+      admin_settings: "Settings"
+      logout: "Log out"
+      menu: "Menu"
+      theme_toggle: "Toggle theme"
+      search: "Search"
+      search_placeholder: "Search by title"
+      search_button: "Search"
+      language_select: "Language"
+      language_en: "English"
+      language_ja: "日本語"
+    sidebar:
+      profile: "Profile"
+      toc: "Table of Contents"
+      related_tags: "Related Tags"
+      related_posts: "Related Posts"
+      categories: "Categories"
+      all_tags: "View all tags →"
+      archives: "Archives"
+      all_archives: "View all archives →"
+      share: "Share"
+      aria_github: "GitHub"
+      aria_x: "X"
+      aria_rss: "RSS"
+      aria_share_x: "Share on X"
+      admin_page: "Admin Panel"
+  posts:
+    index:
+      home: "Home"
+      title_articles: "Articles"
+      title_experiments: "Experiments"
+      search_placeholder: "Search by title"
+      sort_newest: "Newest"
+      sort_oldest: "Oldest"
+      sort_updated: "Recently updated"
+      sort_aria: "Sort order"
+      search_button: "Search"
+      reset: "Reset"
+      all: "All"
+      prev: "Previous"
+      next: "Next"
+      page_info: "%{page} / %{total_pages} pages (%{count} total)"
+      minutes: "min"
+    show:
+      home: "Home"
+      articles: "Articles"
+      edit: "Edit"
+      updated: "Updated"
+      minutes: "min"
+      toc: "Table of Contents"
+      related_posts: "Related Posts"
+      share: "Share:"
+      aria_share_x: "Share on X"
+      copyright: "© 2025 Hiroe Tech Notes. All rights reserved."
+      mobile_toc: "Table of Contents"
+    tags:
+      home: "Home"
+      title: "Tags"
+    categories:
+      home: "Home"
+      title: "Categories"
+    archives:
+      home: "Home"
+      title: "Archives"
+      view_articles: "View all articles →"
+    comments:
+      title: "Comments"
+      empty: "No comments yet."
+      name_label: "Name"
+      name_placeholder: "Your name (required)"
+      body_label: "Comment"
+      body_placeholder: "Your comment (required)"
+      submit: "Post comment"
+  home:
+    index:
+      hero: "Learn by doing.<br>Code & Infrastructure."
+      hero_sub: "Between infrastructure and code, I keep notes on what I learn and try."
+      feature_1: "Cloud / Infrastructure / Automation focused"
+      feature_2: "Small experiments and lessons learned"
+      feature_3: "Hope this helps someone"
+      daily_log: "# Today's Log"
+      memo: "# Memo: Enable versioning too<br># → Continues in experiments..."
+      continue_to_experiments: "Continue to experiments →"
+      latest_posts: "Latest Posts"
+      all: "All"
+      view_all_articles: "View all articles →"
+      experiments: "Experiments"
+      experiments_sub: "Mini experiments and verifications"
+      minutes: "min"
+      view_all_experiments: "View all experiments →"
+    about:
+      home: "Home"
+      title: "About"
+      description_1: "Hiroe Tech Notes is a personal blog for recording technical memos verified by hands-on practice."
+      description_2: "Small validations in infrastructure, cloud, automation, and programming, articulated for future reference."
+    profile:
+      home: "Home"
+      title: "Profile"
+      bio_suffix: "Recording what I learn daily from work and personal experiments, focused on AWS, IaC, automation, SRE, and Observability."
+  admin:
+    base:
+      unauthorized: "Please log in."
+      unauthorized_json: "Please re-authenticate before proceeding."
+    sessions:
+      new:
+        title: "Log in"
+        description: "Sign in to create or edit articles."
+        email_label: "Email"
+        email_placeholder: "e.g. hiroe@example.com"
+        password_label: "Password"
+        password_placeholder: "Enter password"
+        remember_me: "Keep me signed in"
+        forgot_password: "Forgot password?"
+        submit: "Log in"
+        admin_note: "▣ Admin-only page"
+    posts:
+      index:
+        home: "Home"
+        admin: "Admin"
+        title: "Posts"
+        settings: "⚙ Settings"
+        comments: "◈ Comments"
+        has_unread_aria: "You have unread comments"
+        new_post: "⊕ New post"
+        stat_total: "All"
+        stat_published: "Published"
+        stat_draft: "Draft"
+        stat_reviewing: "In Review"
+        stat_all: "All posts"
+        search_placeholder: "Search by title"
+        category_placeholder: "Select category"
+        status_placeholder: "Select status"
+        sort_newest: "Updated (Newest)"
+        sort_oldest: "Updated (Oldest)"
+        sort_aria: "Sort by"
+        filter: "Filter"
+        reset: "↻ Reset filters"
+        header_title: "Title"
+        header_category: "Category / Tags"
+        header_status: "Status"
+        header_updated: "Updated ↓"
+        header_actions: "Actions"
+        preview: "Preview ↗"
+        edit: "Edit"
+        delete: "Delete"
+        delete_confirm: "Are you sure you want to delete this post?"
+        prev: "Previous"
+        next: "Next"
+        page_info: "%{page} / %{total_pages} pages (%{count} total)"
+        count_suffix: "posts"
+      form:
+        home: "Home"
+        posts: "Posts"
+        edit: "Edit"
+        new: "New Post"
+        title_label: "Title <b>*</b>"
+        draft_save: "Save Draft"
+        preview: "Preview"
+        publish: "Publish ▾"
+        tab_markdown: "Markdown"
+        tab_preview: "Preview"
+        markdown_guide: "Markdown Guide ↗"
+        toolbar_aria: "Markdown Toolbar"
+        bold_aria: "Insert bold"
+        italic_aria: "Insert italic"
+        code_aria: "Insert code"
+        list_aria: "Insert list"
+        quote_aria: "Insert quote"
+        ordered_aria: "Insert ordered list"
+        check_aria: "Insert checkbox"
+        image_aria: "Insert image"
+        table_aria: "Insert table"
+        link_aria: "Insert link"
+        image_section: "Article Image"
+        image_help: "Select an image to upload and insert Markdown at cursor position."
+        image_help_draft: "Save as draft first to add images."
+        lines_label: "Lines:"
+        words_label: "Words:"
+        chars_label: "Characters:"
+        markdown_guide_footer: "Markdown Guide ↗"
+        attached_images: "Attached Images"
+        attached_images_help: "Images remain even after removing Markdown from the body. Delete unwanted images here."
+        cdn_unconfigured: "CDN URL not configured"
+        insert: "Insert"
+        delete: "Delete"
+        delete_image_confirm: "This image will be deleted. If the URL remains in the body, the image will be broken."
+        no_images: "No attached images."
+        modal_title: "Publish Settings"
+        close_aria: "Close"
+        slug_label: "Slug <b>*</b>"
+        slug_ai_aria: "Generate slug with AI"
+        slug_ai_tooltip: "Generates an English URL slug from the title and body."
+        slug_pattern_title: "Use only lowercase alphanumeric characters and hyphens"
+        category_label: "Category"
+        kind_label: "Type"
+        tags_label: "Tags (comma separated)"
+        tags_placeholder: "Terraform, IaC, AWS"
+        excerpt_label: "Excerpt"
+        excerpt_ai_aria: "Generate summary with AI"
+        excerpt_ai_tooltip: "Sends the current title and body to external AI and reflects the result."
+        status_label: "Status"
+        published_at_label: "Published at"
+        cancel: "Cancel"
+        schedule: "Schedule (coming soon)"
+        draft_save_modal: "Save Draft"
+        publish_submit: "Publish"
+    comments:
+      index:
+        home: "Home"
+        admin: "Admin"
+        title: "Comments"
+        posts_link: "◈ Posts"
+        header_author: "Author"
+        header_body: "Comment"
+        header_post: "Article"
+        header_date: "Posted at"
+        header_actions: "Actions"
+        empty: "No comments yet."
+        delete: "Delete"
+        delete_confirm: "Are you sure you want to delete this comment?"
+    settings:
+      show:
+        home: "Home"
+        admin: "Admin"
+        title: "Settings"
+        h1: "Settings"
+        preview: "◉ Preview"
+        save: "▣ Save changes"
+        blog_section: "Blog Settings"
+        blog_section_desc: "Configure basic blog information."
+        blog_title: "Blog title"
+        tagline: "Tagline"
+        site_url: "Site URL"
+        blog_description: "Blog description"
+        ogp_placeholder: "Recommended: 1200 x 630px<br>JPG / PNG"
+        change_image: "Change image"
+        save_notice: "Save changes to apply"
+        profile_section: "Profile Settings"
+        profile_section_desc: "Configure profile information."
+        display_name: "Display name"
+        title: "Title"
+        email: "Email"
+        bio: "Bio"
+        change_avatar: "Change profile image"
+        sns_section: "SNS / External Links"
+        sns_section_desc: "Configure links to SNS and external services."
+        github: "GitHub URL"
+        x: "X URL"
+        rss: "RSS URL"
+        zenn: "Zenn URL"
+        note: "note URL"
+        display_section: "Display & Publishing Settings"
+        display_section_desc: "Configure site display and publishing options."
+        profile_visible: "Show profile"
+        sns_visible: "Show SNS links"
+        theme_light: "Light"
+        theme_dark: "Dark"
+        posts_per_page: "Posts per page"
+        password_section: "Change Password"
+        password_section_desc: "Change your admin password."
+        current_password: "Current password"
+        current_password_placeholder: "Enter current password"
+        new_password: "New password"
+        new_password_placeholder: "Enter new password"
+        password_rule: "8+ characters, including letters and numbers"
+        confirm_password: "New password (confirm)"
+        confirm_password_placeholder: "Re-enter new password"
+        update_password: "▣ Update password"
+        last_updated: "Last updated:"
+  flash:
+    comments:
+      created: "Comment posted. Thank you!"
+      spam: "Flagged as spam. Please try again."
+      rate_limit: "Too many posts in a short time. Please wait a moment and try again."
+      destroyed: "Comment deleted."
+    admin:
+      sessions:
+        email_blank: "Please enter your email address."
+        password_blank: "Please enter your password."
+        spam: "Flagged as spam. Please try again."
+        login_success: "Logged in successfully."
+        login_failure: "Email or password is incorrect."
+        logout_success: "Logged out successfully."
+      posts:
+        saved: "Post saved."
+        destroyed: "Post deleted."
+      settings:
+        saved: "Settings saved."
+        password_failed: "Could not update password. Please check your input."
+      base:
+        unauthorized: "Please log in."
+        unauthorized_json: "Please re-authenticate before proceeding."
+      post_images:
+        cdn_not_configured: "CDN URL is not configured."
+        destroyed: "Image deleted."
+        no_file: "Please select an image file."
+        invalid_type: "Please upload JPG, PNG, WebP, or GIF images."
+        too_large: "Please upload images under 10MB."
+        upload_failed: "Could not upload image."
+      post_slugs:
+        generation_failed: "Could not generate slug. Check server logs."
+      post_summaries:
+        generation_failed: "Could not generate summary. Check server logs."
+    profile:
+      not_visible: "Profile is not currently public."
+  helpers:
+    post:
+      status_published: "Published"
+      status_draft: "Draft"
+      status_reviewing: "In Review"
+      kind_article: "Article"
+      kind_experiment: "Experiment"
+  js:
+    markdown:
+      bold_placeholder: "bold text"
+      italic_placeholder: "italic text"
+      code_placeholder: "code"
+      list_placeholder: "list item"
+      ordered_placeholder: "numbered item"
+      quote_placeholder: "quote"
+      check_placeholder: "checklist item"
+      image_placeholder: "images/example.png"
+      table_placeholder_h: "Header"
+      table_placeholder_v: "Value"
+      link_placeholder_text: "link text"
+      link_placeholder_url: "https://example.com"
+    editor:
+      uploading: "Uploading..."
+      upload_success: "Image uploaded and Markdown inserted. Reload the page to see it in the attachment list."
+      upload_error: "Could not upload image."
+      upload_error_json: "Received an invalid JSON response. Check server logs."
+      upload_error_401: "Please log in again before uploading images."
+      upload_error_html: "Received an HTML error page. Check your login status and server logs."
+    post_summary:
+      confirm_overwrite_excerpt: "The current summary will be overwritten by the AI-generated result. Continue?"
+      generating_excerpt: "Generating summary..."
+      excerpt_success: "AI summary applied. Please review before saving."
+      excerpt_error: "Could not generate summary."
+      confirm_overwrite_slug: "The current slug will be overwritten by the AI-generated result. Continue?"
+      generating_slug: "Generating slug..."
+      slug_success: "AI slug applied. Please review before saving."
+      slug_error: "Could not generate slug."
+      error_json: "Received an invalid JSON response. Check server logs."
+      error_401: "Please log in again before proceeding."
+      error_html: "Received an HTML error page. Check your login status and server logs."
+    image_lightbox:
+      aria_expand: "Open expanded image"
+      aria_close: "Close expanded image"
+    password_toggle:
+      show: "Show password"
+      hide: "Hide password"
+    body_stats:
+      lines: "Lines:"
+      words: "Words:"
+      chars: "Characters:"
+    note_box:
+      point: "Note:"
+  activerecord:
+    errors:
+      models:
+        post:
+          attributes:
+            slug:
+              format: "must be lowercase alphanumeric characters and hyphens"
+            images:
+              invalid_type: "must be JPG, PNG, WebP, or GIF"
+              too_large: "must be under 10MB"
+        category:
+          attributes:
+            slug:
+              format: "must be lowercase alphanumeric characters and hyphens"
+        tag:
+          attributes:
+            slug:
+              format: "must be lowercase alphanumeric characters and hyphens"
+        admin_user:
+          attributes:
+            email:
+              format: "is not in a valid format"
+        site_setting:
+          attributes:
+            profile_email:
+              format: "is not in a valid format"
+            site_url:
+              format: "must be an http or https URL"
+            github_url:
+              format: "must be an http or https URL"
+            x_url:
+              format: "must be an http or https URL"
+            rss_url:
+              format: "must be an http or https URL"
+            zenn_url:
+              format: "must be an http or https URL"
+            note_url:
+              format: "must be an http or https URL"
+            ogp_image:
+              invalid_type: "OGP image must be JPG or PNG"
+              too_large: "OGP image must be under %{max_size}MB"
+            profile_image:
+              invalid_type: "Profile image must be JPG or PNG"
+              too_large: "Profile image must be under %{max_size}MB"

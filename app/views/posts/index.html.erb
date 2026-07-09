@@ -5,26 +5,26 @@
 
   <section class="content-area">
     <nav class="breadcrumbs">
-      <%= link_to "ホーム", root_path %>
+      <%= link_to t("posts.index.home"), root_path %>
       <span>›</span>
-      <span><%= @kind == "experiment" ? "実験ログ" : "記事一覧" %></span>
+      <span><%= @kind == "experiment" ? t("posts.index.title_experiments") : t("posts.index.title_articles") %></span>
     </nav>
 
     <div class="page-title-row">
-      <h1><%= @kind == "experiment" ? "実験ログ" : "記事一覧" %></h1>
+      <h1><%= @kind == "experiment" ? t("posts.index.title_experiments") : t("posts.index.title_articles") %></h1>
       <%= form_with url: list_path.call, method: :get, class: "search-inline" do |form| %>
         <% search_params.each do |key, value| %>
           <%= hidden_field_tag key, value %>
         <% end %>
-        <%= form.search_field :q, value: params[:q], placeholder: "タイトルで検索", aria: { label: "タイトルで検索" } %>
-        <%= form.select :sort, options_for_select([ [ "新しい順", "newest" ], [ "古い順", "oldest" ], [ "更新順", "updated" ] ], params[:sort].presence || "newest"), {}, aria: { label: "並び順" }, onchange: "this.form.requestSubmit()" %>
-        <%= form.submit "検索" %>
-        <%= link_to "リセット", list_path.call, class: "secondary-button" %>
+        <%= form.search_field :q, value: params[:q], placeholder: t("posts.index.search_placeholder"), aria: { label: t("posts.index.search_placeholder") } %>
+        <%= form.select :sort, options_for_select([ [ t("posts.index.sort_newest"), "newest" ], [ t("posts.index.sort_oldest"), "oldest" ], [ t("posts.index.sort_updated"), "updated" ] ], params[:sort].presence || "newest"), {}, aria: { label: t("posts.index.sort_aria") }, onchange: "this.form.requestSubmit()" %>
+        <%= form.submit t("posts.index.search_button") %>
+        <%= link_to t("posts.index.reset"), list_path.call, class: "secondary-button" %>
       <% end %>
     </div>
 
     <div class="filter-tabs wide-tabs">
-      <%= link_to "すべて", list_path.call, class: ("active" if params[:category].blank?) %>
+      <%= link_to t("posts.index.all"), list_path.call, class: ("active" if params[:category].blank?) %>
       <% @categories.each do |category| %>
         <%= link_to category.name, list_path.call(preserved_filter_params.merge(category: category.slug)), class: ("active" if params[:category] == category.slug) %>
       <% end %>
@@ -35,7 +35,7 @@
         <article class="post-list-card">
           <div class="document-icon">▤</div>
           <div>
-            <p class="post-meta"><%= post.display_date.strftime("%Y-%m-%d") %> / <%= post.category.name %> / <%= post.reading_minutes %>分</p>
+            <p class="post-meta"><%= post.display_date.strftime("%Y-%m-%d") %> / <%= post.category.name %> / <%= post.reading_minutes %><%= t("posts.index.minutes") %></p>
             <h2><%= link_to post.title, post_path(post.slug) %></h2>
             <p><%= post.excerpt %></p>
             <div class="chip-list">
@@ -50,9 +50,9 @@
 
     <nav class="pagination">
       <% if @page > 1 %>
-        <%= link_to "前へ", list_path.call(request.query_parameters.merge(page: @page - 1)) %>
+        <%= link_to t("posts.index.prev"), list_path.call(request.query_parameters.merge(page: @page - 1)) %>
       <% else %>
-        <span>前へ</span>
+        <span><%= t("posts.index.prev") %></span>
       <% end %>
       <% 1.upto(@total_pages) do |page| %>
         <% if page == @page %>
@@ -62,12 +62,12 @@
         <% end %>
       <% end %>
       <% if @page < @total_pages %>
-        <%= link_to "次へ", list_path.call(request.query_parameters.merge(page: @page + 1)) %>
+        <%= link_to t("posts.index.next"), list_path.call(request.query_parameters.merge(page: @page + 1)) %>
       <% else %>
-        <span>次へ</span>
+        <span><%= t("posts.index.next") %></span>
       <% end %>
     </nav>
-    <p class="page-count"><%= @page %> / <%= @total_pages %> ページ（全<%= @total_count %>件）</p>
+    <p class="page-count"><%= t("posts.index.page_info", page: @page, total_pages: @total_pages, count: @total_count) %></p>
   </section>
 
   <%= render "shared/sidebar", categories: @categories, archives: @archives %>

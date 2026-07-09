@@ -1,16 +1,16 @@
 <main class="admin-page">
   <nav class="breadcrumbs">
-    <%= link_to "ホーム", root_path %>
+    <%= link_to t("admin.comments.index.home"), root_path %>
     <span>›</span>
-    <span>管理画面</span>
+    <span><%= t("admin.comments.index.admin") %></span>
     <span>›</span>
-    <span>コメント一覧</span>
+    <span><%= t("admin.comments.index.title") %></span>
   </nav>
 
   <div class="admin-title-row">
-    <h1>コメント一覧</h1>
+    <h1><%= t("admin.comments.index.title") %></h1>
     <div class="title-actions">
-      <%= link_to "◈ 記事一覧", admin_posts_path, class: "secondary-button" %>
+      <%= link_to t("admin.comments.index.posts_link"), admin_posts_path, class: "secondary-button" %>
     </div>
   </div>
 
@@ -18,17 +18,17 @@
     <table class="admin-table">
       <thead>
         <tr>
-          <th>投稿者</th>
-          <th>本文</th>
-          <th>対象記事</th>
-          <th>投稿日時</th>
-          <th>操作</th>
+          <th><%= t("admin.comments.index.header_author") %></th>
+          <th><%= t("admin.comments.index.header_body") %></th>
+          <th><%= t("admin.comments.index.header_post") %></th>
+          <th><%= t("admin.comments.index.header_date") %></th>
+          <th><%= t("admin.comments.index.header_actions") %></th>
         </tr>
       </thead>
       <tbody>
         <% if @comments.empty? %>
           <tr>
-            <td colspan="5" style="text-align:center;padding:32px;color:var(--muted);">コメントはまだありません。</td>
+            <td colspan="5" style="text-align:center;padding:32px;color:var(--muted);"><%= t("admin.comments.index.empty") %></td>
           </tr>
         <% else %>
           <% @comments.each do |comment| %>
@@ -42,7 +42,7 @@
               </td>
               <td><%= comment.created_at.strftime("%Y/%m/%d %H:%M") %></td>
               <td class="action-cell">
-                <%= button_to "削除", admin_comment_path(comment), method: :delete, form: { data: { turbo_confirm: "このコメントを削除しますか？" } }, class: "danger-button" %>
+                <%= button_to t("admin.comments.index.delete"), admin_comment_path(comment), method: :delete, form: { data: { turbo_confirm: t("admin.comments.index.delete_confirm") } }, class: "danger-button" %>
               </td>
             </tr>
           <% end %>

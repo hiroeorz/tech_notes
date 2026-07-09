@@ -1,6 +1,6 @@
 <% if defined?(@comments) && @comments.present? || defined?(@comment) %>
 <section id="comments" class="comments-section">
-  <h2 class="section-heading"><span>コメント</span></h2>
+  <h2 class="section-heading"><span><%= t("posts.comments.title") %></span></h2>
 
   <% if @comments.any? %>
     <div class="comment-list">
@@ -15,23 +15,23 @@
       <% end %>
     </div>
   <% else %>
-    <p class="empty-note">まだコメントはありません。</p>
+    <p class="empty-note"><%= t("posts.comments.empty") %></p>
   <% end %>
 
   <div class="comment-form-wrap">
     <%= form_with model: [@post, @comment], local: true, html: { "data-controller" => "comment-form", "data-comment-form-site-key-value" => turnstile_site_key } do |form| %>
       <div class="comment-form-fields">
-        <%= form.label :author_name, "名前" %>
-        <%= form.text_field :author_name, maxlength: Comment::AUTHOR_NAME_MAX, placeholder: "お名前（必須）", required: true, aria: { required: true } %>
+        <%= form.label :author_name, t("posts.comments.name_label") %>
+        <%= form.text_field :author_name, maxlength: Comment::AUTHOR_NAME_MAX, placeholder: t("posts.comments.name_placeholder"), required: true, aria: { required: true } %>
 
-        <%= form.label :body, "コメント" %>
-        <%= form.text_area :body, maxlength: Comment::BODY_MAX, rows: 5, placeholder: "本文（必須）", required: true, aria: { required: true } %>
+        <%= form.label :body, t("posts.comments.body_label") %>
+        <%= form.text_area :body, maxlength: Comment::BODY_MAX, rows: 5, placeholder: t("posts.comments.body_placeholder"), required: true, aria: { required: true } %>
       </div>
 
       <div class="turnstile-wrap" data-comment-form-target="turnstile"></div>
 
       <div class="comment-submit-row">
-        <%= form.submit "投稿する", class: "primary-button", data: { "comment-form-target" => "submit" } %>
+        <%= form.submit t("posts.comments.submit"), class: "primary-button", data: { "comment-form-target" => "submit" } %>
       </div>
     <% end %>
   </div>

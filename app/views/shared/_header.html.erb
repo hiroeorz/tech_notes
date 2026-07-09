@@ -7,33 +7,41 @@
   </div>
 
   <% unless controller_path == "admin/sessions" %>
-    <nav class="global-nav" aria-label="グローバルナビゲーション" data-menu-nav>
-      <%= link_to "ホーム", root_path, class: ("active" if current_page?(root_path)) %>
-      <%= link_to "記事一覧", posts_path, class: ("active" if controller_name == "posts" && action_name != "tags" && params[:kind] != "experiment" && request.path != experiments_path) %>
-      <%= link_to "実験ログ", experiments_path, class: ("active" if request.path == experiments_path || params[:kind] == "experiment") %>
-      <%= link_to "タグ一覧", tags_path, class: ("active" if current_page?(tags_path)) %>
+    <nav class="global-nav" aria-label="<%= t("shared.header.nav_aria") %>" data-menu-nav>
+      <%= link_to t("shared.header.home"), root_path, class: ("active" if current_page?(root_path)) %>
+      <%= link_to t("shared.header.articles"), posts_path, class: ("active" if controller_name == "posts" && action_name != "tags" && params[:kind] != "experiment" && request.path != experiments_path) %>
+      <%= link_to t("shared.header.experiments"), experiments_path, class: ("active" if request.path == experiments_path || params[:kind] == "experiment") %>
+      <%= link_to t("shared.header.tags"), tags_path, class: ("active" if current_page?(tags_path)) %>
       <% if current_site_setting.profile_visible? %>
-        <%= link_to "プロフィール", profile_path, class: ("active" if current_page?(profile_path)) %>
+        <%= link_to t("shared.header.profile"), profile_path, class: ("active" if current_page?(profile_path)) %>
       <% end %>
-      <%= link_to "About", about_path, class: ("active" if current_page?(about_path)) %>
+      <%= link_to t("shared.header.about"), about_path, class: ("active" if current_page?(about_path)) %>
     </nav>
   <% end %>
 
   <div class="header-actions">
     <% if admin_signed_in? && controller_path.start_with?("admin/") && controller_path != "admin/sessions" %>
-      <%= link_to "記事管理", admin_posts_path, class: "admin-link" %>
-      <%= link_to "設定", admin_settings_path, class: "admin-link" %>
-      <%= button_to "ログアウト", admin_logout_path, method: :delete, class: "logout-link" %>
+      <%= link_to t("shared.header.admin_posts"), admin_posts_path, class: "admin-link" %>
+      <%= link_to t("shared.header.admin_settings"), admin_settings_path, class: "admin-link" %>
+      <%= button_to t("shared.header.logout"), admin_logout_path, method: :delete, class: "logout-link" %>
     <% end %>
-    <button class="menu-toggle" type="button" data-menu-toggle aria-label="メニュー" aria-expanded="false">☰</button>
-    <button class="icon-button" type="button" data-theme-toggle aria-label="テーマ切り替え" aria-pressed="<%= current_site_setting.default_theme == "dark" %>">☾</button>
-    <button class="icon-button" type="button" data-search-toggle aria-label="検索">⌕</button>
+    <%= form_tag locale_path, method: :post, class: "locale-switch", data: { controller: "locale" } do %>
+      <label class="locale-label" aria-label="<%= t("shared.header.language_select") %>">
+        <select data-action="locale#change" class="locale-select">
+          <option value="en" <%= "selected" if I18n.locale == :en %>><%= t("shared.header.language_en") %></option>
+          <option value="ja" <%= "selected" if I18n.locale == :ja %>><%= t("shared.header.language_ja") %></option>
+        </select>
+      </label>
+    <% end %>
+    <button class="menu-toggle" type="button" data-menu-toggle aria-label="<%= t("shared.header.menu") %>" aria-expanded="false">☰</button>
+    <button class="icon-button" type="button" data-theme-toggle aria-label="<%= t("shared.header.theme_toggle") %>" aria-pressed="<%= current_site_setting.default_theme == "dark" %>">☾</button>
+    <button class="icon-button" type="button" data-search-toggle aria-label="<%= t("shared.header.search") %>">⌕</button>
   </div>
 </header>
 
 <div class="search-panel" data-search-panel hidden>
   <%= form_with url: posts_path, method: :get, class: "search-panel-form" do |form| %>
-    <%= form.search_field :q, placeholder: "記事タイトルで検索", aria: { label: "記事タイトルで検索" } %>
-    <%= form.submit "検索", class: "primary-button" %>
+    <%= form.search_field :q, placeholder: t("shared.header.search_placeholder"), aria: { label: t("shared.header.search_placeholder") } %>
+    <%= form.submit t("shared.header.search_button"), class: "primary-button" %>
   <% end %>
 </div>

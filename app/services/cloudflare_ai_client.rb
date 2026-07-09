@@ -34,20 +34,20 @@ class CloudflareAiClient
   end
 
   def run(messages:)
-    raise ConfigurationError, "Cloudflare Workers AIの設定が不足しています。" unless configured?
+    raise ConfigurationError, "Cloudflare Workers AI is not configured." unless configured?
 
     response = perform_request(messages)
     payload = JSON.parse(response.body)
     raise RateLimitError, cloudflare_error_message(payload) if response.code.to_i == 429
     raise RequestError, cloudflare_error_message(payload) unless response.is_a?(Net::HTTPSuccess) && payload["success"] != false
 
-    extract_text(payload).presence || raise(RequestError, "Cloudflare Workers AIから要約を取得できませんでした。")
+    extract_text(payload).presence || raise(RequestError, "Could not get a response from Cloudflare Workers AI.")
   rescue JSON::ParserError
-    raise RequestError, "Cloudflare Workers AIのレスポンスを解析できませんでした。"
+    raise RequestError, "Could not parse Cloudflare Workers AI response."
   rescue Net::OpenTimeout, Net::ReadTimeout
-    raise RequestError, "Cloudflare Workers AIへの接続がタイムアウトしました。"
+    raise RequestError, "Connection to Cloudflare Workers AI timed out."
   rescue SocketError, SystemCallError => error
-    raise RequestError, "Cloudflare Workers AIへ接続できませんでした。"
+    raise RequestError, "Could not connect to Cloudflare Workers AI."
   end
 
   private
@@ -89,6 +89,6 @@ class CloudflareAiClient
 
       [ error["code"], error["message"] ].compact.join(": ").presence
     end
-    errors.presence&.join(" / ") || "Cloudflare Workers AIの呼び出しに失敗しました。"
+    errors.presence&.join(" / ") || "Cloudflare Workers AI call failed."
   end
 end

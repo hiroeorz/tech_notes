@@ -8,7 +8,7 @@ module Admin
       @setting = current_site_setting
 
       unless password_change_valid?
-        flash.now[:alert] = "パスワードを更新できませんでした。入力内容を確認してください。"
+        flash.now[:alert] = t("flash.admin.settings.password_failed")
         render :show, status: :unprocessable_entity
         return
       end
@@ -18,7 +18,7 @@ module Admin
         apply_password_change! if password_params_present?
       end
 
-      redirect_to admin_settings_path, notice: "設定を保存しました。"
+      redirect_to admin_settings_path, notice: t("flash.admin.settings.saved")
     rescue ActiveRecord::RecordInvalid
       render :show, status: :unprocessable_entity
     end

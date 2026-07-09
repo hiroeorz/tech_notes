@@ -31,10 +31,9 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     get root_path
     assert_response :success
     assert_includes response.body, "Hiroe Tech Notes"
-    assert_includes response.body, "動かしながら学ぶ"
-    assert_not_includes response.body, "管理者ログイン"
+    assert_includes response.body, "Learn by doing"
     assert_not_includes response.body, admin_login_path
-    assert_select "button[data-theme-toggle][aria-label='テーマ切り替え'][aria-pressed]"
+    assert_select "button[data-theme-toggle][aria-label='Toggle theme'][aria-pressed]"
     assert_select ".latest-posts .filter-tabs a[href='#{posts_path(category: @ai_category.slug)}']", text: @ai_category.name
     assert_select "pre.code-card.highlight.language-terraform code.highlight"
     assert_includes response.body, "<span"
@@ -69,7 +68,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
     get archives_path
     assert_response :success
-    assert_includes response.body, "アーカイブ"
+    assert_includes response.body, "Archives"
     assert_includes response.body, @post.title
 
     get profile_path
@@ -129,7 +128,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, experiment.title
     assert_select "form[action='#{experiments_path}']"
-    assert_select ".global-nav a.active", text: "実験ログ"
+    assert_select ".global-nav a.active", text: "Experiments"
     assert_select ".filter-tabs a[href^='#{experiments_path}'][href*='category=#{@category.slug}']", text: @category.name
   end
 
@@ -150,10 +149,10 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_operator response.body.index(older.title), :<, response.body.index(@post.title)
-    assert_select "input[name='q'][aria-label='タイトルで検索']"
-    assert_select "select[name='sort'][aria-label='並び順']"
+    assert_select "input[name='q'][aria-label='Search by title']"
+    assert_select "select[name='sort'][aria-label='Sort order']"
     assert_select "select[name='sort'] option[selected='selected'][value='oldest']"
-    assert_select "a.secondary-button[href='#{posts_path}']", text: "リセット"
+    assert_select "a.secondary-button[href='#{posts_path}']", text: "Reset"
   end
 
   test "public pagination clamps pages beyond the last page" do
@@ -163,7 +162,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_includes response.body, @post.title
-    assert_select ".page-count", text: "1 / 1 ページ（全1件）"
+    assert_select ".page-count", text: "1 / 1 pages (1 total)"
   end
 
   test "top daily log prefers experiment posts over regular articles" do
@@ -368,7 +367,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
     get root_path
     assert_response :success
-    assert_select ".global-nav a", text: "プロフィール", count: 0
+    assert_select ".global-nav a", text: "Profile", count: 0
     assert_not_includes response.body, "profile-card"
 
     get profile_path
@@ -395,29 +394,28 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
     get admin_login_path
     assert_response :success
-    assert_includes response.body, "ログイン"
+    assert_includes response.body, I18n.t("admin.sessions.new.title")
     assert_select ".password-field input[type='password'][name='password']"
-    assert_select ".password-field button[data-password-toggle][data-password-toggle-label='パスワード'][aria-label='パスワードを表示する'][aria-pressed='false']", text: "◎"
-    assert_not_includes response.body, "グローバルナビゲーション"
-    assert_not_includes response.body, "記事一覧"
-    assert_not_includes response.body, "管理者ログイン"
+    assert_select ".password-field button[data-password-toggle][data-password-toggle-label='#{I18n.t("admin.sessions.new.password_label")}'][data-password-toggle-show='#{I18n.t("js.password_toggle.show")}'][data-password-toggle-hide='#{I18n.t("js.password_toggle.hide")}'][aria-label='#{I18n.t("js.password_toggle.show")}'][aria-pressed='false']", text: "◎"
+    assert_not_includes response.body, "Global Navigation"
+    assert_not_includes response.body, "Articles"
     assert_not_includes response.body, "href=\"#\""
     assert_includes response.body, "mailto:#{@setting.profile_email}"
-    assert_includes response.body, "aria-label=\"テーマ切り替え\""
-    assert_includes response.body, "aria-label=\"検索\""
+    assert_includes response.body, "aria-label=\"#{I18n.t("shared.header.theme_toggle")}\""
+    assert_includes response.body, "aria-label=\"#{I18n.t("shared.header.search")}\""
 
     post admin_login_path, params: { email: "", password: "" }
     assert_response :unprocessable_entity
-    assert_includes response.body, "メールアドレスを入力してください。"
-    assert_includes response.body, "パスワードを入力してください。"
+    assert_includes response.body, I18n.t("flash.admin.sessions.email_blank")
+    assert_includes response.body, I18n.t("flash.admin.sessions.password_blank")
 
     post admin_login_path, params: { email: @admin.email, password: "password123" }
     assert_redirected_to admin_posts_path
 
     follow_redirect!
     assert_response :success
-    assert_includes response.body, "記事一覧"
-    assert_includes response.body, "ログアウト"
+    assert_includes response.body, I18n.t("admin.posts.index.title")
+    assert_includes response.body, I18n.t("shared.header.logout")
 
     get root_path
     assert_response :success
@@ -428,19 +426,19 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "data-open-publish-modal"
     assert_includes response.body, "data-publish-modal-backdrop"
-    assert_includes response.body, "公開設定"
-    assert_includes response.body, "投稿を公開する"
+    assert_includes response.body, I18n.t("admin.posts.form.modal_title")
+    assert_includes response.body, I18n.t("admin.posts.form.publish_submit")
     assert_includes response.body, "name=\"commit_status\" value=\"draft\""
     assert_includes response.body, "name=\"commit_status\" value=\"published\""
     assert_select "button[name='commit_status'][value='draft'][formnovalidate]", count: 2
     assert_select "button[name='commit_status'][value='published'][formnovalidate]", count: 0
-    assert_includes response.body, "公開日時"
+    assert_includes response.body, I18n.t("admin.posts.form.published_at_label")
     assert_includes response.body, "data-md-action=\"bold\""
-    assert_includes response.body, "aria-label=\"太字を挿入\""
-    assert_includes response.body, "aria-label=\"画像を挿入\""
+    assert_includes response.body, "aria-label=\"#{I18n.t("admin.posts.form.bold_aria")}\""
+    assert_includes response.body, "aria-label=\"#{I18n.t("admin.posts.form.image_aria")}\""
     assert_select "input[type='file'][data-post-image-input][accept='image/jpeg,image/png,image/webp,image/gif']"
     assert_includes response.body, admin_post_images_path(@post)
-    assert_includes response.body, "添付画像"
+    assert_includes response.body, I18n.t("admin.posts.form.attached_images")
     assert_includes response.body, "data-tag-input=\"true\""
     assert_select ".tag-preview .chip", text: @tag.name
     assert_includes response.body, "data-live-count-input=\"title\""
@@ -448,10 +446,10 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "data-controller=\"post-summary\""
     assert_includes response.body, admin_post_summaries_path
     assert_includes response.body, admin_post_slugs_path
-    assert_includes response.body, "aria-label=\"AIで要約を生成\""
-    assert_includes response.body, "aria-label=\"AIでスラッグを生成\""
-    assert_includes response.body, "data-tooltip=\"現在のタイトルと本文を外部AIに送信し、生成結果を要約欄に反映します。\""
-    assert_includes response.body, "data-tooltip=\"タイトルと本文から英語のURL用スラッグを生成します。\""
+    assert_includes response.body, "aria-label=\"#{I18n.t("admin.posts.form.excerpt_ai_aria")}\""
+    assert_includes response.body, "aria-label=\"#{I18n.t("admin.posts.form.slug_ai_aria")}\""
+    assert_includes response.body, "data-tooltip=\"#{I18n.t("admin.posts.form.excerpt_ai_tooltip")}\""
+    assert_includes response.body, "data-tooltip=\"#{I18n.t("admin.posts.form.slug_ai_tooltip")}\""
     assert_includes response.body, "data-post-summary-target=\"body\""
     assert_includes response.body, "data-post-summary-target=\"excerpt\""
     assert_includes response.body, "data-post-summary-target=\"slug\""
@@ -460,7 +458,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     get new_admin_post_path
     assert_response :success
     assert_includes response.body, "data-open-editor-preview"
-    assert_includes response.body, "先に下書き保存してください"
+    assert_includes response.body, I18n.t("admin.posts.form.image_help_draft")
     assert_select "input[data-post-image-input]", count: 0
     assert_not_includes response.body, "href=\"#\""
 
@@ -470,16 +468,16 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
     get admin_settings_path
     assert_response :success
-    assert_includes response.body, "管理設定"
+    assert_includes response.body, I18n.t("admin.settings.show.h1")
     assert_includes response.body, "data-password-toggle"
-    assert_select ".password-field button[data-password-toggle][data-password-toggle-label='現在のパスワード'][aria-label='現在のパスワードを表示する'][aria-pressed='false']"
+    assert_select ".password-field button[data-password-toggle][data-password-toggle-label='#{I18n.t("admin.settings.show.current_password")}'][data-password-toggle-show='#{I18n.t("js.password_toggle.show")}'][data-password-toggle-hide='#{I18n.t("js.password_toggle.hide")}'][aria-label='#{I18n.t("js.password_toggle.show")}'][aria-pressed='false']"
     assert_select "input#site_setting_ogp_image[type='file']"
-    assert_select "label[for='site_setting_ogp_image']", text: "画像を変更"
+    assert_select "label[for='site_setting_ogp_image']", text: I18n.t("admin.settings.show.change_image")
     assert_select "input#site_setting_ogp_image[data-settings-image-input][data-preview-alt='OGP画像']"
-    assert_select "[data-settings-image-preview-container] [data-settings-image-placeholder]", text: /推奨サイズ/
-    assert_select "[data-settings-image-save-notice][hidden]", text: "反映するには「変更を保存」をクリックしてください", count: 2
+    assert_select "[data-settings-image-preview-container] [data-settings-image-placeholder]", text: /Recommended:/
+    assert_select "[data-settings-image-save-notice][hidden]", text: I18n.t("admin.settings.show.save_notice"), count: 2
     assert_select "input#site_setting_profile_image[type='file']"
-    assert_select "label[for='site_setting_profile_image']", text: "プロフィール画像を変更"
+    assert_select "label[for='site_setting_profile_image']", text: I18n.t("admin.settings.show.change_avatar")
     assert_select "input#site_setting_profile_image[data-settings-image-input][data-preview-alt='プロフィール画像']"
     assert_select "[data-settings-image-preview-container]", count: 2
 
@@ -494,7 +492,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_includes application_source, "const updatePasswordToggle"
     assert_includes application_source, "input.type = visible ? \"text\" : \"password\""
     assert_includes application_source, "button.setAttribute(\"aria-pressed\", visible ? \"true\" : \"false\")"
-    assert_includes application_source, "button.setAttribute(\"aria-label\", `${label}を${visible ? \"非表示にする\" : \"表示する\"}`)"
+    assert_includes application_source, "button.setAttribute(\"aria-label\", visible ? hideLabel : showLabel)"
   end
 
   test "admin management actions require sign in" do
@@ -521,14 +519,14 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
     post admin_post_summaries_path, params: { title: "未ログイン", body: "本文" }, as: :json
     assert_response :unauthorized
-    assert_includes response.parsed_body.fetch("error"), "ログイン"
+    assert_includes response.parsed_body.fetch("error"), I18n.t("flash.admin.base.unauthorized_json")
 
     post admin_post_slugs_path, params: { title: "未ログイン", body: "本文" }
     assert_redirected_to admin_login_path
 
     post admin_post_slugs_path, params: { title: "未ログイン", body: "本文" }, as: :json
     assert_response :unauthorized
-    assert_includes response.parsed_body.fetch("error"), "ログイン"
+    assert_includes response.parsed_body.fetch("error"), I18n.t("flash.admin.base.unauthorized_json")
 
     delete admin_post_image_path(@post, 999)
     assert_redirected_to admin_login_path
@@ -617,11 +615,11 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
     post admin_post_summaries_path, params: { title: "空本文", body: " " }, as: :json
     assert_response :bad_request
-    assert_includes response.parsed_body.fetch("error"), "本文"
+    assert_includes response.parsed_body.fetch("error"), "body text"
 
     fake_generator = Object.new
     def fake_generator.generate(title:, body:)
-      raise PostSummaryGenerator::GenerationError, "Cloudflare Workers AIの設定が不足しています。"
+      raise PostSummaryGenerator::GenerationError, "Cloudflare Workers AI is not configured."
     end
 
     with_post_summary_generator(fake_generator) do
@@ -631,11 +629,11 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :bad_gateway
-    assert_includes response.parsed_body.fetch("error"), "設定"
+    assert_includes response.parsed_body.fetch("error"), "not configured"
 
     rate_limited_generator = Object.new
     def rate_limited_generator.generate(title:, body:)
-      raise PostSummaryGenerator::RateLimitError, "レート制限に達しました。"
+      raise PostSummaryGenerator::RateLimitError, "Rate limit reached."
     end
 
     with_post_summary_generator(rate_limited_generator) do
@@ -645,7 +643,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :too_many_requests
-    assert_includes response.parsed_body.fetch("error"), "レート制限"
+    assert_includes response.parsed_body.fetch("error"), "Rate limit"
   end
 
   test "admin can generate post slug without saving the post" do
@@ -679,11 +677,11 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
     post admin_post_slugs_path, params: { title: " ", body: " " }, as: :json
     assert_response :bad_request
-    assert_includes response.parsed_body.fetch("error"), "タイトル"
+    assert_includes response.parsed_body.fetch("error"), "title or body"
 
     fake_generator = Object.new
     def fake_generator.generate(title:, body:)
-      raise PostSlugGenerator::GenerationError, "Cloudflare Workers AIの設定が不足しています。"
+      raise PostSlugGenerator::GenerationError, "Cloudflare Workers AI is not configured."
     end
 
     with_post_slug_generator(fake_generator) do
@@ -693,11 +691,11 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :bad_gateway
-    assert_includes response.parsed_body.fetch("error"), "設定"
+    assert_includes response.parsed_body.fetch("error"), "not configured"
 
     rate_limited_generator = Object.new
     def rate_limited_generator.generate(title:, body:)
-      raise PostSlugGenerator::RateLimitError, "レート制限に達しました。"
+      raise PostSlugGenerator::RateLimitError, "Rate limit reached."
     end
 
     with_post_slug_generator(rate_limited_generator) do
@@ -707,7 +705,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :too_many_requests
-    assert_includes response.parsed_body.fetch("error"), "レート制限"
+    assert_includes response.parsed_body.fetch("error"), "Rate limit"
   end
 
   test "remember me keeps admin signed in through signed cookie and logout clears it" do
@@ -744,7 +742,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     admin.password = "password123"
 
     assert_not admin.valid?
-    assert_includes admin.errors[:email].join, "形式"
+    assert_includes admin.errors[:email].join, "invalid"
   end
 
   test "admin can update a post through slug based route" do
@@ -768,7 +766,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_equal "更新したTerraform記事", @post.reload.title
 
     follow_redirect!
-    assert_select ".flash.notice[data-flash-kind='notice']", text: "記事を保存しました。"
+    assert_select ".flash.notice[data-flash-kind='notice']", text: I18n.t("flash.admin.posts.saved")
   end
 
   test "admin cannot save a post with an invalid slug" do
@@ -789,7 +787,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     }
 
     assert_response :unprocessable_entity
-    assert_includes response.body, "半角英数字とハイフン"
+    assert_includes response.body, I18n.t("admin.posts.form.slug_pattern_title")
     assert_equal "terraform-remote-state", @post.reload.slug
   end
 
@@ -855,7 +853,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_redirected_to edit_admin_post_path(created.slug)
 
     follow_redirect!
-    assert_select ".flash.notice[data-flash-kind='notice']", text: "記事を保存しました。"
+    assert_select ".flash.notice[data-flash-kind='notice']", text: I18n.t("flash.admin.posts.saved")
   end
 
   test "admin post list can sort by oldest update" do
@@ -897,10 +895,10 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     get admin_posts_path(q: "terraform")
 
     assert_response :success
-    assert_select "input[name='q'][aria-label='タイトルで検索']"
-    assert_select "select[name='category_id'][aria-label='カテゴリーで絞り込み']"
-    assert_select "select[name='status'][aria-label='ステータスで絞り込み']"
-    assert_select "select[name='sort'][aria-label='並び順']"
+    assert_select "input[name='q'][aria-label='#{I18n.t("admin.posts.index.search_placeholder")}']"
+    assert_select "select[name='category_id'][aria-label='Filter by category']"
+    assert_select "select[name='status'][aria-label='Filter by status']"
+    assert_select "select[name='sort'][aria-label='#{I18n.t("admin.posts.index.sort_aria")}']"
     assert_includes response.body, @post.title
   end
 
@@ -912,7 +910,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_includes response.body, @post.title
-    assert_select ".page-count", text: "1 / 1 ページ（全1件）"
+    assert_select ".page-count", text: I18n.t("admin.posts.index.page_info", page: 1, total_pages: 1, count: 1)
   end
 
   test "rss feed renders published posts" do
@@ -987,7 +985,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       assert_includes response.body, "screen.png"
       assert_includes response.body, payload.fetch("url")
       assert_includes response.body, "data-insert-markdown"
-      assert_includes response.body, "本文にURLが残っている場合は画像切れ"
+      assert_includes response.body, I18n.t("admin.posts.form.delete_image_confirm")
 
       assert_difference("ActiveStorage::Attachment.count", -1) do
         assert_difference("ActiveStorage::Blob.count", -1) do
@@ -1023,7 +1021,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       end
 
       assert_response :unprocessable_entity
-      assert_includes response.parsed_body.fetch("error"), "JPG、PNG、WebP、GIF"
+      assert_includes response.parsed_body.fetch("error"), I18n.t("flash.admin.post_images.invalid_type")
 
       oversize_file = Tempfile.new([ "large", ".png" ])
       oversize_file.binmode
@@ -1040,7 +1038,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       end
 
       assert_response :unprocessable_entity
-      assert_includes response.parsed_body.fetch("error"), "10MB以下"
+      assert_includes response.parsed_body.fetch("error"), I18n.t("flash.admin.post_images.too_large")
     end
   end
 
@@ -1296,7 +1294,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
     assert_equal original_site_url, @setting.reload.site_url
-    assert_includes response.body, "httpまたはhttps"
+    assert_includes response.body, "must be an http or https URL"
   end
 
   test "admin settings reject invalid profile email" do
@@ -1327,7 +1325,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
     assert_not_equal "invalid-email", @setting.reload.profile_email
-    assert_includes response.body, "形式"
+    assert_includes response.body, "invalid"
   end
 
   test "admin setting image uploads reject unsupported file types" do
@@ -1363,7 +1361,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     }
 
     assert_response :unprocessable_entity
-    assert_includes response.body, "OGP画像はJPGまたはPNGでアップロードしてください。"
+    assert_includes response.body, "OGP image must be JPG or PNG"
     assert_not @setting.reload.ogp_image.attached?
   end
 
@@ -1374,7 +1372,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_select ".comment-form-wrap form"
     assert_select "input[name='comment[author_name]']"
     assert_select "textarea[name='comment[body]']"
-    assert_select "input[type='submit'][value='投稿する']"
+    assert_select "input[type='submit'][value='Post comment']"
   end
 
   test "visitor can post a comment with valid turnstile" do
@@ -1384,7 +1382,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     }
     assert_redirected_to post_path(@post.slug, anchor: "comments")
     follow_redirect!
-    assert_includes response.body, "コメントを投稿しました"
+    assert_includes response.body, "Comment posted"
 
     get post_path(@post.slug)
     assert_includes response.body, "テスト太郎"
@@ -1397,7 +1395,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     },
     as: :html
     assert_response :unprocessable_entity
-    assert_includes response.body, "スパム判定"
+    assert_includes response.body, "Flagged as spam"
   end
 
   test "visitor cannot post comment with empty name" do
@@ -1406,7 +1404,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       "cf-turnstile-response" => "dummy-token"
     }
     assert_response :unprocessable_entity
-    assert_includes response.body, "名前"
+    assert_includes response.body, "Author name"
   end
 
   test "visitor cannot post comment with empty body" do
@@ -1440,7 +1438,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     end
     assert_redirected_to admin_comments_path
     follow_redirect!
-    assert_includes response.body, "コメントを削除しました"
+    assert_includes response.body, I18n.t("flash.comments.destroyed")
   end
 
   test "unauthenticated user cannot access admin comments" do
