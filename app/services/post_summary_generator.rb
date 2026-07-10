@@ -30,7 +30,8 @@ class PostSummaryGenerator
         role: "system",
         content: <<~PROMPT.squish
           You are an assistant that helps edit technical articles for Hiroe Tech Notes.
-          Create a summary of the article based only on the given title and body.
+          Create a summary of the article based only on the given title and body,
+          in the same language as the article.
           Do not add facts not present in the body.
           Do not use Markdown, HTML, bullet points, headings, quotes, or introductory text.
           End the summary with a period.
@@ -40,7 +41,8 @@ class PostSummaryGenerator
       {
         role: "user",
         content: <<~PROMPT
-          Summarize the following article in one paragraph of 70 to 90 characters.
+          Summarize the following article in one paragraph of 70 to 90 characters,
+          in the same language as the article.
           Do not include URLs, code details, or Markdown syntax.
 
           [Title]

@@ -40,7 +40,8 @@ class PostSummaryGeneratorTest < ActiveSupport::TestCase
     )
 
     assert_equal "Terraform のリモートステート設計について、構成例と運用時の注意点を整理した記事です。", summary
-    assert_includes client.messages.dig(0, :content), "Do not add facts not present in the body"
+    assert_includes client.messages.dig(0, :content), "in the same language as the article"
+    assert_includes client.messages.dig(1, :content), "in the same language as the article"
     assert_includes client.messages.dig(1, :content), "[Title]"
     assert_includes client.messages.dig(1, :content), "Terraformのリモートステート設計"
     assert_includes client.messages.dig(1, :content), "[Body]"
