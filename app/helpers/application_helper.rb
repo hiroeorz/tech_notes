@@ -8,6 +8,19 @@ module ApplicationHelper
     ERB::Util.html_escape(code)
   end
 
+  def icon_key_options
+    [
+      [ "☁ #{t('helpers.category.icon_cloud')}", "cloud" ],
+      [ "▱ #{t('helpers.category.icon_aws')}", "aws" ],
+      [ "◇ #{t('helpers.category.icon_azure')}", "azure" ],
+      [ "⚙ #{t('helpers.category.icon_automation')}", "automation" ],
+      [ "</> #{t('helpers.category.icon_code')}", "code" ],
+      [ "▣ #{t('helpers.category.icon_security')}", "security" ],
+      [ "▤ #{t('helpers.category.icon_ops')}", "ops" ],
+      [ "✎ #{t('helpers.category.icon_poem')}", "poem" ]
+    ]
+  end
+
   def category_icon(icon_key)
     {
       "cloud" => "☁",

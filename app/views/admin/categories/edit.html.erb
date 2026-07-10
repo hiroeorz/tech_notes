@@ -1,0 +1,15 @@
+<main class="admin-page">
+  <nav class="breadcrumbs">
+    <%= link_to t("admin.categories.edit.home"), root_path %>
+    <span>›</span>
+    <%= link_to t("admin.categories.edit.admin"), admin_posts_path %>
+    <span>›</span>
+    <%= link_to t("admin.categories.edit.categories"), admin_categories_path %>
+    <span>›</span>
+    <span><%= t("admin.categories.edit.title") %></span>
+  </nav>
+
+  <h1><%= t("admin.categories.edit.title") %></h1>
+
+  <%= render "form", category: @category %>
+</main>

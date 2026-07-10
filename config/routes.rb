@@ -32,6 +32,7 @@ Rails.application.routes.draw do
       end
       resources :images, only: [ :create, :destroy ], controller: "post_images"
     end
+    resources :categories
     resources :post_summaries, only: [ :create ]
     resources :post_slugs, only: [ :create ]
     resources :comments, only: [ :index, :destroy ]

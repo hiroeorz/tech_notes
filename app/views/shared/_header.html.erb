@@ -22,6 +22,7 @@
   <div class="header-actions">
     <% if admin_signed_in? && controller_path.start_with?("admin/") && controller_path != "admin/sessions" %>
       <%= link_to t("shared.header.admin_posts"), admin_posts_path, class: "admin-link" %>
+      <%= link_to t("shared.header.admin_categories"), admin_categories_path, class: "admin-link" %>
       <%= link_to t("shared.header.admin_settings"), admin_settings_path, class: "admin-link" %>
       <%= button_to t("shared.header.logout"), admin_logout_path, method: :delete, class: "logout-link" %>
     <% end %>
