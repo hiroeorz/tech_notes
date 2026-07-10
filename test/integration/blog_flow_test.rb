@@ -1615,6 +1615,89 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     )
   end
 
+  test "admin category management requires sign in" do
+    get admin_categories_path
+    assert_redirected_to admin_login_path
+
+    get new_admin_category_path
+    assert_redirected_to admin_login_path
+
+    post admin_categories_path, params: { category: { name: "Test", slug: "test" } }
+    assert_redirected_to admin_login_path
+  end
+
+  test "admin can list create edit and delete categories" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+    follow_redirect!
+
+    get admin_categories_path
+    assert_response :success
+    assert_includes response.body, @category.name
+    assert_includes response.body, @category.name_en
+    assert_includes response.body, I18n.t("admin.categories.index.new_category")
+
+    assert_difference("Category.count", 1) do
+      post admin_categories_path, params: {
+        category: {
+          name: "テストカテゴリー",
+          name_en: "Test Category",
+          slug: "test-category",
+          icon_key: "code",
+          position: 10
+        }
+      }
+    end
+    assert_redirected_to admin_categories_path
+    follow_redirect!
+    assert_includes response.body, I18n.t("flash.admin.categories.created")
+
+    created = Category.find_by!(slug: "test-category")
+    assert_equal "テストカテゴリー", created.name
+    assert_equal "Test Category", created.name_en
+
+    get edit_admin_category_path(created)
+    assert_response :success
+    assert_includes response.body, "テストカテゴリー"
+
+    patch admin_category_path(created), params: {
+      category: { name: "更新カテゴリー", name_en: "Updated Category" }
+    }
+    assert_redirected_to admin_categories_path
+    assert_equal "更新カテゴリー", created.reload.name
+    assert_equal "Updated Category", created.name_en
+
+    follow_redirect!
+    assert_includes response.body, I18n.t("flash.admin.categories.saved")
+
+    assert_difference("Category.count", -1) do
+      delete admin_category_path(created)
+    end
+    assert_redirected_to admin_categories_path
+    follow_redirect!
+    assert_includes response.body, I18n.t("flash.admin.categories.destroyed")
+  end
+
+  test "admin cannot delete a category that has posts" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+    follow_redirect!
+
+    assert_no_difference("Category.count") do
+      delete admin_category_path(@category)
+    end
+    assert_redirected_to admin_categories_path
+    follow_redirect!
+    assert_includes response.body, I18n.t("flash.admin.categories.restricted")
+  end
+
+  test "admin category creation validates required fields" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+    follow_redirect!
+
+    post admin_categories_path, params: { category: { name: "", slug: "" } }
+    assert_response :unprocessable_entity
+    assert_match /can&#39;t be blank/, response.body
+  end
+
   def with_public_storage_url(url)
     previous = ENV["ACTIVE_STORAGE_PUBLIC_BASE_URL"]
     if url.nil?

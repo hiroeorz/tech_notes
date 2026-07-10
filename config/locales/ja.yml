@@ -13,6 +13,7 @@ ja:
       profile: "プロフィール"
       about: "About"
       admin_posts: "記事管理"
+      admin_categories: "カテゴリー"
       admin_settings: "設定"
       logout: "ログアウト"
       menu: "メニュー"
@@ -232,6 +233,42 @@ ja:
         empty: "コメントはまだありません。"
         delete: "削除"
         delete_confirm: "このコメントを削除しますか？"
+    categories:
+      index:
+        home: "ホーム"
+        admin: "管理画面"
+        title: "カテゴリー管理"
+        posts: "◈ 記事一覧"
+        new_category: "⊕ 新規作成"
+        header_position: "順"
+        header_icon: "アイコン"
+        header_name: "カテゴリー名"
+        header_name_en: "英語名"
+        header_slug: "スラッグ"
+        header_posts: "記事数"
+        header_actions: "操作"
+        edit: "編集"
+        delete: "削除"
+        delete_confirm: "このカテゴリーを削除しますか？"
+      new:
+        home: "ホーム"
+        admin: "管理画面"
+        categories: "カテゴリー管理"
+        title: "新規カテゴリー"
+      edit:
+        home: "ホーム"
+        admin: "管理画面"
+        categories: "カテゴリー管理"
+        title: "カテゴリー編集"
+      form:
+        name_label: "カテゴリー名"
+        name_en_label: "英語名"
+        slug_label: "スラッグ"
+        slug_pattern_title: "半角英数字とハイフンで入力してください"
+        icon_label: "アイコン"
+        position_label: "表示順"
+        cancel: "キャンセル"
+        save: "保存"
     settings:
       show:
         home: "ホーム"
@@ -304,6 +341,11 @@ ja:
       base:
         unauthorized: "ログインしてください。"
         unauthorized_json: "ログインし直してから実行してください。"
+      categories:
+        created: "カテゴリーを作成しました。"
+        saved: "カテゴリーを更新しました。"
+        destroyed: "カテゴリーを削除しました。"
+        restricted: "このカテゴリーには記事が紐づいているため削除できません。"
       post_images:
         cdn_not_configured: "CDN URLが設定されていません。"
         destroyed: "画像を削除しました。"
@@ -324,6 +366,15 @@ ja:
       status_reviewing: "レビュー中"
       kind_article: "記事"
       kind_experiment: "実験ログ"
+    category:
+      icon_cloud: "クラウド"
+      icon_aws: "AWS"
+      icon_azure: "Azure"
+      icon_automation: "自動化"
+      icon_code: "コード"
+      icon_security: "セキュリティ"
+      icon_ops: "運用"
+      icon_poem: "ポエム"
   js:
     markdown:
       bold_placeholder: "太字"

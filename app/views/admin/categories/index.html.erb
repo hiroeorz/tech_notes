@@ -1,0 +1,49 @@
+<main class="admin-page">
+  <nav class="breadcrumbs">
+    <%= link_to t("admin.categories.index.home"), root_path %>
+    <span>›</span>
+    <%= link_to t("admin.categories.index.admin"), admin_posts_path %>
+    <span>›</span>
+    <span><%= t("admin.categories.index.title") %></span>
+  </nav>
+
+  <div class="admin-title-row">
+    <h1><%= t("admin.categories.index.title") %></h1>
+    <div class="title-actions">
+      <%= link_to t("admin.categories.index.posts"), admin_posts_path, class: "secondary-button" %>
+      <%= link_to t("admin.categories.index.new_category"), new_admin_category_path, class: "primary-button" %>
+    </div>
+  </div>
+
+  <section class="admin-table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th><%= t("admin.categories.index.header_position") %></th>
+          <th><%= t("admin.categories.index.header_icon") %></th>
+          <th><%= t("admin.categories.index.header_name") %></th>
+          <th><%= t("admin.categories.index.header_name_en") %></th>
+          <th><%= t("admin.categories.index.header_slug") %></th>
+          <th><%= t("admin.categories.index.header_posts") %></th>
+          <th><%= t("admin.categories.index.header_actions") %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @categories.each do |category| %>
+          <tr>
+            <td><%= category.position %></td>
+            <td><%= category_icon(category.icon_key) %></td>
+            <td><strong><%= category.name %></strong></td>
+            <td><%= category.name_en %></td>
+            <td><code><%= category.slug %></code></td>
+            <td><%= category.posts.count %></td>
+            <td class="action-cell">
+              <%= link_to t("admin.categories.index.edit"), edit_admin_category_path(category), class: "small-button" %>
+              <%= button_to t("admin.categories.index.delete"), admin_category_path(category), method: :delete, form: { data: { turbo_confirm: t("admin.categories.index.delete_confirm") } }, class: "danger-button" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </section>
+</main>

@@ -1,0 +1,33 @@
+<%= form_with model: [ :admin, category ], class: "category-form" do |form| %>
+  <% if category.errors.any? %>
+    <div class="error-box"><%= category.errors.full_messages.join(" / ") %></div>
+  <% end %>
+
+  <div class="editor-fields">
+    <label>
+      <span><%= t("admin.categories.form.name_label") %> <b>*</b></span>
+      <%= form.text_field :name, required: true %>
+    </label>
+    <label>
+      <span><%= t("admin.categories.form.name_en_label") %></span>
+      <%= form.text_field :name_en %>
+    </label>
+    <label>
+      <span><%= t("admin.categories.form.slug_label") %> <b>*</b></span>
+      <%= form.text_field :slug, required: true, pattern: "[a-z0-9]+(-[a-z0-9]+)*", title: t("admin.categories.form.slug_pattern_title") %>
+    </label>
+    <label>
+      <span><%= t("admin.categories.form.icon_label") %></span>
+      <%= form.select :icon_key, options_for_select(icon_key_options, category.icon_key) %>
+    </label>
+    <label>
+      <span><%= t("admin.categories.form.position_label") %></span>
+      <%= form.number_field :position, min: 0 %>
+    </label>
+  </div>
+
+  <div class="form-actions">
+    <%= link_to t("admin.categories.form.cancel"), admin_categories_path, class: "secondary-button" %>
+    <%= form.submit t("admin.categories.form.save"), class: "primary-button" %>
+  </div>
+<% end %>
