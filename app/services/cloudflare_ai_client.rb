@@ -75,12 +75,16 @@ class CloudflareAiClient
 
   def extract_text(payload)
     result = payload["result"]
-    return result if result.is_a?(String)
+    return result.presence if result.is_a?(String)
     return if result.blank?
 
-    result["response"] ||
-      result["text"] ||
-      result.dig("choices", 0, "message", "content")
+    content = result.dig("choices", 0, "message", "content")
+    return content if content.present?
+
+    response = result["response"]
+    return response if response.is_a?(String) && response.present?
+
+    result["text"].to_s.presence
   end
 
   def cloudflare_error_message(payload)
