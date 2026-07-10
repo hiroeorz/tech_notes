@@ -13,8 +13,8 @@ class CommentsController < ApplicationController
       flash.now[:alert] = @comment.errors.full_messages.first if @comment.errors.any?
       flash.now[:alert] = t("flash.comments.spam") unless turnstile_valid?
       set_post_meta(@post)
-      @related_posts = Post.publicly_visible.where(category: @post.category).where.not(id: @post.id).recent.limit(3)
-      @toc = helpers.extract_headings(@post.body)
+      @related_posts = Post.publicly_visible.includes(:post_translations).where(category: @post.category).where.not(id: @post.id).recent.limit(3)
+      @toc = helpers.extract_headings(@post.localized_body)
       load_sidebar
       render "posts/show", status: :unprocessable_entity
     end
@@ -23,7 +23,7 @@ class CommentsController < ApplicationController
   private
 
   def set_post
-    @post = Post.publicly_visible.find_by!(slug: params[:post_slug])
+    @post = Post.publicly_visible.includes(:post_translations).find_by!(slug: params[:post_slug])
   end
 
   def comment_params
@@ -36,8 +36,8 @@ class CommentsController < ApplicationController
   end
 
   def set_post_meta(post)
-    @page_title = "#{post.title} | #{current_site_setting.blog_title}"
-    @page_description = post.excerpt
+    @page_title = "#{post.localized_title} | #{current_site_setting.blog_title}"
+    @page_description = post.localized_excerpt
     @page_type = "article"
     @page_url = post_url(post.slug)
   end

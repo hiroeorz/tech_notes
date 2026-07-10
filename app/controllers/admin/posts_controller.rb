@@ -3,8 +3,8 @@ module Admin
     before_action :set_post, only: [ :show, :preview, :edit, :update, :destroy ]
 
     def index
-      @posts = Post.includes(:category, :tags).recent
-      @posts = @posts.where("LOWER(posts.title) LIKE ?", "%#{ActiveRecord::Base.sanitize_sql_like(params[:q].downcase)}%") if params[:q].present?
+      @posts = Post.includes(:category, :tags, :post_translations).recent
+      @posts = @posts.search_by_title(params[:q], locale: I18n.locale) if params[:q].present?
       @posts = @posts.where(category_id: params[:category_id]) if params[:category_id].present?
       @posts = @posts.where(status: params[:status]) if params[:status].present? && Post.statuses.key?(params[:status])
       @posts = @posts.reorder(updated_at: :asc) if params[:sort] == "oldest"
@@ -27,12 +27,12 @@ module Admin
     end
 
     def preview
-      @page_title = "プレビュー: #{@post.title} | #{current_site_setting.blog_title}"
-      @page_description = @post.excerpt
+      @page_title = "#{t('admin.posts.form.preview')}: #{@post.localized_title} | #{current_site_setting.blog_title}"
+      @page_description = @post.localized_excerpt
       @page_type = "article"
       @page_url = preview_admin_post_url(@post.slug)
-      @toc = helpers.extract_headings(@post.body)
-      @related_posts = Post.where(category: @post.category).where.not(id: @post.id).recent.limit(3)
+      @toc = helpers.extract_headings(@post.localized_body)
+      @related_posts = Post.includes(:post_translations).where(category: @post.category).where.not(id: @post.id).recent.limit(3)
       render "posts/show"
     end
 
@@ -42,21 +42,21 @@ module Admin
 
     def new
       @post = Post.new(status: :draft, kind: :article, published_at: Time.current)
-      @categories = Category.ordered
+      prepare_form(use_localized_content: false)
     end
 
     def edit
-      @categories = Category.ordered
+      prepare_form(use_localized_content: true)
     end
 
     def create
       @post = current_admin_user.posts.new(post_params)
       assign_tag_names
 
-      if @post.save
+      if save_post
         redirect_to edit_admin_post_path(@post.slug), notice: t("flash.admin.posts.saved")
       else
-        @categories = Category.ordered
+        prepare_form(use_localized_content: false)
         render :new, status: :unprocessable_entity
       end
     end
@@ -65,10 +65,10 @@ module Admin
       @post.assign_attributes(post_params)
       assign_tag_names
 
-      if @post.save
+      if save_post
         redirect_to edit_admin_post_path(@post.slug), notice: t("flash.admin.posts.saved")
       else
-        @categories = Category.ordered
+        prepare_form(use_localized_content: false)
         render :edit, status: :unprocessable_entity
       end
     end
@@ -92,6 +92,26 @@ module Admin
 
     def assign_tag_names
       @post.tag_names = params.dig(:post, :tag_names)
+    end
+
+    def save_post
+      saved = false
+      Post.transaction do
+        saved = @post.save
+        raise ActiveRecord::Rollback unless saved
+
+        PostTranslationScheduler.call(post: @post, source_locale: I18n.locale)
+      end
+      saved
+    end
+
+    def prepare_form(use_localized_content:)
+      @categories = Category.ordered
+      @form_content = if use_localized_content
+        @post.localized_content
+      else
+        { title: @post[:title], body: @post[:body], excerpt: @post[:excerpt] }
+      end
     end
   end
 end

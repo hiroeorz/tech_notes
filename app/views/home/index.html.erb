@@ -16,7 +16,7 @@
         <p class="section-kicker"><%= t("home.index.daily_log") %></p>
         <% if @daily_log.present? %>
           <time><%= @daily_log.display_date.strftime("%Y-%m-%d") %></time>
-          <h2><%= @daily_log.title %></h2>
+          <h2><%= @daily_log.localized_title %></h2>
         <% else %>
           <time><%= Date.current.strftime("%Y-%m-%d") %></time>
           <h2>TerraformでS3バケットを作ってみる</h2>
@@ -53,7 +53,7 @@
         <% @latest_posts.each do |post| %>
           <%= link_to post_path(post), class: "article-line" do %>
             <time><%= post.display_date.strftime("%Y-%m-%d") %></time>
-            <strong><%= post.title %></strong>
+            <strong><%= post.localized_title %></strong>
             <span class="line-tags">
               <% post.tags.limit(2).each do |tag| %>
                 <span class="chip"><%= tag.name %></span>
@@ -73,7 +73,7 @@
         <% @experiments.each do |post| %>
           <%= link_to post_path(post), class: "experiment-card" do %>
             <time><%= post.display_date.strftime("%Y-%m-%d") %></time>
-            <h3><%= post.title %></h3>
+            <h3><%= post.localized_title %></h3>
             <% if (preview = post.body_preview) %>
               <div class="experiment-card-preview">
                 <% if preview[:type] == :image %>
@@ -83,7 +83,7 @@
                 <% end %>
               </div>
             <% end %>
-            <p><%= post.excerpt %></p>
+            <p><%= post.localized_excerpt %></p>
             <footer>
               <span>#<%= post.tags.first&.name || post.category.name %></span>
               <span>◷ <%= post.reading_minutes * 15 %><%= t("home.index.minutes") %></span>

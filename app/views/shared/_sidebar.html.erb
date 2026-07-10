@@ -50,7 +50,7 @@
       <div class="related-list">
         <% related_posts.each do |post| %>
           <%= link_to post_path(post), class: "related-item" do %>
-            <span><%= post.title %></span>
+            <span><%= post.localized_title %></span>
             <time><%= l(post.display_date, format: :short) %></time>
           <% end %>
         <% end %>
@@ -97,7 +97,7 @@
       <h2><%= t("shared.sidebar.share") %></h2>
       <div class="share-icons">
         <%= social_link "GitHub", current_site_setting.github_url, aria: { label: t("shared.sidebar.aria_github") } %>
-        <%= link_to "𝕏", "https://x.com/intent/tweet?url=#{ERB::Util.url_encode(request.original_url)}&text=#{ERB::Util.url_encode(@post&.title || current_site_setting.blog_title)}", aria: { label: t("shared.sidebar.aria_share_x") } %>
+        <%= link_to "𝕏", "https://x.com/intent/tweet?url=#{ERB::Util.url_encode(request.original_url)}&text=#{ERB::Util.url_encode(@post&.localized_title || current_site_setting.blog_title)}", aria: { label: t("shared.sidebar.aria_share_x") } %>
         <%= link_to "RSS", feed_path(format: :xml), aria: { label: t("shared.sidebar.aria_rss") } %>
       </div>
     </section>

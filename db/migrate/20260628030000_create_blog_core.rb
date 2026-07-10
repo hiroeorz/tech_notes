@@ -60,7 +60,7 @@ class CreateBlogCore < ActiveRecord::Migration[8.1]
     create_table :site_settings do |t|
       t.string :blog_title, null: false, default: "Hiroe Tech Notes"
       t.string :tagline, null: false, default: "あるエンジニアの技術ノート"
-      t.string :site_url, null: false, default: "https://hiroe-tech-notes.dev"
+      t.string :site_url, null: false, default: "https://example.com"
       t.text :description, null: false
       t.string :ogp_image_path
       t.string :profile_name, null: false, default: "Hiroe"

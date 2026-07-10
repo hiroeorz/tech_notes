@@ -19,7 +19,7 @@
             <% posts.each do |post| %>
               <%= link_to post_path(post), class: "article-line" do %>
                 <time><%= post.display_date.strftime("%Y-%m-%d") %></time>
-                <strong><%= post.title %></strong>
+                <strong><%= post.localized_title %></strong>
                 <span class="line-tags">
                   <span class="chip"><%= post.category.name %></span>
                   <% post.tags.limit(2).each do |tag| %>

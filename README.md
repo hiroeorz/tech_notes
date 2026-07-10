@@ -67,6 +67,8 @@ export SSH_USER="deploy"                 # SSHログインユーザー名
 # アプリケーション
 export RAILS_MASTER_KEY="$(cat config/master.key)"
 export APP_HOST="your-app.example.com"   # デプロイ先ホスト名（SSL証明書・Railsホスト解決用）
+export ADMIN_EMAIL="admin@example.com"
+export ADMIN_PASSWORD="set-a-strong-unique-password"
 
 # PostgreSQL
 export POSTGRES_USER="postgres"
@@ -84,6 +86,8 @@ export POSTGRES_PASSWORD="your-password"
 
 # アプリケーション
 export APP_HOST="your-app.example.com"
+export ADMIN_EMAIL="admin@example.com"
+export ADMIN_PASSWORD="set-a-strong-unique-password"
 
 # Cloudflare R2（画像保存）— 画像アップロードを使用する場合のみ必須
 export CLOUDFLARE_R2_ACCESS_KEY_ID="your-access-key"

@@ -72,7 +72,7 @@ class ApplicationController < ActionController::Base
 
   def load_sidebar
     @categories = sidebar_categories
-    @archives = Post.publicly_visible.group_by { |post| post.display_date.beginning_of_month }
+    @archives = Post.publicly_visible.includes(:post_translations).group_by { |post| post.display_date.beginning_of_month }
   end
 
   def sidebar_categories

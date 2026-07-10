@@ -38,7 +38,7 @@
                 <%= truncate(strip_tags(comment.body), length: 80) %>
               </td>
               <td>
-                <%= link_to comment.post.title, post_path(comment.post.slug, locale: I18n.locale), target: "_blank", class: "text-link" %>
+                <%= link_to comment.post.localized_title, post_path(comment.post.slug, locale: I18n.locale), target: "_blank", class: "text-link" %>
               </td>
               <td><%= comment.created_at.strftime("%Y/%m/%d %H:%M") %></td>
               <td class="action-cell">

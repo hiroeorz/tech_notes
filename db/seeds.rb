@@ -1,23 +1,34 @@
+require "securerandom"
+
 setting = SiteSetting.current
 setting.update!(
   blog_title: "Hiroe Tech Notes",
   tagline: "あるエンジニアの技術ノート",
-  site_url: "https://hiroe-tech-notes.dev",
+  site_url: "https://#{ENV.fetch('APP_HOST', 'example.com')}",
   description: "インフラ、クラウド、SRE、自動化などに関する学びや実践を記録する個人のテックブログです。実際の構築手順やトラブルシューティング、ツールの使い方、実験ログなどをわかりやすく共有しています。",
   profile_name: "Hiroe",
   profile_title: "インフラエンジニア / プログラマ",
-  profile_email: "hiroe@example.com",
+  profile_email: ENV.fetch("PROFILE_EMAIL", "admin@example.com"),
   profile_bio: "クラウドや自動化が好きで、日々の業務や個人の実験で得た学びを発信しています。",
-  github_url: "https://github.com/hiroe-tech",
-  x_url: "https://x.com/hiroe_tech",
-  rss_url: "https://hiroe-tech-notes.dev/feed.xml",
-  zenn_url: "https://zenn.dev/hiroe_tech",
-  note_url: "https://note.com/hiroe_tech",
+  github_url: ENV.fetch("PROFILE_GITHUB_URL", "https://example.com/github"),
+  x_url: ENV.fetch("PROFILE_X_URL", "https://example.com/x"),
+  rss_url: ENV.fetch("PROFILE_RSS_URL", "https://example.com/feed.xml"),
+  zenn_url: ENV.fetch("PROFILE_ZENN_URL", "https://example.com/zenn"),
+  note_url: ENV.fetch("PROFILE_NOTE_URL", "https://example.com/note"),
   posts_per_page: 10
 )
 
-admin = AdminUser.find_or_initialize_by(email: "hiroe@example.com")
-admin.password = "password123" if admin.new_record?
+admin_email = ENV["ADMIN_EMAIL"]
+admin_password = ENV["ADMIN_PASSWORD"]
+if Rails.env.production? || admin_email.present? || admin_password.present?
+  raise "ADMIN_EMAIL and ADMIN_PASSWORD must both be set" if admin_email.blank? || admin_password.blank?
+else
+  admin_email = "admin@example.com"
+  admin_password = SecureRandom.base64(48)
+end
+
+admin = AdminUser.find_or_initialize_by(email: admin_email)
+admin.password = admin_password if admin.new_record?
 admin.save!
 
 categories = [

@@ -14,7 +14,7 @@
     </nav>
 
     <div class="article-label"><%= @post.category.name %> / <%= @post.tags.first&.name || "Tech" %></div>
-    <h1><%= @post.title %></h1>
+    <h1><%= @post.localized_title %></h1>
     <% if admin_signed_in? %>
       <div class="article-admin-actions">
         <%= link_to t("posts.show.edit"), edit_admin_post_path(@post.slug), class: "admin-edit-link" %>
@@ -48,7 +48,7 @@
     <% end %>
 
     <div class="markdown-body" data-image-lightbox>
-      <%= render_markdown(@post.body) %>
+      <%= render_markdown(@post.localized_body) %>
     </div>
 
     <% if @related_posts.present? %>
@@ -56,7 +56,7 @@
         <h3><%= t("posts.show.related_posts") %></h3>
         <% @related_posts.each do |post| %>
           <%= link_to post_path(post), class: "mobile-related-item" do %>
-            <span><%= post.title %></span>
+            <span><%= post.localized_title %></span>
             <time><%= l(post.display_date, format: :short) %></time>
           <% end %>
         <% end %>
@@ -66,7 +66,7 @@
     <div class="mobile-share mobile-only">
       <span><%= t("posts.show.share") %></span>
       <%= link_to "GitHub", current_site_setting.github_url, aria: { label: "GitHub" } if current_site_setting.github_url.present? %>
-      <%= link_to "𝕏", "https://x.com/intent/tweet?url=#{ERB::Util.url_encode(request.original_url)}&text=#{ERB::Util.url_encode(@post.title)}", aria: { label: t("posts.show.aria_share_x") } %>
+      <%= link_to "𝕏", "https://x.com/intent/tweet?url=#{ERB::Util.url_encode(request.original_url)}&text=#{ERB::Util.url_encode(@post.localized_title)}", aria: { label: t("posts.show.aria_share_x") } %>
       <%= link_to "RSS", feed_path(format: :xml), aria: { label: "RSS" } %>
     </div>
 

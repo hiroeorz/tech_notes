@@ -1,7 +1,7 @@
 module Admin
   class CommentsController < BaseController
     def index
-      @comments = Comment.includes(:post).recent
+      @comments = Comment.includes(post: :post_translations).recent
       current_admin_user.touch(:last_comments_read_at)
     end
 
