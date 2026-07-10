@@ -1480,6 +1480,115 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_select ".badge-dot", count: 0
   end
 
+  test "publishing a post stores the admin locale source and enqueues translation" do
+    post admin_login_path,
+      params: { email: @admin.email, password: "password123" },
+      headers: { "Accept-Language" => "ja" }
+
+    assert_enqueued_jobs 1, only: TranslatePostJob do
+      patch admin_post_path(@post),
+        params: {
+          commit_status: "published",
+          post: {
+            title: "更新後の日本語タイトル",
+            slug: @post.slug,
+            excerpt: "更新後の日本語要約です。",
+            body: "## 更新後の本文\n\n日本語の内容です。",
+            category_id: @category.id,
+            status: "draft",
+            kind: "article",
+            tag_names: @post.tag_names
+          }
+        },
+        headers: { "Accept-Language" => "ja" }
+    end
+
+    assert_redirected_to edit_admin_post_path(@post.slug)
+    source = @post.post_translations.find_by!(locale: "ja")
+    assert_equal "更新後の日本語タイトル", source.title
+    assert_equal "## 更新後の本文\n\n日本語の内容です。", source.body
+    assert_not @post.post_translations.exists?(locale: "en")
+  end
+
+  test "draft and reviewing saves do not enqueue translation" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+
+    %w[draft reviewing].each do |status|
+      assert_no_enqueued_jobs only: TranslatePostJob do
+        patch admin_post_path(@post), params: {
+          commit_status: status,
+          post: {
+            title: "#{status} title",
+            slug: @post.slug,
+            excerpt: "#{status} excerpt",
+            body: "#{status} body",
+            category_id: @category.id,
+            status: "published",
+            kind: "article",
+            tag_names: @post.tag_names
+          }
+        }
+      end
+      assert @post.reload.public_send("#{status}?")
+    end
+  end
+
+  test "public pages display and search persisted content for the current locale" do
+    @post.post_translations.create!(
+      locale: "en",
+      title: "English translated title",
+      excerpt: "English translated excerpt",
+      body: "## English heading\n\nEnglish translated body",
+      content_digest: "en-digest"
+    )
+    @post.post_translations.create!(
+      locale: "ja",
+      title: "日本語の翻訳タイトル",
+      excerpt: "日本語の翻訳要約",
+      body: "## 日本語の見出し\n\n日本語の翻訳本文",
+      content_digest: "ja-digest"
+    )
+
+    get "/en/posts/#{@post.slug}"
+    assert_response :success
+    assert_select "h1", text: "English translated title"
+    assert_includes response.body, "English translated body"
+    assert_select "meta[name='description'][content='English translated excerpt']"
+
+    get "/ja/posts/#{@post.slug}"
+    assert_response :success
+    assert_select "h1", text: "日本語の翻訳タイトル"
+    assert_includes response.body, "日本語の翻訳本文"
+
+    get "/en/posts", params: { q: "English translated" }
+    assert_response :success
+    assert_includes response.body, "English translated title"
+
+    get "/ja/posts", params: { q: "English translated" }
+    assert_response :success
+    assert_not_includes response.body, "English translated title"
+  end
+
+  test "admin editor uses its current locale content" do
+    @post.post_translations.create!(
+      locale: "ja",
+      title: "管理画面の日本語タイトル",
+      excerpt: "管理画面の日本語要約",
+      body: "管理画面の日本語本文",
+      content_digest: "ja-digest"
+    )
+    post admin_login_path,
+      params: { email: @admin.email, password: "password123" },
+      headers: { "Accept-Language" => "ja" }
+
+    get edit_admin_post_path(@post.slug), headers: { "Accept-Language" => "ja" }
+
+    assert_response :success
+    assert_select "input[name='post[title]'][value='管理画面の日本語タイトル']"
+    assert_select "textarea[name='post[body]']", text: "管理画面の日本語本文"
+    assert_select "textarea[name='post[excerpt]']", text: "管理画面の日本語要約"
+  end
+
   private
 
   def with_post_summary_generator(generator)

@@ -9,8 +9,8 @@ xml.rss version: "2.0" do
 
     @posts.each do |post|
       xml.item do
-        xml.title post.title
-        xml.description post.excerpt
+        xml.title post.localized_title
+        xml.description post.localized_excerpt
         xml.pubDate((post.published_at || post.created_at).rfc2822)
         xml.link post_url(post.slug)
         xml.guid post_url(post.slug)

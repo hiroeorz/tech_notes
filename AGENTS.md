@@ -72,9 +72,9 @@
 
 - `kamal deploy` がデプロイエントリポイント。初回は `kamal setup`。
 - サービス名は **`tech_notes`**（deploy.yml、accessory ホストエイリアス `tech_notes-db`、Active Storage ボリューム `tech_notes_storage` で使用）。内部 Docker ネットワークの DNS 名を決めるため、一貫して同じ名前を使うこと。
-- シークレット（`RAILS_MASTER_KEY`, `POSTGRES_PASSWORD`, オプションで `KAMAL_REGISTRY_PASSWORD`）は `.kamal/secrets` 経由で環境変数から注入 — 生の値をコミットしないこと。
+- シークレット（`RAILS_MASTER_KEY`, `POSTGRES_PASSWORD`, `ADMIN_PASSWORD`, オプションで `KAMAL_REGISTRY_PASSWORD`）は `.kamal/secrets` 経由で環境変数から注入 — 生の値をコミットしないこと。新規本番DBの初期化時は`ADMIN_EMAIL`と`ADMIN_PASSWORD`を必須とする。
 - 本番環境は `RAILS_ENV=production`（`config/deploy.yml` の `env.clear` で設定）と、ホスト上に `config/master.key` が必要。
-- レジストリは Docker Hub（`docker.io`）、イメージは `hiroeorz/tech_notes`。`kamal setup` の前に `KAMAL_REGISTRY_PASSWORD`（Docker Hub アクセストークン）を環境変数に設定すること。
+- レジストリは Docker Hub（`docker.io`）を使用し、イメージ名は`IMAGE`、レジストリユーザーは`REGISTRY_USERNAME`から取得する。`kamal setup` の前に `KAMAL_REGISTRY_PASSWORD`（Docker Hub アクセストークン）を環境変数に設定すること。
 - `config/environments/production.rb` で `assume_ssl` / `force_ssl` / `host_authorization` が有効 — Kamal proxy（Traefik）が TLS を終端する。ステージング等で SSL を無効にする場合は、これらの設定も緩和しないとリクエストが失敗する。
 
 ## 注意点

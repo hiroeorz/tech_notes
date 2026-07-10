@@ -1,11 +1,11 @@
 class PostsController < ApplicationController
   def index
     @kind = params[:kind].presence || "article"
-    @posts = Post.publicly_visible.includes(:category, :tags).recent
+    @posts = Post.publicly_visible.includes(:category, :tags, :post_translations).recent
     @posts = @posts.where(kind: Post.kinds[@kind]) if Post.kinds.key?(@kind)
     @posts = @posts.joins(:category).where(categories: { slug: params[:category] }) if params[:category].present?
     @posts = @posts.joins(:tags).where(tags: { slug: params[:tag] }) if params[:tag].present?
-    @posts = @posts.where("LOWER(posts.title) LIKE ?", "%#{ActiveRecord::Base.sanitize_sql_like(params[:q].downcase)}%") if params[:q].present?
+    @posts = @posts.search_by_title(params[:q], locale: I18n.locale) if params[:q].present?
     if (month = parsed_month)
       @posts = @posts.where(published_at: month.beginning_of_month..month.end_of_month)
     end
@@ -22,12 +22,12 @@ class PostsController < ApplicationController
   end
 
   def show
-    @post = Post.publicly_visible.includes(:category, :tags).find_by!(slug: params[:slug])
+    @post = Post.publicly_visible.includes(:category, :tags, :post_translations).find_by!(slug: params[:slug])
     @comment = @post.comments.build
     @comments = @post.comments.oldest
     set_post_meta(@post)
-    @related_posts = Post.publicly_visible.where(category: @post.category).where.not(id: @post.id).recent.limit(3)
-    @toc = helpers.extract_headings(@post.body)
+    @related_posts = Post.publicly_visible.includes(:post_translations).where(category: @post.category).where.not(id: @post.id).recent.limit(3)
+    @toc = helpers.extract_headings(@post.localized_body)
     load_sidebar
   end
 
@@ -48,12 +48,12 @@ class PostsController < ApplicationController
   end
 
   def archives
-    @archive_groups = Post.publicly_visible.includes(:category, :tags).recent.group_by { |post| post.display_date.beginning_of_month }
+    @archive_groups = Post.publicly_visible.includes(:category, :tags, :post_translations).recent.group_by { |post| post.display_date.beginning_of_month }
     load_sidebar
   end
 
   def feed
-    @posts = Post.publicly_visible.includes(:category, :tags).recent.limit(20)
+    @posts = Post.publicly_visible.includes(:category, :tags, :post_translations).recent.limit(20)
     respond_to do |format|
       format.xml
     end
@@ -81,8 +81,8 @@ class PostsController < ApplicationController
   end
 
   def set_post_meta(post)
-    @page_title = "#{post.title} | #{current_site_setting.blog_title}"
-    @page_description = post.excerpt
+    @page_title = "#{post.localized_title} | #{current_site_setting.blog_title}"
+    @page_description = post.localized_excerpt
     @page_type = "article"
     @page_url = post_url(post.slug)
   end

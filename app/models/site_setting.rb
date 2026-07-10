@@ -17,11 +17,11 @@ class SiteSetting < ApplicationRecord
     first_or_create!(
       description: "インフラ、クラウド、SRE、自動化などに関する学びや実践を記録する個人のテックブログです。",
       profile_bio: "クラウドや自動化が好きで、日々の業務や個人の実験で得た学びを発信しています。",
-      github_url: "https://github.com/hiroe-tech",
-      x_url: "https://x.com/hiroe_tech",
-      rss_url: "https://hiroe-tech-notes.dev/feed.xml",
-      zenn_url: "https://zenn.dev/hiroe_tech",
-      note_url: "https://note.com/hiroe_tech"
+      github_url: "https://example.com/github",
+      x_url: "https://example.com/x",
+      rss_url: "https://example.com/feed.xml",
+      zenn_url: "https://example.com/zenn",
+      note_url: "https://example.com/note"
     )
   end
 

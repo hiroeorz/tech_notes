@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_05_163438) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_10_000002) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -81,6 +81,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_163438) do
     t.index ["tag_id"], name: "index_post_tags_on_tag_id"
   end
 
+  create_table "post_translations", force: :cascade do |t|
+    t.text "body", null: false
+    t.string "content_digest", null: false
+    t.datetime "created_at", null: false
+    t.text "excerpt", null: false
+    t.string "locale", null: false
+    t.integer "post_id", null: false
+    t.string "title", null: false
+    t.string "translation_requested_digest"
+    t.datetime "updated_at", null: false
+    t.index ["post_id", "locale"], name: "index_post_translations_on_post_id_and_locale", unique: true
+    t.index ["post_id"], name: "index_post_translations_on_post_id"
+  end
+
   create_table "posts", force: :cascade do |t|
     t.integer "admin_user_id", null: false
     t.text "body", null: false
@@ -110,13 +124,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_163438) do
     t.string "ogp_image_path"
     t.integer "posts_per_page", default: 10, null: false
     t.text "profile_bio", null: false
-    t.string "profile_email", default: "hiroe@example.com", null: false
+    t.string "profile_email", default: "admin@example.com", null: false
     t.string "profile_image_path"
     t.string "profile_name", default: "Hiroe", null: false
     t.string "profile_title", default: "インフラエンジニア / プログラマ", null: false
     t.boolean "profile_visible", default: true, null: false
     t.string "rss_url"
-    t.string "site_url", default: "https://hiroe-tech-notes.dev", null: false
+    t.string "site_url", default: "https://example.com", null: false
     t.boolean "sns_visible", default: true, null: false
     t.string "tagline", default: "技術を、実践し、言語化する。", null: false
     t.datetime "updated_at", null: false
@@ -137,6 +151,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_163438) do
   add_foreign_key "comments", "posts"
   add_foreign_key "post_tags", "posts"
   add_foreign_key "post_tags", "tags"
+  add_foreign_key "post_translations", "posts"
   add_foreign_key "posts", "admin_users"
   add_foreign_key "posts", "categories"
 end

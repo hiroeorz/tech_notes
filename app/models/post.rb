@@ -7,6 +7,7 @@ class Post < ApplicationRecord
   has_many :post_tags, dependent: :destroy
   has_many :tags, through: :post_tags
   has_many :comments, dependent: :destroy
+  has_many :post_translations, dependent: :destroy
 
   IMAGE_CONTENT_TYPES = %w[image/jpeg image/png image/webp image/gif].freeze
   IMAGE_MAX_SIZE = 10.megabytes
@@ -27,6 +28,24 @@ class Post < ApplicationRecord
   scope :recent, -> { order(published_at: :desc, updated_at: :desc) }
   scope :publicly_visible, -> { published.where("published_at IS NULL OR published_at <= ?", Time.current) }
 
+  def self.search_by_title(query, locale: I18n.locale)
+    locale = locale.to_s
+    join = sanitize_sql_array([
+      <<~SQL.squish,
+        LEFT OUTER JOIN post_translations localized_post_translations
+          ON localized_post_translations.post_id = posts.id
+          AND localized_post_translations.locale = ?
+      SQL
+      locale
+    ])
+    pattern = "%#{ActiveRecord::Base.sanitize_sql_like(query.to_s.downcase)}%"
+
+    joins(join).where(
+      "LOWER(COALESCE(localized_post_translations.title, posts.title)) LIKE ?",
+      pattern
+    )
+  end
+
   def tag_names=(names)
     parsed_names = names.to_s.split(",").map(&:strip).reject(&:blank?).uniq
     self.tags = parsed_names.map do |name|
@@ -42,10 +61,33 @@ class Post < ApplicationRecord
     (published_at || created_at || Time.current).to_date
   end
 
-  def body_preview
-    if (img_match = body.to_s.match(/!\[([^\]]*)\]\(([^)]+)\)/))
-      { type: :image, url: img_match[2], alt: img_match[1].presence || title }
-    elsif (code_match = body.to_s.match(/```(\w*)\n(.+?)```/m))
+  def localized_content(locale = I18n.locale)
+    translation = translation_for(locale)
+
+    {
+      title: translation&.title || self[:title],
+      body: translation&.body || self[:body],
+      excerpt: translation&.excerpt || self[:excerpt]
+    }
+  end
+
+  def localized_title(locale = I18n.locale)
+    localized_content(locale).fetch(:title)
+  end
+
+  def localized_body(locale = I18n.locale)
+    localized_content(locale).fetch(:body)
+  end
+
+  def localized_excerpt(locale = I18n.locale)
+    localized_content(locale).fetch(:excerpt)
+  end
+
+  def body_preview(locale = I18n.locale)
+    localized_body = self.localized_body(locale).to_s
+    if (img_match = localized_body.match(/!\[([^\]]*)\]\(([^)]+)\)/))
+      { type: :image, url: img_match[2], alt: img_match[1].presence || localized_title(locale) }
+    elsif (code_match = localized_body.match(/```(\w*)\n(.+?)```/m))
       { type: :code, code: code_match[2].strip, language: code_match[1].presence || "text" }
     end
   end
@@ -61,6 +103,11 @@ class Post < ApplicationRecord
   end
 
   private
+
+  def translation_for(locale)
+    locale = locale.to_s
+    post_translations.detect { |translation| translation.locale == locale }
+  end
 
   def validate_images
     images.each do |image|
