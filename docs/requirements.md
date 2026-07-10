@@ -88,7 +88,8 @@ Tech Notes は、インフラ、クラウド、SRE、自動化、プログラミ
 
 カテゴリーは以下の情報を持つ。
 
-- 名前
+- 日本語名（name）
+- 英語名（name_en）— 国際化対応のため、言語ごとに表示名を切り替える
 - 表示順
 - 記事数
 - アイコンまたは識別表示
@@ -713,10 +714,20 @@ Tech Notes は、インフラ、クラウド、SRE、自動化、プログラミ
 
 - 記事の本文・タイトル・要約
 - サイト設定（SiteSetting）の全項目
-- カテゴリ名・タグ名（これらは SiteSetting/DB の動的値）
+- タグ名（DB の動的値、ユーザー入力）
 - 技術用語としての固有名詞（Terraform, AWS, GitHub 等）
 - AI生成用プロンプト（英語/日本語固定）
 - コードブロック内のサンプルコード
+
+### 12.5.1 カテゴリー名の国際化
+
+カテゴリー名は DB に `name`（日本語）と `name_en`（英語）の2つのカラムを持ち、ロケールに応じて表示を切り替える。
+
+- `Category#localized_name` メソッドがロケールに応じた名前を返す（`I18n.locale == :ja` または `name_en` が未設定の場合は `name` を返す）
+- 全ビューで `category.name` の代わりに `category.localized_name` を使用する
+- 管理画面のカテゴリー選択（collection_select / options_from_collection_for_select）も `:localized_name` を使用する
+- 新しいカテゴリー追加時は `name_en` も必須で設定する必要がある
+- seeds にあらかじめ英語名を設定する
 
 ### 12.6 非機能要件
 

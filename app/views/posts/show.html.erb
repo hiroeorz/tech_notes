@@ -10,10 +10,10 @@
       <span>›</span>
       <%= link_to t("posts.show.articles"), posts_path %>
       <span>›</span>
-      <span><%= @post.category.name %></span>
+      <span><%= @post.category.localized_name %></span>
     </nav>
 
-    <div class="article-label"><%= @post.category.name %> / <%= @post.tags.first&.name || "Tech" %></div>
+    <div class="article-label"><%= @post.category.localized_name %> / <%= @post.tags.first&.name || "Tech" %></div>
     <h1><%= @post.localized_title %></h1>
     <% if admin_signed_in? %>
       <div class="article-admin-actions">

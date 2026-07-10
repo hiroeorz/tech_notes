@@ -65,7 +65,7 @@
         <% categories.each do |category| %>
           <li>
             <%= link_to posts_path(category: category.slug) do %>
-              <span><%= category_icon(category.icon_key) %> <%= category.name %></span>
+              <span><%= category_icon(category.icon_key) %> <%= category.localized_name %></span>
               <strong><%= category.respond_to?(:posts_count) ? category.posts_count : category.posts.count %></strong>
             <% end %>
           </li>

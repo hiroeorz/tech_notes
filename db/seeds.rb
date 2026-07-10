@@ -32,22 +32,23 @@ admin.password = admin_password if admin.new_record?
 admin.save!
 
 categories = [
-  [ "インフラ", "infrastructure", "cloud", 1 ],
-  [ "AWS", "aws", "aws", 2 ],
-  [ "Azure", "azure", "azure", 3 ],
-  [ "自動化", "automation", "automation", 4 ],
-  [ "プログラミング", "programming", "code", 5 ],
-  [ "セキュリティ", "security", "security", 6 ],
-  [ "AI開発", "ai-development", "code", 7 ],
-  [ "運用", "operations", "ops", 8 ],
-  [ "ポエム", "poem", "poem", 9 ]
-].to_h { |name, slug, icon, position|
+  [ "インフラ", "Infrastructure", "infrastructure", "cloud", 1 ],
+  [ "AWS", "AWS", "aws", "aws", 2 ],
+  [ "Azure", "Azure", "azure", "azure", 3 ],
+  [ "自動化", "Automation", "automation", "automation", 4 ],
+  [ "プログラミング", "Programming", "programming", "code", 5 ],
+  [ "セキュリティ", "Security", "security", "security", 6 ],
+  [ "AI開発", "AI Development", "ai-development", "code", 7 ],
+  [ "運用", "Operations", "operations", "ops", 8 ],
+  [ "ポエム", "Poem", "poem", "poem", 9 ]
+].to_h { |name, name_en, slug, icon, position|
   category = Category.find_or_create_by!(slug: slug) do |record|
     record.name = name
+    record.name_en = name_en
     record.icon_key = icon
     record.position = position
   end
-  category.update!(name: name, icon_key: icon, position: position)
+  category.update!(name: name, name_en: name_en, icon_key: icon, position: position)
   [ slug, category ]
 }
 

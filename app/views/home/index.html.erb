@@ -43,7 +43,7 @@
           <%= link_to t("home.index.all"), posts_path, class: "active" %>
           <% %w[infrastructure aws automation programming security ai-development].each do |slug| %>
             <% if (category = @top_filter_categories[slug]) %>
-              <%= link_to category.name, posts_path(category: category.slug) %>
+              <%= link_to category.localized_name, posts_path(category: category.slug) %>
             <% end %>
           <% end %>
         </div>
@@ -85,7 +85,7 @@
             <% end %>
             <p><%= post.localized_excerpt %></p>
             <footer>
-              <span>#<%= post.tags.first&.name || post.category.name %></span>
+              <span>#<%= post.tags.first&.name || post.category.localized_name %></span>
               <span>◷ <%= post.reading_minutes * 15 %><%= t("home.index.minutes") %></span>
             </footer>
           <% end %>
