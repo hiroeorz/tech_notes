@@ -10,7 +10,7 @@
   <div class="tag-cloud category-cloud">
     <% @categories.each do |category| %>
       <%= link_to posts_path(category: category.slug), class: "tag-pill category-pill" do %>
-        <span><%= category_icon(category.icon_key) %> <%= category.name %></span>
+        <span><%= category_icon(category.icon_key) %> <%= category.localized_name %></span>
         <strong><%= category.respond_to?(:posts_count) ? category.posts_count : category.posts.count %></strong>
       <% end %>
     <% end %>

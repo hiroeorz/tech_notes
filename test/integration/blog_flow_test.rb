@@ -10,8 +10,8 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       password_salt: "salt",
       password_digest: AdminUser.digest_password("password123", "salt")
     )
-    @category = Category.create!(name: "AWS", slug: "aws", icon_key: "aws", position: 1)
-    @ai_category = Category.create!(name: "AI開発", slug: "ai-development", icon_key: "code", position: 2)
+    @category = Category.create!(name: "AWS", name_en: "AWS", slug: "aws", icon_key: "aws", position: 1)
+    @ai_category = Category.create!(name: "AI開発", name_en: "AI Development", slug: "ai-development", icon_key: "code", position: 2)
     @tag = Tag.create!(name: "Terraform", slug: "terraform")
     @post = Post.create!(
       admin_user: @admin,
@@ -34,7 +34,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Learn by doing"
     assert_not_includes response.body, admin_login_path
     assert_select "button[data-theme-toggle][aria-label='Toggle theme'][aria-pressed]"
-    assert_select ".latest-posts .filter-tabs a[href='/en/posts?category=ai-development']", text: @ai_category.name
+    assert_select ".latest-posts .filter-tabs a[href='/en/posts?category=ai-development']", text: @ai_category.localized_name
     assert_select "pre.code-card.highlight.language-terraform code.highlight"
     assert_includes response.body, "<span"
 
@@ -63,9 +63,9 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
     get "/en/categories"
     assert_response :success
-    assert_includes response.body, @category.name
-    assert_select "a[href='/en/posts?category=aws'] strong", text: "1"
+    assert_includes response.body, @category.localized_name
 
+    assert_select "a[href='/en/posts?category=aws'] strong", text: "1"
     get "/en/archives"
     assert_response :success
     assert_includes response.body, "Archives"
@@ -129,7 +129,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_includes response.body, experiment.title
     assert_select "form[action='/en/experiments']"
     assert_select ".global-nav a.active", text: "Experiments"
-    assert_select ".filter-tabs a[href^='/en/experiments'][href*='category=aws']", text: @category.name
+    assert_select ".filter-tabs a[href^='/en/experiments'][href*='category=aws']", text: @category.localized_name
   end
 
   test "public post list can change sort order and reset filters" do
@@ -358,7 +358,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
     get "/en/categories"
     assert_response :success
-    assert_includes response.body, @category.name
+    assert_includes response.body, @category.localized_name
     assert_not_includes response.body, draft_category.name
   end
 

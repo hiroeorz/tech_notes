@@ -124,7 +124,7 @@
           </label>
           <label>
             <span><%= t("admin.posts.form.category_label") %></span>
-            <%= form.collection_select :category_id, categories, :id, :name %>
+            <%= form.collection_select :category_id, categories, :id, :localized_name %>
           </label>
           <label>
             <span><%= t("admin.posts.form.kind_label") %></span>

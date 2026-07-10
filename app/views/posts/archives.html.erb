@@ -21,7 +21,7 @@
                 <time><%= post.display_date.strftime("%Y-%m-%d") %></time>
                 <strong><%= post.localized_title %></strong>
                 <span class="line-tags">
-                  <span class="chip"><%= post.category.name %></span>
+                  <span class="chip"><%= post.category.localized_name %></span>
                   <% post.tags.limit(2).each do |tag| %>
                     <span class="chip"><%= tag.name %></span>
                   <% end %>

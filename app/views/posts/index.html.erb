@@ -26,7 +26,7 @@
     <div class="filter-tabs wide-tabs">
       <%= link_to t("posts.index.all"), list_path.call, class: ("active" if params[:category].blank?) %>
       <% @categories.each do |category| %>
-        <%= link_to category.name, list_path.call(preserved_filter_params.merge(category: category.slug)), class: ("active" if params[:category] == category.slug) %>
+        <%= link_to category.localized_name, list_path.call(preserved_filter_params.merge(category: category.slug)), class: ("active" if params[:category] == category.slug) %>
       <% end %>
     </div>
 
@@ -35,7 +35,7 @@
         <article class="post-list-card">
           <div class="document-icon">▤</div>
           <div>
-            <p class="post-meta"><%= post.display_date.strftime("%Y-%m-%d") %> / <%= post.category.name %> / <%= post.reading_minutes %><%= t("posts.index.minutes") %></p>
+            <p class="post-meta"><%= post.display_date.strftime("%Y-%m-%d") %> / <%= post.category.localized_name %> / <%= post.reading_minutes %><%= t("posts.index.minutes") %></p>
             <h2><%= link_to post.localized_title, post_path(post) %></h2>
             <p><%= post.localized_excerpt %></p>
             <div class="chip-list">

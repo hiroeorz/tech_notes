@@ -30,7 +30,7 @@
 
   <%= form_with url: admin_posts_path, method: :get, class: "filter-bar" do |form| %>
     <%= form.search_field :q, value: params[:q], placeholder: t("admin.posts.index.search_placeholder"), aria: { label: t("admin.posts.index.search_placeholder") } %>
-    <%= form.select :category_id, options_from_collection_for_select(@categories, :id, :name, params[:category_id]), { include_blank: t("admin.posts.index.category_placeholder") }, aria: { label: "Filter by category" } %>
+    <%= form.select :category_id, options_from_collection_for_select(@categories, :id, :localized_name, params[:category_id]), { include_blank: t("admin.posts.index.category_placeholder") }, aria: { label: "Filter by category" } %>
     <%= form.select :status, options_for_select(Post.statuses.keys.map { |status| [ status_label(status), status ] }, params[:status]), { include_blank: t("admin.posts.index.status_placeholder") }, aria: { label: "Filter by status" } %>
     <%= form.select :sort, options_for_select([ [ t("admin.posts.index.sort_newest"), "newest" ], [ t("admin.posts.index.sort_oldest"), "oldest" ] ], params[:sort]), {}, aria: { label: t("admin.posts.index.sort_aria") } %>
     <%= form.submit t("admin.posts.index.filter") %>
@@ -60,7 +60,7 @@
             </td>
             <td>
               <div class="chip-list">
-                <span class="chip"><%= post.category.name %></span>
+                <span class="chip"><%= post.category.localized_name %></span>
                 <% post.tags.limit(3).each do |tag| %>
                   <span class="chip"><%= tag.name %></span>
                 <% end %>
