@@ -96,11 +96,12 @@ export CLOUDFLARE_R2_BUCKET="tech-notes-images"
 export CLOUDFLARE_R2_ENDPOINT="https://<ACCOUNT_ID>.r2.cloudflarestorage.com"
 export ACTIVE_STORAGE_PUBLIC_BASE_URL="https://cdn.example.com"
 
-# Cloudflare Workers AI（記事要約生成）— 要約機能を使用する場合のみ必須
+# Cloudflare Workers AI（記事要約生成・自動翻訳）— 要約・翻訳機能を使用する場合のみ必須
 export CLOUDFLARE_ACCOUNT_ID="your-account-id"
 export CLOUDFLARE_AI_API_TOKEN="your-api-token"
 export CLOUDFLARE_AI_MODEL="@cf/meta/llama-3.2-1b-instruct"
 export CLOUDFLARE_AI_TIMEOUT_SECONDS="60"
+export CLOUDFLARE_AI_MAX_TOKENS="8192"   # 翻訳時の最大出力トークン数（長い記事は増やす）
 
 # Google Search Console — サイトマップ登録に使用
 export GOOGLE_SITE_VERIFICATION="your-verification-token"
