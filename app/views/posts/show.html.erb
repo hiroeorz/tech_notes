@@ -70,8 +70,13 @@
             <span><%= post.localized_title %></span>
             <time><%= l(post.display_date, format: :short) %></time>
           <% end %>
-        <% end %>
-      </div>
+      <% end %>
+      <% if @post.audio_for_locale&.file&.attached? %>
+        <audio controls class="article-audio-player" src="<%= url_for(@post.audio_for_locale.file) %>">
+          <%= t("posts.show.audio_unsupported") %>
+        </audio>
+      <% end %>
+    </div>
     <% end %>
 
     <div class="mobile-share mobile-only">

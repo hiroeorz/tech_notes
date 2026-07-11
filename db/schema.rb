@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_10_233505) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_11_102520) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -72,6 +72,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_10_233505) do
     t.index ["post_id"], name: "index_comments_on_post_id"
   end
 
+  create_table "post_audios", force: :cascade do |t|
+    t.string "content_digest"
+    t.datetime "created_at", null: false
+    t.text "error_message"
+    t.string "locale", null: false
+    t.integer "post_id", null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.string "voice"
+    t.index ["post_id", "locale"], name: "index_post_audios_on_post_id_and_locale", unique: true
+    t.index ["post_id"], name: "index_post_audios_on_post_id"
+  end
+
   create_table "post_tags", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "post_id", null: false
@@ -102,6 +115,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_10_233505) do
     t.integer "category_id", null: false
     t.datetime "created_at", null: false
     t.text "excerpt", null: false
+    t.boolean "generate_audio", default: true, null: false
     t.integer "kind", default: 0, null: false
     t.datetime "published_at"
     t.integer "reading_minutes", default: 1, null: false
@@ -150,6 +164,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_10_233505) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "comments", "posts"
+  add_foreign_key "post_audios", "posts"
   add_foreign_key "post_tags", "posts"
   add_foreign_key "post_tags", "tags"
   add_foreign_key "post_translations", "posts"

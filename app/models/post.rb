@@ -8,6 +8,7 @@ class Post < ApplicationRecord
   has_many :tags, through: :post_tags
   has_many :comments, dependent: :destroy
   has_many :post_translations, dependent: :destroy
+  has_many :post_audios, dependent: :destroy
 
   IMAGE_CONTENT_TYPES = %w[image/jpeg image/png image/webp image/gif].freeze
   IMAGE_MAX_SIZE = 10.megabytes
@@ -94,6 +95,10 @@ class Post < ApplicationRecord
 
   def to_param
     slug
+  end
+
+  def audio_for_locale(locale = I18n.locale)
+    post_audios.find_by(locale: locale.to_s, status: :completed)
   end
 
   def self.valid_image_upload?(upload)

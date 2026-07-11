@@ -27,6 +27,7 @@ module Admin
     end
 
     def preview
+      @post = Post.includes(:category, :tags, :post_translations, :post_audios).find_by!(slug: params[:slug])
       @page_title = "#{t('admin.posts.form.preview')}: #{@post.localized_title} | #{current_site_setting.blog_title}"
       @page_description = @post.localized_excerpt
       @page_type = "article"
@@ -85,7 +86,7 @@ module Admin
     end
 
     def post_params
-      permitted = params.require(:post).permit(:title, :slug, :excerpt, :body, :category_id, :status, :kind, :published_at)
+      permitted = params.require(:post).permit(:title, :slug, :excerpt, :body, :category_id, :status, :kind, :published_at, :generate_audio)
       permitted[:status] = params[:commit_status] if Post.statuses.key?(params[:commit_status])
       permitted
     end
@@ -101,6 +102,12 @@ module Admin
         raise ActiveRecord::Rollback unless saved
 
         PostTranslationScheduler.call(post: @post, source_locale: I18n.locale)
+
+        if @post.published?
+          PostAudioScheduler.call(post: @post, locale: I18n.locale)
+          target_locale = (PostTranslation::SUPPORTED_LOCALES - [ I18n.locale.to_s ]).first
+          PostAudioScheduler.call(post: @post, locale: target_locale) if target_locale
+        end
       end
       saved
     end

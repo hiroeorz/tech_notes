@@ -68,6 +68,7 @@ ja:
       share_on_x: "Xでシェア"
       aria_share_x: "Xでシェア"
       aria_share_x_article: "この記事をXでシェア"
+      audio_unsupported: "お使いのブラウザは音声再生に対応していません。"
       copyright: "© 2025 Hiroe Tech Notes. All rights reserved."
       mobile_toc: "目次"
     tags:
@@ -218,6 +219,7 @@ ja:
         status_label: "ステータス"
         published_at_label: "公開日時"
         cancel: "キャンセル"
+        generate_audio: "音声を生成（TTS）"
         schedule: "公開予約（準備中）"
         draft_save_modal: "下書き保存"
         publish_submit: "投稿を公開する"
