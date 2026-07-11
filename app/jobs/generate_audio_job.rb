@@ -58,7 +58,7 @@ class GenerateAudioJob < ApplicationJob
     current = +""
     paragraphs.each do |para|
       if current.bytesize + para.bytesize + 1 <= MAX_CHUNK_BYTES
-        current << " " << para
+        current << "\n" << para
       else
         chunks << current.strip if current.present?
         current = +para

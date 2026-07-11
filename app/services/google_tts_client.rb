@@ -77,10 +77,29 @@ class GoogleTtsClient
     raise RequestError, "Could not connect to Google Cloud TTS."
   end
 
+  MAX_SENTENCE_LENGTH = 100
+
   def ssml_wrap(text)
     sentences = text.split(/(?<=[。．！？.!?\n])/).map(&:strip).reject(&:blank?)
+    sentences = sentences.flat_map { |s| split_sentence(s) }
     inner = sentences.map { |s| "<s>#{escape_ssml(s)}</s>" }.join
     "<speak>#{inner}</speak>"
+  end
+
+  def split_sentence(sentence)
+    return [ sentence ] if sentence.length <= MAX_SENTENCE_LENGTH
+
+    parts = []
+    remaining = sentence.dup
+    while remaining.length > MAX_SENTENCE_LENGTH
+      split_at = remaining.rindex(/、/, MAX_SENTENCE_LENGTH) ||
+                 remaining.rindex(/\s+/, MAX_SENTENCE_LENGTH) ||
+                 MAX_SENTENCE_LENGTH
+      parts << remaining[0...split_at].strip
+      remaining = remaining[split_at..].to_s.strip
+    end
+    parts << remaining if remaining.present?
+    parts
   end
 
   def escape_ssml(text)
