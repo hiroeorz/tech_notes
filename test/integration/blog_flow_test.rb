@@ -1825,6 +1825,50 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_not_includes response.body, ERB::Util.url_encode(@post.localized_excerpt(:ja))
   end
 
+  test "article with audio shows radio-style player" do
+    audio_post = Post.create!(
+      admin_user: @admin,
+      category: @category,
+      title: "Audio Post",
+      slug: "audio-post",
+      excerpt: "Post with audio",
+      body: "## Audio\nTest.",
+      status: :published,
+      kind: :article,
+      published_at: Time.current
+    )
+    post_audio = audio_post.post_audios.create!(
+      locale: "en",
+      status: :completed,
+      content_digest: "test-digest",
+      voice: "en-US-Neural2-C"
+    )
+    post_audio.file.attach(
+      io: StringIO.new("dummy audio"),
+      filename: "test.mp3",
+      content_type: "audio/mpeg"
+    )
+
+    get "/en/posts/audio-post"
+    assert_response :success
+    assert_select ".audio-player-wrapper" do
+      assert_select ".audio-player-toggle-button"
+      assert_select ".audio-player-toggle-button span", text: "Listen to this article"
+      assert_select ".audio-player-panel[hidden]"
+      assert_select ".audio-player-dial"
+      assert_select ".audio-player-onair"
+    end
+
+    audio_post.post_audios.destroy_all
+    audio_post.destroy!
+  end
+
+  test "article without audio does not show radio-style player" do
+    get "/en/posts/terraform-remote-state"
+    assert_response :success
+    assert_select ".audio-player-wrapper", count: 0
+  end
+
   def with_category_name_translator(translator)
     original_new = CategoryNameTranslator.method(:new)
     CategoryNameTranslator.define_singleton_method(:new) { |*| translator }
