@@ -47,7 +47,7 @@ class GenerateAudioJob < ApplicationJob
     segments = chunk_text(text)
     return nil if segments.blank?
 
-    segments.map { |segment| tts_client.synthesize(text: segment, locale: locale) }.join
+    segments.map { |segment| tts_client.synthesize_ssml(text: segment, locale: locale) }.join
   end
 
   def chunk_text(text)
@@ -58,7 +58,7 @@ class GenerateAudioJob < ApplicationJob
     current = +""
     paragraphs.each do |para|
       if current.bytesize + para.bytesize + 1 <= MAX_CHUNK_BYTES
-        current << " " << para
+        current << "\n" << para
       else
         chunks << current.strip if current.present?
         current = +para
