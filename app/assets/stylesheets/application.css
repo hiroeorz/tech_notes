@@ -849,15 +849,9 @@ textarea {
 }
 
 .article-audio-player {
-  display: inline-flex;
   vertical-align: middle;
-  height: 36px;
   margin-left: 8px;
-  border-radius: 5px;
-}
-
-.article-audio-player::-webkit-media-controls-panel {
-  background: rgba(255, 255, 255, 0.65);
+  max-width: 300px;
 }
 
 .checkbox-label {
