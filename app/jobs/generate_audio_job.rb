@@ -35,7 +35,7 @@ class GenerateAudioJob < ApplicationJob
     raise
   end
 
-  MAX_CHUNK_CHARS = 250
+  MAX_CHUNK_BYTES = 4000
 
   private
 
@@ -47,20 +47,24 @@ class GenerateAudioJob < ApplicationJob
     segments = chunk_text(text)
     return nil if segments.blank?
 
-    results = segments.map { |segment| tts_client.synthesize(text: segment, locale: locale) }
-    return nil if results.any?(&:nil?)
-
-    results.join
+    segments.map { |segment| tts_client.synthesize(text: segment, locale: locale) }.join
   end
 
   def chunk_text(text)
-    sentences = text.split(/(?<=[。．！？.!?\n])/).map(&:strip).reject(&:blank?)
-    return force_split(text) if sentences.blank?
+    paragraphs = text.split(/\n\n+/).map(&:strip).reject(&:blank?)
+    return [ text ] if paragraphs.one? && paragraphs.first.bytesize <= MAX_CHUNK_BYTES
 
-    sentences.flat_map { |s| s.length > MAX_CHUNK_CHARS ? force_split(s) : [ s ] }
-  end
-
-  def force_split(text)
-    text.scan(/.{1,#{MAX_CHUNK_CHARS}}/m).map(&:strip).reject(&:blank?)
+    chunks = []
+    current = +""
+    paragraphs.each do |para|
+      if current.bytesize + para.bytesize + 1 <= MAX_CHUNK_BYTES
+        current << " " << para
+      else
+        chunks << current.strip if current.present?
+        current = +para
+      end
+    end
+    chunks << current.strip if current.present?
+    chunks.presence || [ text ]
   end
 end

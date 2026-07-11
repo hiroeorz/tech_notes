@@ -31,8 +31,8 @@ class PostAudioCleaner
     text.gsub!(/^[#]{1,6}\s+/, "")
     # Remove control characters except newlines
     text.gsub!(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/, "")
-    # Replace any character that is not a word character, space, or newline with period
-    text.gsub!(/[^\p{Word}\s\n]/, ".")
+    # Remove control characters
+    text.gsub!(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/, "")
     # Collapse whitespace (preserve paragraph breaks)
     text.gsub!(/\n{3,}/, "\n\n")
     text.gsub!(/[ \t]+/, " ")

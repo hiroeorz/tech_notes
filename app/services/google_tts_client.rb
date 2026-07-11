@@ -10,8 +10,8 @@ class GoogleTtsClient
   DEFAULT_TIMEOUT_SECONDS = 60
 
   VOICE_MAP = {
-    "ja" => { language_code: "ja-JP", name: "ja-JP-Chirp3-HD-Despina" },
-    "en" => { language_code: "en-US", name: "en-US-Chirp3-HD-Despina" }
+    "ja" => { language_code: "ja-JP", name: "ja-JP-Neural2-C" },
+    "en" => { language_code: "en-US", name: "en-US-Neural2-C" }
   }.freeze
 
   def initialize(api_key: self.class.config_value)
