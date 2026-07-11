@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
+  get "llms.txt", to: "llms_txt#show"
 
   scope "(:locale)", locale: /en|ja/ do
     root "home#index"
