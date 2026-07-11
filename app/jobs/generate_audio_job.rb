@@ -58,7 +58,7 @@ class GenerateAudioJob < ApplicationJob
     paragraphs.each do |para|
       if para.bytesize >= MAX_CHUNK_BYTES
         chunks << current.strip if current.present?
-        chunks << para[0, MAX_CHUNK_BYTES]
+        chunks.concat(split_long_paragraph(para))
         current = +""
       elsif current.bytesize + para.bytesize + 1 < MAX_CHUNK_BYTES
         current << " " << para
@@ -69,5 +69,21 @@ class GenerateAudioJob < ApplicationJob
     end
     chunks << current.strip if current.present?
     chunks.presence
+  end
+
+  def split_long_paragraph(text)
+    sentences = text.split(/(?<=[。．！？.!?])/).map(&:strip).reject(&:blank?)
+    chunks = []
+    current = +""
+    sentences.each do |sentence|
+      if current.bytesize + sentence.bytesize + 1 < MAX_CHUNK_BYTES
+        current << " " << sentence
+      else
+        chunks << current.strip if current.present?
+        current = +sentence
+      end
+    end
+    chunks << current.strip if current.present?
+    chunks.presence || [ text[0, MAX_CHUNK_BYTES] ]
   end
 end

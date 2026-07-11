@@ -29,9 +29,9 @@ class PostAudioCleaner
     text.gsub!(/\|$/, "")
     # Remove heading markers but keep text
     text.gsub!(/^[#]{1,6}\s+/, "")
-    # Collapse whitespace
+    # Collapse whitespace (preserve paragraph breaks)
     text.gsub!(/\n{3,}/, "\n\n")
-    text.gsub!(/[[:space:]]+/, " ")
+    text.gsub!(/[ \t]+/, " ")
     text.strip!
     text.presence || ""
   end

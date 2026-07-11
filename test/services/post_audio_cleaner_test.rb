@@ -3,7 +3,7 @@ require "test_helper"
 class PostAudioCleanerTest < ActiveSupport::TestCase
   test "strips code blocks" do
     input = "Text\n```ruby\nputs 'hello'\n```\nEnd"
-    assert_equal "Text End", PostAudioCleaner.clean(input)
+    assert_equal "Text\n\nEnd", PostAudioCleaner.clean(input)
   end
 
   test "strips inline code" do
@@ -28,17 +28,17 @@ class PostAudioCleanerTest < ActiveSupport::TestCase
 
   test "strips heading markers but keeps text" do
     input = "## Hello World\n### Subtitle"
-    assert_equal "Hello World Subtitle", PostAudioCleaner.clean(input)
+    assert_equal "Hello World\nSubtitle", PostAudioCleaner.clean(input)
   end
 
   test "removes horizontal rules" do
     input = "Text\n---\nMore"
-    assert_equal "Text More", PostAudioCleaner.clean(input)
+    assert_equal "Text\n\nMore", PostAudioCleaner.clean(input)
   end
 
   test "collapses excessive whitespace" do
     input = "Hello   world\n\n\nMore"
-    assert_equal "Hello world More", PostAudioCleaner.clean(input)
+    assert_equal "Hello world\n\nMore", PostAudioCleaner.clean(input)
   end
 
   test "returns empty string for blank input" do

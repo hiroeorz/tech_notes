@@ -50,8 +50,9 @@ class PostAudioSchedulerTest < ActiveJob::TestCase
     end
   end
 
-  test "skips scheduling when content has not changed" do
+  test "skips scheduling when content has not changed and audio is completed" do
     assert PostAudioScheduler.call(post: @post, locale: "ja")
+    @post.post_audios.find_by(locale: "ja").update!(status: :completed)
 
     assert_no_enqueued_jobs do
       assert_not PostAudioScheduler.call(post: @post, locale: "ja")
