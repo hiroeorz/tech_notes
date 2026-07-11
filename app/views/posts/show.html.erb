@@ -39,6 +39,13 @@
         <span class="x-icon">𝕏</span>
         <span><%= t("posts.show.share_on_x") %></span>
       <% end %>
+      <% audio = @post.audio_for_locale %>
+      <% if audio&.file&.attached? %>
+        <audio controls preload="metadata" class="article-audio-player">
+          <source src="<%= url_for(audio.file) %>" type="audio/mpeg">
+          <%= t("posts.show.audio_unsupported") %>
+        </audio>
+      <% end %>
     </div>
 
     <% if @toc.present? %>
@@ -70,15 +77,8 @@
             <span><%= post.localized_title %></span>
             <time><%= l(post.display_date, format: :short) %></time>
           <% end %>
-      <% end %>
-      <% audio = @post.audio_for_locale %>
-      <% if audio&.file&.attached? %>
-        <audio controls preload="metadata" class="article-audio-player">
-          <source src="<%= url_for(audio.file) %>" type="audio/mpeg">
-          <%= t("posts.show.audio_unsupported") %>
-        </audio>
-      <% end %>
-    </div>
+        <% end %>
+      </div>
     <% end %>
 
     <div class="mobile-share mobile-only">
