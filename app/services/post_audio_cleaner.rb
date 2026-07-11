@@ -29,10 +29,10 @@ class PostAudioCleaner
     text.gsub!(/\|$/, "")
     # Remove heading markers but keep text
     text.gsub!(/^[#]{1,6}\s+/, "")
-    # Remove special Unicode characters (symbols, emoji, musical notation, etc.)
-    text.gsub!(/[\u{2200}-\u{22FF}\u{2400}-\u{27BF}\u{1D000}-\u{1D0FF}\u{1D100}-\u{1D1FF}]+/, " ")
     # Remove control characters except newlines
     text.gsub!(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/, "")
+    # Remove Unicode symbols (math, music, arrows, dingbats, etc.)
+    text.gsub!(/\p{So}|\p{Sm}|\p{Sk}/, " ")
     # Collapse whitespace (preserve paragraph breaks)
     text.gsub!(/\n{3,}/, "\n\n")
     text.gsub!(/[ \t]+/, " ")
