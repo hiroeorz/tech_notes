@@ -17,7 +17,8 @@ class GenerateAudioJob < ApplicationJob
     clean_text = PostAudioCleaner.clean(body)
     return audio.update!(status: :failed, error_message: "No readable text found") if clean_text.blank?
 
-    mp3_data = tts_client.synthesize(text: clean_text, locale: locale)
+    mp3_data = synthesize_text(clean_text, locale)
+    return audio.update!(status: :failed, error_message: "No audio data generated") if mp3_data.blank?
 
     audio.file.attach(
       io: StringIO.new(mp3_data),
@@ -34,9 +35,39 @@ class GenerateAudioJob < ApplicationJob
     raise
   end
 
+  MAX_CHUNK_BYTES = 4000
+
   private
 
   def tts_client
     @tts_client ||= GoogleTtsClient.new
+  end
+
+  def synthesize_text(text, locale)
+    segments = chunk_text(text)
+    return nil if segments.blank?
+
+    segments.map { |segment| tts_client.synthesize(text: segment, locale: locale) }.join
+  end
+
+  def chunk_text(text)
+    paragraphs = text.split(/\n\n+/).map(&:strip).reject(&:blank?)
+    chunks = []
+    current = +""
+
+    paragraphs.each do |para|
+      if para.bytesize >= MAX_CHUNK_BYTES
+        chunks << current.strip if current.present?
+        chunks << para[0, MAX_CHUNK_BYTES]
+        current = +""
+      elsif current.bytesize + para.bytesize + 1 < MAX_CHUNK_BYTES
+        current << " " << para
+      else
+        chunks << current.strip if current.present?
+        current = +para
+      end
+    end
+    chunks << current.strip if current.present?
+    chunks.presence
   end
 end
