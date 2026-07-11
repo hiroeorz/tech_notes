@@ -35,7 +35,7 @@ class GenerateAudioJob < ApplicationJob
     raise
   end
 
-  MAX_CHUNK_CHARS = 1000
+  MAX_CHUNK_CHARS = 500
 
   private
 
@@ -80,14 +80,21 @@ class GenerateAudioJob < ApplicationJob
     result = []
     current = +""
     segments.each do |seg|
-      if current.length + seg.length + 1 > MAX_CHUNK_CHARS
-        result << current.strip if current.present?
-        current = +seg
-      else
-        current << " " << seg
+      chunks = seg.length > MAX_CHUNK_CHARS ? split_long_segment(seg) : [ seg ]
+      chunks.each do |chunk|
+        if current.length + chunk.length + 1 > MAX_CHUNK_CHARS
+          result << current.strip if current.present?
+          current = +chunk
+        else
+          current << " " << chunk
+        end
       end
     end
     result << current.strip if current.present?
     result
+  end
+
+  def split_long_segment(text)
+    text.scan(/.{1,#{MAX_CHUNK_CHARS}}/m).map(&:strip).reject(&:blank?)
   end
 end
