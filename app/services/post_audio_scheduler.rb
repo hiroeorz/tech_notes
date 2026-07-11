@@ -17,7 +17,7 @@ class PostAudioScheduler
     digest = PostAudio.digest_for(content)
     audio = post.post_audios.find_or_initialize_by(locale: locale)
 
-    return false if audio.persisted? && audio.content_digest == digest && !audio.failed?
+    return false if audio.completed? && audio.content_digest == digest
 
     audio.assign_attributes(
       content_digest: digest,

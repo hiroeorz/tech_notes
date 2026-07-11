@@ -29,6 +29,9 @@ class GenerateAudioJob < ApplicationJob
   rescue GoogleTtsClient::RequestError => error
     audio&.update!(status: :failed, error_message: error.message)
     raise
+  rescue => error
+    audio&.update!(status: :failed, error_message: "#{error.class}: #{error.message}")
+    raise
   end
 
   private
