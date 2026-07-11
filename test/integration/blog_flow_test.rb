@@ -1698,6 +1698,70 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_match /can&#39;t be blank/, response.body
   end
 
+  test "admin can translate category name via ai" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+
+    fake_translator = Object.new
+    def fake_translator.generate(name:)
+      raise "unexpected name" unless name == "インフラ"
+
+      "Infrastructure"
+    end
+
+    with_category_name_translator(fake_translator) do
+      post admin_category_name_translation_path(@category),
+        params: { name: "インフラ" },
+        as: :json
+    end
+
+    assert_response :success
+    assert_equal "Infrastructure", response.parsed_body.fetch("name_en")
+  end
+
+  test "admin category name translation validates input and reports ai failures" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+
+    post admin_category_name_translation_path(@category), params: { name: " " }, as: :json
+    assert_response :bad_request
+    assert_includes response.parsed_body.fetch("error"), "enter a category name"
+
+    fake_translator = Object.new
+    def fake_translator.generate(name:)
+      raise CategoryNameTranslator::GenerationError, "Cloudflare Workers AI is not configured."
+    end
+
+    with_category_name_translator(fake_translator) do
+      post admin_category_name_translation_path(@category),
+        params: { name: "インフラ" },
+        as: :json
+    end
+
+    assert_response :bad_gateway
+    assert_includes response.parsed_body.fetch("error"), "not configured"
+
+    rate_limited_translator = Object.new
+    def rate_limited_translator.generate(name:)
+      raise CategoryNameTranslator::RateLimitError, "Rate limit reached."
+    end
+
+    with_category_name_translator(rate_limited_translator) do
+      post admin_category_name_translation_path(@category),
+        params: { name: "インフラ" },
+        as: :json
+    end
+
+    assert_response :too_many_requests
+    assert_includes response.parsed_body.fetch("error"), "Rate limit"
+  end
+
+  def with_category_name_translator(translator)
+    original_new = CategoryNameTranslator.method(:new)
+    CategoryNameTranslator.define_singleton_method(:new) { |*| translator }
+    yield
+  ensure
+    CategoryNameTranslator.define_singleton_method(:new) { |*args, **kwargs| original_new.call(*args, **kwargs) }
+  end
+
   def with_public_storage_url(url)
     previous = ENV["ACTIVE_STORAGE_PUBLIC_BASE_URL"]
     if url.nil?

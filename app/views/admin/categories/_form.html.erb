@@ -1,4 +1,4 @@
-<%= form_with model: [ :admin, category ], class: "category-form" do |form| %>
+<%= form_with model: [ :admin, category ], class: "category-form", data: { controller: "category-name-translator", category_name_translator_url_value: category.persisted? ? admin_category_name_translation_path(category) : "", category_name_translator_translating_value: t("admin.categories.form.translating"), category_name_translator_success_value: t("admin.categories.form.translation_success"), category_name_translator_error_value: t("admin.categories.form.translation_error") } do |form| %>
   <% if category.errors.any? %>
     <div class="error-box"><%= category.errors.full_messages.join(" / ") %></div>
   <% end %>
@@ -6,11 +6,15 @@
   <div class="editor-fields">
     <label>
       <span><%= t("admin.categories.form.name_label") %> <b>*</b></span>
-      <%= form.text_field :name, required: true %>
+      <%= form.text_field :name, required: true, data: { category_name_translator_target: "name" } %>
     </label>
     <label>
       <span><%= t("admin.categories.form.name_en_label") %></span>
-      <%= form.text_field :name_en %>
+      <div class="ai-summary-controls">
+        <%= button_tag type: "button", class: "ai-icon-button", data: { action: "category-name-translator#translate", category_name_translator_target: "button", tooltip: t("admin.categories.form.translate_ai_tooltip") }, aria: { label: t("admin.categories.form.translate_ai_aria") }, disabled: (!category.persisted?) do %>🧠<% end %>
+      </div>
+      <%= form.text_field :name_en, data: { category_name_translator_target: "nameEn" } %>
+      <strong class="ai-summary-message" data-category-name-translator-target="message" hidden></strong>
     </label>
     <label>
       <span><%= t("admin.categories.form.slug_label") %> <b>*</b></span>
