@@ -35,7 +35,7 @@ class GenerateAudioJob < ApplicationJob
     raise
   end
 
-  MAX_CHUNK_CHARS = 500
+  MAX_CHUNK_CHARS = 250
 
   private
 
@@ -47,54 +47,20 @@ class GenerateAudioJob < ApplicationJob
     segments = chunk_text(text)
     return nil if segments.blank?
 
-    segments.map { |segment| tts_client.synthesize(text: segment, locale: locale) }.join
+    results = segments.map { |segment| tts_client.synthesize(text: segment, locale: locale) }
+    return nil if results.any?(&:nil?)
+
+    results.join
   end
 
   def chunk_text(text)
-    paragraphs = text.split(/\n\n+/).map(&:strip).reject(&:blank?)
-    chunks = []
-    current = +""
+    sentences = text.split(/(?<=[。．！？.!?\n])/).map(&:strip).reject(&:blank?)
+    return force_split(text) if sentences.blank?
 
-    paragraphs.each do |para|
-      if current.length + para.length + 1 > MAX_CHUNK_CHARS
-        chunks << current.strip if current.present?
-        if para.length > MAX_CHUNK_CHARS
-          chunks.concat(split_text(para))
-          current = +""
-        else
-          current = +para
-        end
-      else
-        current << " " << para
-      end
-    end
-    chunks << current.strip if current.present?
-    chunks.presence
+    sentences.flat_map { |s| s.length > MAX_CHUNK_CHARS ? force_split(s) : [ s ] }
   end
 
-  def split_text(text)
-    segments = text.split(/(?<=[。．！？.!?\n])/).map(&:strip).reject(&:blank?)
-    if segments.blank?
-      return text.scan(/.{1,#{MAX_CHUNK_CHARS}}/m).map(&:strip).reject(&:blank?).presence || [ text ]
-    end
-    result = []
-    current = +""
-    segments.each do |seg|
-      chunks = seg.length > MAX_CHUNK_CHARS ? split_long_segment(seg) : [ seg ]
-      chunks.each do |chunk|
-        if current.length + chunk.length + 1 > MAX_CHUNK_CHARS
-          result << current.strip if current.present?
-          current = +chunk
-        else
-          current << " " << chunk
-        end
-      end
-    end
-    result << current.strip if current.present?
-    result
-  end
-
-  def split_long_segment(text)
+  def force_split(text)
     text.scan(/.{1,#{MAX_CHUNK_CHARS}}/m).map(&:strip).reject(&:blank?)
   end
 end
