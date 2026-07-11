@@ -913,6 +913,52 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_select ".page-count", text: I18n.t("admin.posts.index.page_info", page: 1, total_pages: 1, count: 1)
   end
 
+  test "llms.txt renders site info and published posts" do
+    get "/llms.txt"
+    assert_response :success
+    assert_equal "text/plain", response.media_type
+    assert_includes response.body, "# #{@setting.blog_title}"
+    assert_includes response.body, ">#{@setting.description}"
+    assert_includes response.body, @post.title
+    assert_includes response.body, post_url(@post, locale: :en)
+    assert_includes response.body, @post.excerpt
+    assert_includes response.body, "## Optional"
+    assert_includes response.body, "## 記事"
+    assert_includes response.body, @setting.github_url
+    assert_includes response.body, feed_url(locale: :en, format: :xml)
+  end
+
+  test "llms.txt excludes draft and future posts" do
+    Post.create!(
+      admin_user: @admin,
+      category: @category,
+      title: "下書き記事",
+      slug: "draft-post-llms",
+      excerpt: "下書きです。",
+      body: "## 下書き",
+      status: :draft,
+      kind: :article
+    )
+
+    Post.create!(
+      admin_user: @admin,
+      category: @category,
+      title: "未来の記事",
+      slug: "future-post-llms",
+      excerpt: "未来の記事です。",
+      body: "## 未来",
+      status: :published,
+      kind: :article,
+      published_at: 3.days.from_now
+    )
+
+    get "/llms.txt"
+    assert_response :success
+    assert_not_includes response.body, "下書き記事"
+    assert_not_includes response.body, "未来の記事"
+    assert_includes response.body, @post.title
+  end
+
   test "rss feed renders published posts" do
     get "/en/feed.xml"
 

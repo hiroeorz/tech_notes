@@ -1,0 +1,30 @@
+# <%= current_site_setting.blog_title %>
+
+><%= current_site_setting.description %>
+
+<%= current_site_setting.tagline %>
+
+公開記事数: <%= Post.publicly_visible.count %>件
+サイトURL: <%= current_site_setting.site_url %>
+
+## 記事
+
+<% Post.publicly_visible.recent.includes(:category).each do |post| %>
+- [<%= post.title %>](<%= post_url(post, locale: :en) %>): <%= post.excerpt %>
+<% end %>
+
+## Optional
+
+- [RSSフィード](<%= feed_url(locale: :en, format: :xml) %>): 記事の更新情報
+<% if current_site_setting.github_url.present? %>
+- [GitHub](<%= current_site_setting.github_url %>): プロフィール
+<% end %>
+<% if current_site_setting.x_url.present? %>
+- [X](<%= current_site_setting.x_url %>): ソーシャル
+<% end %>
+<% if current_site_setting.zenn_url.present? %>
+- [Zenn](<%= current_site_setting.zenn_url %>): 外部記事
+<% end %>
+<% if current_site_setting.note_url.present? %>
+- [note](<%= current_site_setting.note_url %>): 外部記事
+<% end %>
