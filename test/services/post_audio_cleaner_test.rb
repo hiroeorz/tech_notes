@@ -47,6 +47,16 @@ class PostAudioCleanerTest < ActiveSupport::TestCase
     assert_equal "", PostAudioCleaner.clean("```code```")
   end
 
+  test "strips inline asterisks used for emphasis" do
+    input = "This is *italic* and **bold** text."
+    assert_equal "This is italic and bold text.", PostAudioCleaner.clean(input)
+  end
+
+  test "strips triple asterisks" do
+    input = "***bold italic***"
+    assert_equal "bold italic", PostAudioCleaner.clean(input)
+  end
+
   test "preserves regular paragraph text" do
     input = "This is a normal paragraph with some text."
     assert_equal "This is a normal paragraph with some text.", PostAudioCleaner.clean(input)

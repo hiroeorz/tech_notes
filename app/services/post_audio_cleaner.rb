@@ -29,6 +29,8 @@ class PostAudioCleaner
     text.gsub!(/\|$/, "")
     # Remove heading markers but keep text
     text.gsub!(/^[#]{1,6}\s+/, "")
+    # Remove emphasis markers
+    text.gsub!(/[*]+/, "")
     # Remove control characters except newlines
     text.gsub!(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/, "")
     # Collapse whitespace (preserve paragraph breaks)
