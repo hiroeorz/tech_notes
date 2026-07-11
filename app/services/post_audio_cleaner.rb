@@ -31,8 +31,8 @@ class PostAudioCleaner
     text.gsub!(/^[#]{1,6}\s+/, "")
     # Remove control characters except newlines
     text.gsub!(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/, "")
-    # Remove Unicode symbols (math, music, arrows, dingbats, etc.)
-    text.gsub!(/\p{So}|\p{Sm}|\p{Sk}/, " ")
+    # Replace Unicode symbols with period to break up long sentence runs
+    text.gsub!(/\p{So}|\p{Sm}|\p{Sk}/, ".")
     # Collapse whitespace (preserve paragraph breaks)
     text.gsub!(/\n{3,}/, "\n\n")
     text.gsub!(/[ \t]+/, " ")

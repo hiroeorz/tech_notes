@@ -35,7 +35,7 @@ class GenerateAudioJob < ApplicationJob
     raise
   end
 
-  MAX_CHUNK_CHARS = 1200
+  MAX_CHUNK_CHARS = 1000
 
   private
 
