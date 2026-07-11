@@ -71,8 +71,10 @@
             <time><%= l(post.display_date, format: :short) %></time>
           <% end %>
       <% end %>
-      <% if @post.audio_for_locale&.file&.attached? %>
-        <audio controls class="article-audio-player" src="<%= url_for(@post.audio_for_locale.file) %>">
+      <% audio = @post.audio_for_locale %>
+      <% if audio&.file&.attached? %>
+        <audio controls preload="metadata" class="article-audio-player">
+          <source src="<%= url_for(audio.file) %>" type="audio/mpeg">
           <%= t("posts.show.audio_unsupported") %>
         </audio>
       <% end %>
