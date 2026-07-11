@@ -156,6 +156,10 @@
             <span><%= t("admin.posts.form.published_at_label") %></span>
             <%= form.datetime_local_field :published_at %>
           </label>
+          <label class="checkbox-label">
+            <%= form.check_box :generate_audio, checked: post.generate_audio? %>
+            <span><%= t("admin.posts.form.generate_audio") %></span>
+          </label>
         </div>
         <div class="modal-footer">
           <button type="button" class="secondary-button" data-close-publish-modal><%= t("admin.posts.form.cancel") %></button>

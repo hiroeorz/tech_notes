@@ -22,7 +22,7 @@ class PostsController < ApplicationController
   end
 
   def show
-    @post = Post.publicly_visible.includes(:category, :tags, :post_translations).find_by!(slug: params[:slug])
+    @post = Post.publicly_visible.includes(:category, :tags, :post_translations, :post_audios).find_by!(slug: params[:slug])
     @comment = @post.comments.build
     @comments = @post.comments.oldest
     set_post_meta(@post)

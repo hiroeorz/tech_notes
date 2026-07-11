@@ -848,6 +848,34 @@ textarea {
   line-height: 1;
 }
 
+.article-audio-player {
+  display: inline-flex;
+  vertical-align: middle;
+  height: 36px;
+  margin-left: 8px;
+  border-radius: 5px;
+}
+
+.article-audio-player::-webkit-media-controls-panel {
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--orange);
+  cursor: pointer;
+}
+
 .article-excerpt {
   line-height: 1.8;
 }
