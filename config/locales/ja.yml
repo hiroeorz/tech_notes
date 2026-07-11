@@ -267,6 +267,11 @@ ja:
         slug_pattern_title: "半角英数字とハイフンで入力してください"
         icon_label: "アイコン"
         position_label: "表示順"
+        translate_ai_aria: "AIで英語名を生成"
+        translate_ai_tooltip: "カテゴリー名をAIで英訳し、英語名フィールドに反映します。"
+        translating: "翻訳中..."
+        translation_success: "英語名を反映しました。保存前に内容を確認してください。"
+        translation_error: "翻訳できませんでした。"
         cancel: "キャンセル"
         save: "保存"
     settings:
@@ -357,6 +362,8 @@ ja:
         generation_failed: "スラッグを生成できませんでした。サーバーログを確認してください。"
       post_summaries:
         generation_failed: "要約を生成できませんでした。サーバーログを確認してください。"
+      category_name_translations:
+        generation_failed: "英語名を生成できませんでした。サーバーログを確認してください。"
     profile:
       not_visible: "プロフィールは現在公開されていません。"
   helpers:

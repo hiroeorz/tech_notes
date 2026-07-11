@@ -267,6 +267,11 @@ en:
         slug_pattern_title: "Use only lowercase alphanumeric characters and hyphens"
         icon_label: "Icon"
         position_label: "Position"
+        translate_ai_aria: "Generate English name with AI"
+        translate_ai_tooltip: "Translates the category name to English via AI and fills the English name field."
+        translating: "Translating..."
+        translation_success: "English name applied. Please review before saving."
+        translation_error: "Could not translate."
         cancel: "Cancel"
         save: "Save"
     settings:
@@ -357,6 +362,8 @@ en:
         generation_failed: "Could not generate slug. Check server logs."
       post_summaries:
         generation_failed: "Could not generate summary. Check server logs."
+      category_name_translations:
+        generation_failed: "Could not generate English name. Check server logs."
     profile:
       not_visible: "Profile is not currently public."
   helpers:
