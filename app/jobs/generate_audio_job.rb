@@ -35,7 +35,8 @@ class GenerateAudioJob < ApplicationJob
     raise
   end
 
-  MAX_CHUNK_BYTES = 4000
+  MAX_CHUNK_BYTES = 3500
+  MAX_SENTENCE_CHARS = 1500
 
   private
 
@@ -58,7 +59,7 @@ class GenerateAudioJob < ApplicationJob
     paragraphs.each do |para|
       if para.bytesize >= MAX_CHUNK_BYTES
         chunks << current.strip if current.present?
-        chunks.concat(split_long_paragraph(para))
+        chunks.concat(split_paragraph(para))
         current = +""
       elsif current.bytesize + para.bytesize + 1 < MAX_CHUNK_BYTES
         current << " " << para
@@ -71,19 +72,16 @@ class GenerateAudioJob < ApplicationJob
     chunks.presence
   end
 
-  def split_long_paragraph(text)
-    sentences = text.split(/(?<=[。．！？.!?])/).map(&:strip).reject(&:blank?)
-    chunks = []
-    current = +""
-    sentences.each do |sentence|
-      if current.bytesize + sentence.bytesize + 1 < MAX_CHUNK_BYTES
-        current << " " << sentence
-      else
-        chunks << current.strip if current.present?
-        current = +sentence
-      end
-    end
-    chunks << current.strip if current.present?
-    chunks.presence || [ text[0, MAX_CHUNK_BYTES] ]
+  def split_paragraph(text)
+    segments = split_at_punctuation(text)
+    segments.flat_map { |s| s.length > MAX_SENTENCE_CHARS ? split_by_length(s) : [ s ] }
+  end
+
+  def split_at_punctuation(text)
+    text.split(/(?<=[。．！？.!?])/).map(&:strip).reject(&:blank?).presence || [ text ]
+  end
+
+  def split_by_length(text)
+    text.scan(/.{1,#{MAX_SENTENCE_CHARS}}/m).map(&:strip).reject(&:blank?)
   end
 end
