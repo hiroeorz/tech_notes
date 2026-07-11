@@ -1851,13 +1851,14 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
     get "/en/posts/audio-post"
     assert_response :success
-    assert_select ".audio-player-wrapper" do
+    assert_select ".article-meta .audio-player-wrapper" do
       assert_select ".audio-player-toggle-button"
-      assert_select ".audio-player-toggle-button span", text: "Listen to this article"
+      assert_select ".audio-player-toggle-button span", text: "Listen"
       assert_select ".audio-player-panel[hidden]"
       assert_select ".audio-player-dial"
       assert_select ".audio-player-onair"
     end
+    assert_select ".article-actions .audio-player-wrapper", count: 0
 
     audio_post.post_audios.destroy_all
     audio_post.destroy!
@@ -1867,6 +1868,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     get "/en/posts/terraform-remote-state"
     assert_response :success
     assert_select ".audio-player-wrapper", count: 0
+    assert_select ".article-meta .audio-player-wrapper", count: 0
   end
 
   def with_category_name_translator(translator)
