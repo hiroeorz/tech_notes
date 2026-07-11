@@ -74,7 +74,9 @@ class GenerateAudioJob < ApplicationJob
 
   def split_text(text)
     segments = text.split(/(?<=[。．！？.!?\n])/).map(&:strip).reject(&:blank?)
-    segments = [ text ] if segments.blank?
+    if segments.blank?
+      return text.scan(/.{1,#{MAX_CHUNK_CHARS}}/m).map(&:strip).reject(&:blank?).presence || [ text ]
+    end
     result = []
     current = +""
     segments.each do |seg|
