@@ -1800,6 +1800,31 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_includes response.parsed_body.fetch("error"), "Rate limit"
   end
 
+  test "article show page has X share button with localized content" do
+    get "/en/posts/terraform-remote-state"
+    assert_response :success
+    assert_select ".article-actions .share-x-button" do
+      assert_select ".x-icon"
+      assert_select "span", text: "Share on X"
+    end
+    assert_select ".article-actions .share-x-button[aria-label='Share this article on X']"
+    assert_select ".article-actions .share-x-button[target='_blank'][rel='noopener noreferrer']"
+
+    expected_en_text = "#{@post.localized_title(:en)}\n\n#{@post.localized_excerpt(:en)}"
+    assert_includes response.body, ERB::Util.url_encode(expected_en_text)
+
+    get "/ja/posts/terraform-remote-state"
+    assert_response :success
+    assert_select ".article-actions .share-x-button" do
+      assert_select "span", text: "Xでシェア"
+    end
+    assert_select ".article-actions .share-x-button[aria-label='この記事をXでシェア']"
+
+    expected_ja_text = @post.localized_title(:ja)
+    assert_includes response.body, ERB::Util.url_encode(expected_ja_text)
+    assert_not_includes response.body, ERB::Util.url_encode(@post.localized_excerpt(:ja))
+  end
+
   def with_category_name_translator(translator)
     original_new = CategoryNameTranslator.method(:new)
     CategoryNameTranslator.define_singleton_method(:new) { |*| translator }

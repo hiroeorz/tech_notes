@@ -65,7 +65,9 @@ ja:
       toc: "目次"
       related_posts: "関連記事"
       share: "シェア:"
+      share_on_x: "Xでシェア"
       aria_share_x: "Xでシェア"
+      aria_share_x_article: "この記事をXでシェア"
       copyright: "© 2025 Hiroe Tech Notes. All rights reserved."
       mobile_toc: "目次"
     tags:

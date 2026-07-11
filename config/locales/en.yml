@@ -65,7 +65,9 @@ en:
       toc: "Table of Contents"
       related_posts: "Related Posts"
       share: "Share:"
+      share_on_x: "Share on X"
       aria_share_x: "Share on X"
+      aria_share_x_article: "Share this article on X"
       copyright: "© 2025 Hiroe Tech Notes. All rights reserved."
       mobile_toc: "Table of Contents"
     tags:
