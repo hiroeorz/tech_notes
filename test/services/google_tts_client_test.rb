@@ -23,12 +23,12 @@ class GoogleTtsClientTest < ActiveSupport::TestCase
   test "voice map has ja entry" do
     entry = GoogleTtsClient::VOICE_MAP["ja"]
     assert_equal "ja-JP", entry[:language_code]
-    assert_equal "ja-JP-Neural2-C", entry[:name]
+    assert_equal "ja-JP-Chirp3-HD-Despina", entry[:name]
   end
 
   test "voice map has en entry" do
     entry = GoogleTtsClient::VOICE_MAP["en"]
     assert_equal "en-US", entry[:language_code]
-    assert_equal "en-US-Neural2-C", entry[:name]
+    assert_equal "en-US-Chirp3-HD-Despina", entry[:name]
   end
 end

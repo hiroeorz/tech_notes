@@ -47,7 +47,7 @@ class GenerateAudioJob < ApplicationJob
     segments = chunk_text(text)
     return nil if segments.blank?
 
-    segments.map { |segment| tts_client.synthesize(text: segment, locale: locale) }.join
+    segments.map { |segment| tts_client.synthesize_ssml(text: segment, locale: locale) }.join
   end
 
   def chunk_text(text)

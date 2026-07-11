@@ -10,8 +10,8 @@ class GoogleTtsClient
   DEFAULT_TIMEOUT_SECONDS = 60
 
   VOICE_MAP = {
-    "ja" => { language_code: "ja-JP", name: "ja-JP-Neural2-C" },
-    "en" => { language_code: "en-US", name: "en-US-Neural2-C" }
+    "ja" => { language_code: "ja-JP", name: "ja-JP-Chirp3-HD-Despina" },
+    "en" => { language_code: "en-US", name: "en-US-Chirp3-HD-Despina" }
   }.freeze
 
   def initialize(api_key: self.class.config_value)
@@ -31,12 +31,37 @@ class GoogleTtsClient
   end
 
   def synthesize(text:, locale:)
+    json_request(input: { text: text }, locale: locale)
+  end
+
+  def synthesize_ssml(text:, locale:)
+    json_request(input: { ssml: ssml_wrap(text) }, locale: locale)
+  end
+
+  private
+
+  def json_request(input:, locale:)
     raise ConfigurationError, "Google Cloud TTS is not configured." unless configured?
 
     voice_config = VOICE_MAP[locale.to_s]
     raise ArgumentError, "Unsupported locale: #{locale}" unless voice_config
 
-    response = perform_request(text, voice_config)
+    uri = URI("https://texttospeech.googleapis.com/v1/text:synthesize")
+    uri.query = URI.encode_www_form(key: @api_key)
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+    http.open_timeout = DEFAULT_TIMEOUT_SECONDS
+    http.read_timeout = DEFAULT_TIMEOUT_SECONDS
+
+    request = Net::HTTP::Post.new(uri)
+    request["Content-Type"] = "application/json"
+    request.body = JSON.generate(
+      input: input,
+      voice: voice_config,
+      audioConfig: { audioEncoding: "MP3" }
+    )
+
+    response = http.request(request)
     payload = JSON.parse(response.body)
     raise RequestError, google_error_message(payload) unless response.is_a?(Net::HTTPSuccess)
 
@@ -52,25 +77,14 @@ class GoogleTtsClient
     raise RequestError, "Could not connect to Google Cloud TTS."
   end
 
-  private
+  def ssml_wrap(text)
+    sentences = text.split(/(?<=[。．！？.!?\n])/).map(&:strip).reject(&:blank?)
+    inner = sentences.map { |s| "<s>#{escape_ssml(s)}</s>" }.join
+    "<speak>#{inner}</speak>"
+  end
 
-  def perform_request(text, voice_config)
-    uri = URI("https://texttospeech.googleapis.com/v1/text:synthesize")
-    uri.query = URI.encode_www_form(key: @api_key)
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    http.open_timeout = DEFAULT_TIMEOUT_SECONDS
-    http.read_timeout = DEFAULT_TIMEOUT_SECONDS
-
-    request = Net::HTTP::Post.new(uri)
-    request["Content-Type"] = "application/json"
-    request.body = JSON.generate(
-      input: { text: text },
-      voice: voice_config,
-      audioConfig: { audioEncoding: "MP3" }
-    )
-
-    http.request(request)
+  def escape_ssml(text)
+    text.gsub("&", "&amp;").gsub("<", "&lt;").gsub(">", "&gt;").gsub('"', "&quot;").gsub("'", "&apos;")
   end
 
   def google_error_message(payload)
