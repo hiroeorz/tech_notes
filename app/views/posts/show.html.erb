@@ -30,6 +30,17 @@
       <% end %>
     </div>
 
+    <div class="article-actions">
+      <%= link_to "https://x.com/intent/tweet?url=#{ERB::Util.url_encode(request.original_url)}&text=#{ERB::Util.url_encode(share_text_for_x(@post))}",
+          class: "share-x-button",
+          aria: { label: t("posts.show.aria_share_x_article") },
+          target: "_blank",
+          rel: "noopener noreferrer" do %>
+        <span class="x-icon">𝕏</span>
+        <span><%= t("posts.show.share_on_x") %></span>
+      <% end %>
+    </div>
+
     <% if @toc.present? %>
       <div class="mobile-toc-box mobile-only" data-controller="toc-toggle">
         <div class="mobile-toc-header" role="button" tabindex="0" aria-expanded="false" data-action="click->toc-toggle#toggle keydown.enter->toc-toggle#toggle keydown.space->toc-toggle#toggle">
