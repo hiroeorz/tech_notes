@@ -69,6 +69,12 @@ ja:
       aria_share_x: "Xでシェア"
       aria_share_x_article: "この記事をXでシェア"
       audio_unsupported: "お使いのブラウザは音声再生に対応していません。"
+      listen_to_article: "この記事を読み上げる"
+      close_player: "閉じる"
+      play: "再生"
+      pause: "一時停止"
+      seek: "シーク"
+      audio_error: "音声を再生できませんでした"
       copyright: "© 2025 Hiroe Tech Notes. All rights reserved."
       mobile_toc: "目次"
     tags:
