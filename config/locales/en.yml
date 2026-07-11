@@ -69,7 +69,7 @@ en:
       aria_share_x: "Share on X"
       aria_share_x_article: "Share this article on X"
       audio_unsupported: "Your browser does not support the audio element."
-      listen_to_article: "Listen to this article"
+      listen_to_article: "Listen"
       close_player: "Close"
       play: "Play"
       pause: "Pause"

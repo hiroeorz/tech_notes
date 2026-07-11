@@ -852,18 +852,17 @@ textarea {
   display: inline-flex;
   flex-direction: column;
   vertical-align: middle;
-  margin-left: 8px;
 }
 
 .audio-player-toggle-button {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
+  gap: 5px;
+  padding: 4px 10px;
   border: 1px solid var(--orange);
-  border-radius: 5px;
+  border-radius: 4px;
   background: rgba(241, 90, 36, 0.06);
-  font-weight: 800;
+  font-weight: 700;
   font-size: 13px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
