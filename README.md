@@ -103,6 +103,10 @@ export CLOUDFLARE_AI_MODEL="@cf/meta/llama-3.2-1b-instruct"
 export CLOUDFLARE_AI_TIMEOUT_SECONDS="60"
 export CLOUDFLARE_AI_MAX_TOKENS="8192"   # 翻訳時の最大出力トークン数（長い記事は増やす）
 
+# Google Cloud TTS（記事音声読み上げ）— 音声生成機能を使用する場合のみ必須
+export GOOGLE_CLOUD_API_KEY="your-google-cloud-api-key"
+export CLOUDFLARE_R2_AUDIO_BUCKET="tech-notes-audio"
+
 # Google Search Console — サイトマップ登録に使用
 export GOOGLE_SITE_VERIFICATION="your-verification-token"
 
