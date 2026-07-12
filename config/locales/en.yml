@@ -309,7 +309,7 @@ en:
         email: "Email"
         bio: "Bio"
         bio_en: "English Bio"
-        translate_profile: "🧠 AI Translate"
+        translate_bio: "🧠 AI Translate"
         translating: "Translating..."
         translate_success: "Translation applied. Please review before saving."
         translate_error: "Could not translate."

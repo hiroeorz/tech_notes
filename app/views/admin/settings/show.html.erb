@@ -43,33 +43,41 @@
 
     <section class="settings-card">
       <div class="settings-card-title"><span>♙</span><h2><%= t("admin.settings.show.profile_section") %></h2><p><%= t("admin.settings.show.profile_section_desc") %></p></div>
-      <div class="settings-fields" data-controller="profile-translator" data-profile-translator-url-value="<%= admin_profile_translation_path %>" data-profile-translator-translating-value="<%= t("admin.settings.show.translating") %>" data-profile-translator-success-value="<%= t("admin.settings.show.translate_success") %>" data-profile-translator-error-value="<%= t("admin.settings.show.translate_error") %>">
+      <div class="settings-fields">
         <label><span><%= t("admin.settings.show.display_name") %></span><%= form.text_field :profile_name %></label>
-        <label>
-          <span><%= t("admin.settings.show.title") %></span>
-          <%= form.text_field :profile_title, data: { profile_translator_target: "title" } %>
-        </label>
-        <label>
-          <span><%= t("admin.settings.show.title_en") %></span>
-          <span class="translation-field-row">
-            <%= form.text_field :profile_title_en, data: { profile_translator_target: "titleEn" } %>
-          </span>
-        </label>
-        <label><span><%= t("admin.settings.show.email") %></span><%= form.email_field :profile_email %></label>
-        <label class="wide">
-          <span><%= t("admin.settings.show.bio") %></span>
-          <%= form.text_area :profile_bio, rows: 3, data: { profile_translator_target: "bio" } %>
-        </label>
-        <label class="wide">
-          <span><%= t("admin.settings.show.bio_en") %></span>
-          <span class="translation-field-row">
-            <%= form.text_area :profile_bio_en, rows: 3, data: { profile_translator_target: "bioEn" } %>
-          </span>
-        </label>
-        <div class="translation-actions">
-          <button type="button" class="secondary-button" data-action="profile-translator#translate" data-profile-translator-target="button">🧠 <span><%= t("admin.settings.show.translate_profile") %></span></button>
-          <span hidden data-profile-translator-target="message"></span>
+
+        <div class="translation-field-group" data-controller="profile-translator" data-profile-translator-url-value="<%= admin_profile_translation_path %>" data-profile-translator-field-value="title" data-profile-translator-translating-value="<%= t("admin.settings.show.translating") %>" data-profile-translator-success-value="<%= t("admin.settings.show.translate_success") %>" data-profile-translator-error-value="<%= t("admin.settings.show.translate_error") %>">
+          <label>
+            <span><%= t("admin.settings.show.title") %></span>
+            <%= form.text_field :profile_title, data: { profile_translator_target: "source" } %>
+          </label>
+          <label>
+            <span><%= t("admin.settings.show.title_en") %></span>
+            <span class="translation-field-row">
+              <%= form.text_field :profile_title_en, data: { profile_translator_target: "target" } %>
+              <button type="button" class="secondary-button compact" data-action="profile-translator#translate" data-profile-translator-target="button">🧠</button>
+            </span>
+          </label>
+          <span hidden data-profile-translator-target="message" class="translation-message"></span>
         </div>
+
+        <label><span><%= t("admin.settings.show.email") %></span><%= form.email_field :profile_email %></label>
+
+        <div class="translation-field-group" data-controller="profile-translator" data-profile-translator-url-value="<%= admin_profile_translation_path %>" data-profile-translator-field-value="bio" data-profile-translator-translating-value="<%= t("admin.settings.show.translating") %>" data-profile-translator-success-value="<%= t("admin.settings.show.translate_success") %>" data-profile-translator-error-value="<%= t("admin.settings.show.translate_error") %>">
+          <label class="wide">
+            <span><%= t("admin.settings.show.bio") %></span>
+            <%= form.text_area :profile_bio, rows: 3, data: { profile_translator_target: "source" } %>
+          </label>
+          <label class="wide">
+            <span><%= t("admin.settings.show.bio_en") %></span>
+            <%= form.text_area :profile_bio_en, rows: 3, data: { profile_translator_target: "target" } %>
+          </label>
+          <div class="translation-actions">
+            <button type="button" class="secondary-button" data-action="profile-translator#translate" data-profile-translator-target="button">🧠 <span><%= t("admin.settings.show.translate_bio") %></span></button>
+            <span hidden data-profile-translator-target="message"></span>
+          </div>
+        </div>
+
         <label class="settings-avatar-upload" data-settings-image-preview-container>
           <% if @setting.profile_image.attached? && @setting.profile_image.blob.persisted? %>
             <%= image_tag @setting.profile_image, alt: "プロフィール画像", class: "settings-avatar-image", data: { settings_image_preview: true } %>

@@ -309,7 +309,7 @@ ja:
         email: "メールアドレス"
         bio: "自己紹介"
         bio_en: "英語の自己紹介"
-        translate_profile: "🧠 AI翻訳"
+        translate_bio: "🧠 AI翻訳"
         translating: "翻訳中..."
         translate_success: "翻訳を反映しました。保存前に内容を確認してください。"
         translate_error: "翻訳できませんでした。"
