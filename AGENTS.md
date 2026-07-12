@@ -47,6 +47,11 @@
 - `bin/brakeman --no-pager` と `bin/bundler-audit` を CI で実行（追加引数なし）。
 - JS 依存関係は `bin/importmap audit` で監査。
 
+## Dependabot PR の処理
+
+- Dependabot が起票した PR の処理は `.agents/skills/dependabot-pr/SKILL.md` の手順に従うこと。
+- 本リポジトリに Dependabot 設定ファイル（`.github/dependabot.yml`）がない場合は、同スキルの提案内容を参照してユーザーと相談すること。
+
 ## コミット前のセキュリティチェック
 
 - `git commit` を実行する**前に必ず** `.agents/skills/security-check/SKILL.md` の手順に従い、リポジトリ全体の機密情報スキャンを実行すること。
