@@ -20,6 +20,22 @@ class ProfileTranslator
     raise GenerationError, error.message
   end
 
+  def translate_field(field:, value:)
+    raise InvalidInput, "Value must not be blank." if value.to_s.strip.blank?
+
+    result = @client.run(messages: field_messages(field: field, value: value))
+    text = normalize_translation(result)
+    raise GenerationError, "Could not get a valid English translation from the AI." if text.blank?
+
+    text
+  rescue CloudflareAiClient::RateLimitError => error
+    raise RateLimitError, error.message
+  rescue CloudflareAiClient::ConfigurationError => error
+    raise GenerationError, error.message
+  rescue CloudflareAiClient::RequestError => error
+    raise GenerationError, error.message
+  end
+
   private
 
   def messages(profile_title:, profile_bio:)
@@ -44,6 +60,27 @@ class ProfileTranslator
     ]
   end
 
+  def field_messages(field:, value:)
+    label = field.to_s == "title" ? "title" : "bio"
+    [
+      {
+        role: "system",
+        content: <<~PROMPT.squish
+          You translate a Japanese tech blogger's profile #{label} into natural English.
+          Return only the translated text without quotes, markdown, or explanations.
+        PROMPT
+      },
+      {
+        role: "user",
+        content: <<~PROMPT
+          Translate this Japanese profile #{label} to English:
+
+          #{value.strip}
+        PROMPT
+      }
+    ]
+  end
+
   def parse_result(value)
     text = value.to_s.strip
     json = text.sub(/\A```(?:json)?\s*/, "").sub(/\s*```\z/, "")
@@ -57,5 +94,17 @@ class ProfileTranslator
     { profile_title_en: title, profile_bio_en: bio }
   rescue JSON::ParserError
     raise GenerationError, "Could not parse AI response as JSON."
+  end
+
+  def normalize_translation(value)
+    translation = value.to_s.strip
+    translation = translation.delete_prefix("translation:").delete_prefix("translation：").strip
+    translation = translation[1...-1].strip if wrapped_with_quote?(translation)
+    translation
+  end
+
+  def wrapped_with_quote?(value)
+    (value.start_with?("\"") && value.end_with?("\"")) ||
+      (value.start_with?("'") && value.end_with?("'"))
   end
 end

@@ -503,54 +503,79 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "input[name='site_setting[profile_title_en]']"
     assert_select "textarea[name='site_setting[profile_bio_en]']"
-    assert_select "[data-controller='profile-translator']"
-    assert_includes response.body, I18n.t("admin.settings.show.translate_profile")
+    assert_select "[data-controller='profile-translator']", count: 2
+    assert_includes response.body, I18n.t("admin.settings.show.translate_bio")
   end
 
-  test "admin profile translation endpoint works" do
+  test "admin profile title translation endpoint works" do
     post admin_login_path, params: { email: @admin.email, password: "password123" }
 
     fake_translator = Object.new
-    def fake_translator.translate(profile_title:, profile_bio:)
-      { profile_title_en: "Engineer", profile_bio_en: "I love coding." }
+    def fake_translator.translate_field(field:, value:)
+      raise "unexpected field" unless field == "title"
+      raise "unexpected value" unless value == "エンジニア"
+
+      "Engineer"
     end
 
     with_profile_translator(fake_translator) do
       post admin_profile_translation_path,
-        params: { profile_title: "エンジニア", profile_bio: "コードが大好きです" },
+        params: { field: "title", value: "エンジニア" },
         as: :json
     end
 
     assert_response :success
-    json = response.parsed_body
-    assert_equal "Engineer", json["profile_title_en"]
-    assert_equal "I love coding.", json["profile_bio_en"]
+    assert_equal "Engineer", response.parsed_body.fetch("profile_title_en")
+  end
+
+  test "admin profile bio translation endpoint works" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+
+    fake_translator = Object.new
+    def fake_translator.translate_field(field:, value:)
+      raise "unexpected field" unless field == "bio"
+
+      "I love coding."
+    end
+
+    with_profile_translator(fake_translator) do
+      post admin_profile_translation_path,
+        params: { field: "bio", value: "コードが大好きです" },
+        as: :json
+    end
+
+    assert_response :success
+    assert_equal "I love coding.", response.parsed_body.fetch("profile_bio_en")
   end
 
   test "admin profile translation reports errors" do
     post admin_login_path, params: { email: @admin.email, password: "password123" }
 
-    post admin_profile_translation_path, params: { profile_title: "", profile_bio: "" }, as: :json
+    post admin_profile_translation_path, params: { field: "title", value: "" }, as: :json
     assert_response :bad_request
     assert_includes response.parsed_body.fetch("error"), "must not be blank"
 
     fake_translator = Object.new
-    def fake_translator.translate(profile_title:, profile_bio:)
+    def fake_translator.translate_field(field:, value:)
       raise ProfileTranslator::GenerationError, "Cloudflare Workers AI is not configured."
     end
 
     with_profile_translator(fake_translator) do
       post admin_profile_translation_path,
-        params: { profile_title: "肩書き", profile_bio: "経歴" },
+        params: { field: "title", value: "肩書き" },
         as: :json
     end
 
     assert_response :bad_gateway
     assert_includes response.parsed_body.fetch("error"), "not configured"
+
+    post admin_profile_translation_path, params: { field: "invalid", value: "test" }, as: :json
+    assert_response :bad_request
+    assert_includes response.parsed_body.fetch("error"), "Invalid field"
   end
 
   test "profile translation endpoint requires auth" do
-    post admin_profile_translation_path, params: { profile_title: "test", profile_bio: "test" }, as: :json
+    post admin_profile_translation_path, params: { field: "title", value: "test" }, as: :json
     assert_response :unauthorized
   end
 

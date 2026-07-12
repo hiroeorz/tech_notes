@@ -1,18 +1,18 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["title", "titleEn", "bio", "bioEn", "button", "message"]
+  static targets = ["source", "target", "button", "message"]
   static values = {
     url: String,
+    field: String,
     translating: String,
     success: String,
     error: String
   }
 
   async translate() {
-    const title = this.titleTarget.value.trim()
-    const bio = this.bioTarget.value.trim()
-    if (title === "" && bio === "") return
+    const value = this.sourceTarget.value.trim()
+    if (value === "") return
 
     this.setMessage(this.translatingValue, false)
     this.buttonTarget.disabled = true
@@ -25,7 +25,7 @@ export default class extends Controller {
           "Content-Type": "application/json",
           "X-CSRF-Token": document.querySelector("meta[name='csrf-token']")?.content || ""
         },
-        body: JSON.stringify({ profile_title: title, profile_bio: bio })
+        body: JSON.stringify({ field: this.fieldValue, value: value })
       })
 
       if (!response.ok) {
@@ -35,11 +35,9 @@ export default class extends Controller {
       }
 
       const data = await response.json()
-      if (this.hasTitleEnTarget && data.profile_title_en) {
-        this.titleEnTarget.value = data.profile_title_en
-      }
-      if (this.hasBioEnTarget && data.profile_bio_en) {
-        this.bioEnTarget.value = data.profile_bio_en
+      const key = `profile_${this.fieldValue}_en`
+      if (data[key]) {
+        this.targetTarget.value = data[key]
       }
       this.setMessage(this.successValue, false)
     } catch {

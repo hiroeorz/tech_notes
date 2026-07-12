@@ -1,11 +1,13 @@
 module Admin
   class ProfileTranslationsController < BaseController
+    SUPPORTED_FIELDS = %w[title bio].freeze
+
     def create
-      translation = translator.translate(
-        profile_title: params[:profile_title].to_s,
-        profile_bio: params[:profile_bio].to_s
-      )
-      render json: translation
+      field = params[:field].to_s
+      return render json: { error: "Invalid field" }, status: :bad_request unless field.in?(SUPPORTED_FIELDS)
+
+      translation = translator.translate_field(field: field, value: params[:value].to_s)
+      render json: { "profile_#{field}_en" => translation }
     rescue ProfileTranslator::InvalidInput => error
       render json: { error: error.message }, status: :bad_request
     rescue ProfileTranslator::RateLimitError => error
