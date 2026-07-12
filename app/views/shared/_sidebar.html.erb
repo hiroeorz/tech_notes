@@ -10,8 +10,8 @@
         </div>
       <% end %>
       <h3><%= current_site_setting.profile_name %></h3>
-      <p class="role"><%= current_site_setting.profile_title %></p>
-      <p><%= current_site_setting.profile_bio %></p>
+      <p class="role"><%= current_site_setting.localized_profile_title %></p>
+      <p><%= current_site_setting.localized_profile_bio %></p>
       <% if current_site_setting.sns_visible? %>
         <div class="social-icons">
           <%= social_link "GitHub", current_site_setting.github_url, aria: { label: t("shared.sidebar.aria_github") } %>

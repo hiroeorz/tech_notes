@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_11_102520) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_12_020103) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -139,10 +139,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_11_102520) do
     t.string "ogp_image_path"
     t.integer "posts_per_page", default: 10, null: false
     t.text "profile_bio", null: false
+    t.text "profile_bio_en"
     t.string "profile_email", default: "admin@example.com", null: false
     t.string "profile_image_path"
     t.string "profile_name", default: "Hiroe", null: false
     t.string "profile_title", default: "インフラエンジニア / プログラマ", null: false
+    t.string "profile_title_en"
     t.boolean "profile_visible", default: true, null: false
     t.string "rss_url"
     t.string "site_url", default: "https://example.com", null: false

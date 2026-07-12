@@ -495,6 +495,88 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_includes application_source, "button.setAttribute(\"aria-label\", visible ? hideLabel : showLabel)"
   end
 
+  test "admin settings page shows profile translation fields" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+    follow_redirect!
+
+    get admin_settings_path
+    assert_response :success
+    assert_select "input[name='site_setting[profile_title_en]']"
+    assert_select "textarea[name='site_setting[profile_bio_en]']"
+    assert_select "[data-controller='profile-translator']"
+    assert_includes response.body, I18n.t("admin.settings.show.translate_profile")
+  end
+
+  test "admin profile translation endpoint works" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+
+    fake_translator = Object.new
+    def fake_translator.translate(profile_title:, profile_bio:)
+      { profile_title_en: "Engineer", profile_bio_en: "I love coding." }
+    end
+
+    with_profile_translator(fake_translator) do
+      post admin_profile_translation_path,
+        params: { profile_title: "エンジニア", profile_bio: "コードが大好きです" },
+        as: :json
+    end
+
+    assert_response :success
+    json = response.parsed_body
+    assert_equal "Engineer", json["profile_title_en"]
+    assert_equal "I love coding.", json["profile_bio_en"]
+  end
+
+  test "admin profile translation reports errors" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+
+    post admin_profile_translation_path, params: { profile_title: "", profile_bio: "" }, as: :json
+    assert_response :bad_request
+    assert_includes response.parsed_body.fetch("error"), "must not be blank"
+
+    fake_translator = Object.new
+    def fake_translator.translate(profile_title:, profile_bio:)
+      raise ProfileTranslator::GenerationError, "Cloudflare Workers AI is not configured."
+    end
+
+    with_profile_translator(fake_translator) do
+      post admin_profile_translation_path,
+        params: { profile_title: "肩書き", profile_bio: "経歴" },
+        as: :json
+    end
+
+    assert_response :bad_gateway
+    assert_includes response.parsed_body.fetch("error"), "not configured"
+  end
+
+  test "profile translation endpoint requires auth" do
+    post admin_profile_translation_path, params: { profile_title: "test", profile_bio: "test" }, as: :json
+    assert_response :unauthorized
+  end
+
+  test "public profile page shows translated content in english locale" do
+    @setting.update!(profile_title_en: "Infrastructure Engineer", profile_bio_en: "English bio content.")
+
+    get "/en/profile"
+    assert_response :success
+    assert_includes response.body, "Infrastructure Engineer"
+    assert_includes response.body, "English bio content."
+
+    get "/ja/profile"
+    assert_response :success
+    assert_not_includes response.body, "Infrastructure Engineer"
+    assert_includes response.body, @setting.profile_bio
+  end
+
+  test "public profile page falls back to original when no english translation exists" do
+    @setting.update!(profile_title_en: nil, profile_bio_en: nil)
+
+    get "/en/profile"
+    assert_response :success
+    assert_includes response.body, @setting.profile_title
+    assert_includes response.body, @setting.profile_bio
+  end
+
   test "admin management actions require sign in" do
     get new_admin_post_path
     assert_redirected_to admin_login_path
@@ -1875,6 +1957,14 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     yield
   ensure
     CategoryNameTranslator.define_singleton_method(:new) { |*args, **kwargs| original_new.call(*args, **kwargs) }
+  end
+
+  def with_profile_translator(translator)
+    original_new = ProfileTranslator.method(:new)
+    ProfileTranslator.define_singleton_method(:new) { |*| translator }
+    yield
+  ensure
+    ProfileTranslator.define_singleton_method(:new) { |*args, **kwargs| original_new.call(*args, **kwargs) }
   end
 
   def with_public_storage_url(url)

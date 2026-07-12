@@ -45,6 +45,7 @@ module Admin
       params.require(:site_setting).permit(
         :blog_title, :tagline, :site_url, :description, :ogp_image_path,
         :profile_name, :profile_title, :profile_email, :profile_bio, :profile_image_path,
+        :profile_title_en, :profile_bio_en,
         :github_url, :x_url, :rss_url, :zenn_url, :note_url,
         :profile_visible, :sns_visible, :default_theme, :posts_per_page,
         :ogp_image, :profile_image

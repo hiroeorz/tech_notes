@@ -10,13 +10,13 @@
       <% end %>
       <div>
         <h2><%= current_site_setting.profile_name %></h2>
-        <p class="role"><%= current_site_setting.profile_title %></p>
+        <p class="role"><%= current_site_setting.localized_profile_title %></p>
         <% if current_site_setting.profile_email.present? %>
           <p><%= mail_to current_site_setting.profile_email %></p>
         <% end %>
       </div>
     </div>
-    <p><%= current_site_setting.profile_bio %></p>
+    <p><%= current_site_setting.localized_profile_bio %></p>
     <p><%= t("home.profile.bio_suffix") %></p>
     <% if current_site_setting.sns_visible? %>
       <div class="social-icons profile-links">

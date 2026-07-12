@@ -25,6 +25,16 @@ class SiteSetting < ApplicationRecord
     )
   end
 
+  def localized_profile_title(locale = I18n.locale)
+    return profile_title_en if locale.to_s == "en" && profile_title_en.present?
+    profile_title
+  end
+
+  def localized_profile_bio(locale = I18n.locale)
+    return profile_bio_en if locale.to_s == "en" && profile_bio_en.present?
+    profile_bio
+  end
+
   private
 
   def validate_ogp_image

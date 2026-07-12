@@ -37,6 +37,7 @@ Rails.application.routes.draw do
         resource :name_translation, only: [ :create ], controller: "category_name_translations"
       end
     resources :post_summaries, only: [ :create ]
+    resource :profile_translation, only: [ :create ], controller: "profile_translations"
     resources :post_slugs, only: [ :create ]
     resources :comments, only: [ :index, :destroy ]
     resource :settings, only: [ :show, :update ]
