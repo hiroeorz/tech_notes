@@ -305,8 +305,14 @@ en:
         profile_section_desc: "Configure profile information."
         display_name: "Display name"
         title: "Title"
+        title_en: "English Title"
         email: "Email"
         bio: "Bio"
+        bio_en: "English Bio"
+        translate_profile: "🧠 AI Translate"
+        translating: "Translating..."
+        translate_success: "Translation applied. Please review before saving."
+        translate_error: "Could not translate."
         change_avatar: "Change profile image"
         sns_section: "SNS / External Links"
         sns_section_desc: "Configure links to SNS and external services."
@@ -374,6 +380,8 @@ en:
         generation_failed: "Could not generate summary. Check server logs."
       category_name_translations:
         generation_failed: "Could not generate English name. Check server logs."
+      profile_translations:
+        generation_failed: "Could not generate translation. Check server logs."
     profile:
       not_visible: "Profile is not currently public."
   helpers:

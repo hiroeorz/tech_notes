@@ -305,8 +305,14 @@ ja:
         profile_section_desc: "プロフィール情報を設定します。"
         display_name: "表示名"
         title: "肩書き"
+        title_en: "英語の肩書き"
         email: "メールアドレス"
         bio: "自己紹介"
+        bio_en: "英語の自己紹介"
+        translate_profile: "🧠 AI翻訳"
+        translating: "翻訳中..."
+        translate_success: "翻訳を反映しました。保存前に内容を確認してください。"
+        translate_error: "翻訳できませんでした。"
         change_avatar: "プロフィール画像を変更"
         sns_section: "SNS / 外部リンク"
         sns_section_desc: "各種SNSや外部サービスのリンクを設定します。"
@@ -374,6 +380,8 @@ ja:
         generation_failed: "要約を生成できませんでした。サーバーログを確認してください。"
       category_name_translations:
         generation_failed: "英語名を生成できませんでした。サーバーログを確認してください。"
+      profile_translations:
+        generation_failed: "翻訳を生成できませんでした。サーバーログを確認してください。"
     profile:
       not_visible: "プロフィールは現在公開されていません。"
   helpers:
