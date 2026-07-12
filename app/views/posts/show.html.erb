@@ -25,10 +25,6 @@
       <span>↻ <%= t("posts.show.updated") %> <%= @post.updated_at.strftime("%Y-%m-%d") %></span>
       <span>◷ <%= @post.reading_minutes %><%= t("posts.show.minutes") %></span>
       <span>♙ <%= current_site_setting.profile_name %></span>
-      <% audio = @post.audio_for_locale %>
-      <% if audio&.file&.attached? %>
-        <%= render "posts/audio_player", audio: audio %>
-      <% end %>
       <% @post.tags.each do |tag| %>
         <%= link_to tag.name, posts_path(tag: tag.slug), class: "chip" %>
       <% end %>
@@ -42,6 +38,10 @@
           rel: "noopener noreferrer" do %>
         <span class="x-icon">𝕏</span>
         <span><%= t("posts.show.share_on_x") %></span>
+      <% end %>
+      <% audio = @post.audio_for_locale %>
+      <% if audio&.file&.attached? %>
+        <%= render "posts/audio_player", audio: audio %>
       <% end %>
     </div>
 
