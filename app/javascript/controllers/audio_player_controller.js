@@ -15,9 +15,10 @@ export default class extends Controller {
 
     if (this.openValue) {
       this.buttonLabelTarget.textContent = this.element.dataset.closeLabel
+      this._play()
     } else {
       this.buttonLabelTarget.textContent = this.element.dataset.openLabel
-      if (this.playingValue) this._stop()
+      this._stop()
     }
   }
 
