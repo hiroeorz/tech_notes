@@ -10,11 +10,3 @@ updates:
     labels:
       - "dependencies"
       - "ruby"
-    groups:
-      patches:
-        update-types:
-          - "patch"
-        labels:
-          - "auto-merge"
-          - "dependencies"
-          - "ruby"
