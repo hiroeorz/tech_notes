@@ -1,0 +1,15 @@
+<%= t(".title") %>
+<%= "=" * t(".title").length %>
+
+<%= t(".intro", author_name: @comment.author_name) %>
+
+<%= t(".post_title") %>: <%= @post.localized_title %>
+<%= post_url(@post, locale: I18n.default_locale) %>
+
+---
+<%= @comment.author_name %> (<%= l @comment.created_at, format: :long %>)
+
+<%= @comment.body %>
+---
+
+<%= t(".manage_link") %>: <%= admin_comments_url %>

@@ -1,0 +1,12 @@
+<h1><%= @site_setting.blog_title %> - <%= t(".title") %></h1>
+
+<p><%= t(".intro", author_name: @comment.author_name) %></p>
+
+<h2><%= t(".post_title") %>: <%= link_to @post.localized_title, post_url(@post, locale: I18n.default_locale) %></h2>
+
+<div style="margin: 20px 0; padding: 15px; border-left: 4px solid #e67e22; background: #f9f9f9;">
+  <p><strong><%= @comment.author_name %></strong> <span style="color: #888;"><%= l @comment.created_at, format: :long %></span></p>
+  <p><%= simple_format(h(@comment.body)) %></p>
+</div>
+
+<p><%= link_to t(".manage_link"), admin_comments_url %></p>

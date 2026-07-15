@@ -1529,10 +1529,12 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
   end
 
   test "visitor can post a comment with valid turnstile" do
-    post "/en/posts/terraform-remote-state/comments", params: {
-      comment: { author_name: "テスト太郎", body: "参考になりました！" },
-      "cf-turnstile-response" => "dummy-token"
-    }
+    assert_enqueued_jobs 1, only: CommentNotificationJob do
+      post "/en/posts/terraform-remote-state/comments", params: {
+        comment: { author_name: "テスト太郎", body: "参考になりました！" },
+        "cf-turnstile-response" => "dummy-token"
+      }
+    end
     assert_redirected_to post_path(@post, anchor: "comments")
     follow_redirect!
     assert_includes response.body, "Comment posted"

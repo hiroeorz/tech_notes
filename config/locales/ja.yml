@@ -489,3 +489,10 @@ ja:
             profile_image:
               invalid_type: "%{label}はJPGまたはPNGでアップロードしてください。"
               too_large: "%{label}は%{max_size}MB以下でアップロードしてください。"
+  comment_mailer:
+    new_comment:
+      subject: "[%{site_name}] 記事「%{post_title}」に新しいコメントが投稿されました"
+      title: "新しいコメント通知"
+      intro: "%{author_name} さんがコメントを投稿しました。"
+      post_title: "記事"
+      manage_link: "コメント管理 →"

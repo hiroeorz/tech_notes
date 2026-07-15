@@ -61,6 +61,7 @@ env:
     - TURNSTILE_SECRET_KEY
     - ADMIN_EMAIL
     - ADMIN_PASSWORD
+    - RESEND_API_KEY
   clear:
     RAILS_ENV: production
 
