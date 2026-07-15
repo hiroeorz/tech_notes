@@ -4,7 +4,7 @@
 <%= t(".intro", author_name: @comment.author_name) %>
 
 <%= t(".post_title") %>: <%= @post.localized_title %>
-<%= post_url(@post, locale: I18n.locale) %>
+<%= post_url(slug: @post.slug) %>
 
 ---
 <%= @comment.author_name %> (<%= l @comment.created_at, format: :long %>)

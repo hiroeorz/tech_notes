@@ -7,7 +7,7 @@ class CommentsController < ApplicationController
     @comment.ip_address = request.remote_ip
 
     if turnstile_valid? && @comment.save
-      CommentNotificationJob.perform_later(@comment, locale: I18n.locale.to_s)
+      CommentNotificationJob.perform_later(@comment)
       redirect_to post_path(@post.slug, anchor: "comments"), notice: t("flash.comments.created")
     else
       @comments = @post.comments.oldest

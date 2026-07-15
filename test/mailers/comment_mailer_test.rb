@@ -44,7 +44,7 @@ class CommentMailerTest < ActionMailer::TestCase
     assert_match "Commenter", email.body.encoded
     assert_match "This is a test comment.", email.body.encoded
     assert_match "http://example.com/admin/comments", email.body.encoded
-    assert_match "http://example.com/en/posts/test-post", email.body.encoded
+    assert_match "http://example.com/posts/test-post", email.body.encoded
   end
 
   test "new_comment email is sent with correct subject in Japanese" do
@@ -53,7 +53,7 @@ class CommentMailerTest < ActionMailer::TestCase
     I18n.with_locale(:ja) do
       email = CommentMailer.new_comment(@comment)
       assert_match "[テストブログ] 記事「Test Post」に新しいコメントが投稿されました", email.subject
-      assert_match "http://example.com/ja/posts/test-post", email.html_part.body.decoded
+      assert_match "http://example.com/posts/test-post", email.html_part.body.decoded
     end
   end
 end

@@ -2,7 +2,7 @@
 
 <p><%= t(".intro", author_name: @comment.author_name) %></p>
 
-<h2><%= t(".post_title") %>: <%= link_to @post.localized_title, post_url(@post, locale: I18n.locale) %></h2>
+<h2><%= t(".post_title") %>: <%= link_to @post.localized_title, post_url(slug: @post.slug) %></h2>
 
 <div style="margin: 20px 0; padding: 15px; border-left: 4px solid #e67e22; background: #f9f9f9;">
   <p><strong><%= @comment.author_name %></strong> <span style="color: #888;"><%= l @comment.created_at, format: :long %></span></p>
