@@ -78,8 +78,8 @@ class MarkdownRenderer
 
   def decorate_headings(fragment)
     fragment.css("h2").each do |heading|
-      heading.css("a.anchor").remove
-      heading["id"] ||= self.class.heading_id(heading.text.strip)
+      heading.css("a.anchor, a[data-heading-content]").remove
+      heading["id"] = self.class.heading_id(heading.text.strip)
     end
   end
 
