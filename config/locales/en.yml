@@ -489,3 +489,10 @@ en:
             profile_image:
               invalid_type: "Profile image must be JPG or PNG"
               too_large: "Profile image must be under %{max_size}MB"
+  comment_mailer:
+    new_comment:
+      subject: "[%{site_name}] New comment on \"%{post_title}\""
+      title: "New Comment Notification"
+      intro: "%{author_name} posted a comment on your site."
+      post_title: "Article"
+      manage_link: "Manage comments →"

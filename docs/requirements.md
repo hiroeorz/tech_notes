@@ -986,3 +986,53 @@ Tech Notes は、インフラ、クラウド、SRE、自動化、プログラミ
 - AI翻訳ボタンのリクエスト・レスポンスが正常に動作することを確認する。
 - 公開画面で英語ロケール時に翻訳版が表示され、未設定時は日本語原文がフォールバック表示されることを確認する。
 - 公開画面で日本語ロケール時は常に日本語原文が表示されることを確認する。
+
+## 17. メール通知要件
+
+### 17.1 概要
+
+- 記事にコメントが投稿された際、管理者へメール通知を送信する。
+- メール送信には Resend を利用する。
+- メール送信は非同期ジョブ（Solid Queue）で行い、コメント投稿がブロックされないようにする。
+
+### 17.2 トリガー
+
+- 公開コメントフォームからの投稿が成功した時点で、`CommentNotificationJob` をエンキューする。
+- メール送信に失敗してもコメント投稿自体はロールバックされない（ジョブ内でエラーハンドリング）。
+
+### 17.3 メール仕様
+
+| 項目 | 内容 |
+|---|---|
+| 送信手段 | Resend（`resend` gem、`delivery_method :resend`） |
+| From | `MAILER_FROM_ADDRESS` 環境変数（デフォルト `no-reply@aomaro.com`） |
+| To | `SiteSetting.current.profile_email` |
+| 件名 | `[ブログ名] 記事「{記事タイトル}」に新しいコメントが投稿されました`（ブログ名は `SiteSetting.current.title`） |
+| 本文（HTML/Text） | 記事タイトル（公開ページへのリンク付き）、コメント者名、コメント本文、管理画面コメント一覧へのリンク |
+
+### 17.4 非同期処理
+
+- `CommentNotificationJob` は `ApplicationJob` を継承し、`queue_as :default` とする。
+- 既存ジョブ（`GenerateAudioJob`、`TranslatePostJob`）と同様のパターンに従う。
+- ジョブはコメント保存後の `after_create_commit` またはコントローラの成功時にエンキューする。
+
+### 17.5 環境設定
+
+- **本番環境**: `config.action_mailer.delivery_method = :resend`
+- **開発環境**: `letter_opener_web` gem でブラウザ確認可能にする
+- **テスト環境**: `config.action_mailer.delivery_method = :test`
+- Resend API キーは環境変数 `RESEND_API_KEY` から取得する
+- From アドレスは環境変数 `MAILER_FROM_ADDRESS` から取得し、未設定時は `no-reply@aomaro.com` をデフォルトとする
+- `default_url_options` の `host` は既存の `APP_HOST` を使用する
+
+### 17.6 テスト要件
+
+- `CommentMailer` のユニットテストでレンダリング、送信先、件名を確認する
+- 統合テストでコメント投稿 → ジョブエンキュー → メール送信の一連の流れを確認する
+- 既存の全テストがパスすること
+
+### 17.7 非機能要件
+
+- メール送信がコメント投稿のレイテンシに影響しないこと（非同期ジョブ）
+- 送信失敗時はジョブのリトライ機構に委ね、指数バックオフで最大5回リトライする
+- リトライ上限超過後もコメントはデータベースに残り、管理画面から確認可能であること
