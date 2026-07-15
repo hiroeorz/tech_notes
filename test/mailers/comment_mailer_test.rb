@@ -53,6 +53,7 @@ class CommentMailerTest < ActionMailer::TestCase
     I18n.with_locale(:ja) do
       email = CommentMailer.new_comment(@comment)
       assert_match "[テストブログ] 記事「Test Post」に新しいコメントが投稿されました", email.subject
+      assert_match "http://example.com/ja/posts/test-post", email.html_part.body.decoded
     end
   end
 end
