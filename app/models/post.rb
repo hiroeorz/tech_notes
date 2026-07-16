@@ -88,8 +88,10 @@ class Post < ApplicationRecord
     localized_body = self.localized_body(locale).to_s
     if (img_match = localized_body.match(/!\[([^\]]*)\]\(([^)]+)\)/))
       { type: :image, url: img_match[2], alt: img_match[1].presence || localized_title(locale) }
-    elsif (code_match = localized_body.match(/```(\w*)\n(.+?)```/m))
-      { type: :code, code: code_match[2].strip, language: code_match[1].presence || "text" }
+    elsif (code_match = localized_body.match(/```([^\n]*)\n(.+?)```/m))
+      raw_lang = code_match[1].strip
+      language = raw_lang.split(/[\s:]/).first.presence || "text"
+      { type: :code, code: code_match[2].strip, language: language }
     end
   end
 
