@@ -330,6 +330,40 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     )
 
     assert_nil without.body_preview
+
+    with_filename = Post.create!(
+      admin_user: @admin,
+      category: @category,
+      title: "コード + ファイル名",
+      slug: "code-with-filename",
+      excerpt: "テスト用",
+      body: "```ruby:resend-test.rb\nrequire \"resend\"\n\nResend.api_key = \"re_xxx\"\n```",
+      status: :published,
+      kind: :experiment,
+      published_at: Time.current
+    )
+
+    preview = with_filename.body_preview
+    assert_equal :code, preview[:type]
+    assert_equal "require \"resend\"\n\nResend.api_key = \"re_xxx\"", preview[:code]
+    assert_equal "ruby", preview[:language]
+
+    with_trailing_colon = Post.create!(
+      admin_user: @admin,
+      category: @category,
+      title: "コード + コロン",
+      slug: "code-with-trailing-colon",
+      excerpt: "テスト用",
+      body: "説明文\n```ruby:\nputs \"hello\"\n```\nおわり",
+      status: :published,
+      kind: :experiment,
+      published_at: Time.current
+    )
+
+    preview = with_trailing_colon.body_preview
+    assert_equal :code, preview[:type]
+    assert_equal "puts \"hello\"", preview[:code]
+    assert_equal "ruby", preview[:language]
   end
 
   test "public sidebar tag list and category list count only published posts" do
