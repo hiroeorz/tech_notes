@@ -114,6 +114,10 @@ export GOOGLE_SITE_VERIFICATION="your-verification-token"
 export TURNSTILE_SITE_KEY="0x4AAAAAAA-example"
 export TURNSTILE_SECRET_KEY="0x4AAAAAAA-example-secret"
 
+# Resend（コメント通知メール）— コメント通知を使用する場合のみ必須
+export RESEND_API_KEY="your-resend-api-key"
+export MAILER_FROM_ADDRESS="no-reply@your-app.example.com"
+
 # Kamal デプロイ
 export IMAGE="your-docker-user/tech_notes"
 export SERVER_IP="192.168.0.1"
