@@ -39,7 +39,7 @@ class CommentMailerTest < ActionMailer::TestCase
     end
 
     assert_equal [ "admin@blog.com" ], email.to
-    assert_equal [ ENV.fetch("MAILER_FROM_ADDRESS", "no-reply@aomaro.com") ], email.from
+    assert_equal [ ENV.fetch("MAILER_FROM_ADDRESS") ], email.from
     assert_match "[Test Blog] New comment on \"Test Post\"", email.subject
     assert_match "Commenter", email.body.encoded
     assert_match "This is a test comment.", email.body.encoded

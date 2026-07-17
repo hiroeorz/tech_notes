@@ -88,10 +88,30 @@ class Post < ApplicationRecord
     localized_body = self.localized_body(locale).to_s
     if (img_match = localized_body.match(/!\[([^\]]*)\]\(([^)]+)\)/))
       { type: :image, url: img_match[2], alt: img_match[1].presence || localized_title(locale) }
-    elsif (code_match = localized_body.match(/```([^\n]*)\n(.+?)```/m))
-      raw_lang = code_match[1].strip
-      language = raw_lang.split(/[\s:]/).first.presence || "text"
-      { type: :code, code: code_match[2].strip, language: language }
+    else
+      lines = localized_body.lines
+      lines.each_with_index do |line, opening_index|
+        opening = line.match(/\A[ \t]{0,3}(?<fence>`{3,})(?<info>[^\r\n]*)\r?\n?\z/)
+        next unless opening
+
+        closing_pattern = /\A[ \t]{0,3}`{#{opening[:fence].length},}[ \t]*\r?\n?\z/
+        closing_index = nil
+        lines.each_with_index do |candidate, index|
+          next unless index > opening_index && candidate.match?(closing_pattern)
+
+          closing_index = index
+          break
+        end
+        next unless closing_index
+
+        code = lines[(opening_index + 1)...closing_index].join.strip
+        next if code.blank?
+
+        language = opening[:info].strip.split(/[\s:]/).first.presence || "text"
+        return { type: :code, code: code, language: language }
+      end
+
+      nil
     end
   end
 
