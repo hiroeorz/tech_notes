@@ -261,6 +261,40 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "top experiment card ignores inline triple backticks when extracting code preview" do
+    experiment = Post.create!(
+      admin_user: @admin,
+      category: @category,
+      title: "行内コード記法あり実験",
+      slug: "experiment-with-inline-triple-backticks",
+      excerpt: "行内コード記法付き実験ログです。",
+      body: "環境変数を ```CLOUDFLARE_AI_API_TOKEN``` に設定します。\r\n\r\n  ```bash\r\n  export CLOUDFLARE_AI_API_TOKEN=\"...\"\r\n  ```\r\n",
+      status: :published,
+      kind: :experiment,
+      published_at: Time.current
+    )
+
+    preview = experiment.body_preview
+    assert_equal :code, preview[:type]
+    assert_equal "export CLOUDFLARE_AI_API_TOKEN=\"...\"", preview[:code]
+    assert_equal "bash", preview[:language]
+
+    get "/en"
+
+    assert_response :success
+    assert_select ".experiment-card[href='#{post_path(experiment)}'] .experiment-card-code code", text: "export CLOUDFLARE_AI_API_TOKEN=\"...\""
+  end
+
+  test "post body_preview supports long code fences" do
+    experiment = Post.new(
+      title: "長いコードフェンス",
+      body: "````ruby\nputs 'hello'\n`````",
+      kind: :experiment
+    )
+
+    assert_equal({ type: :code, code: "puts 'hello'", language: "ruby" }, experiment.body_preview)
+  end
+
   test "top experiment card hides preview when post has no image or code block" do
     experiment = Post.create!(
       admin_user: @admin,

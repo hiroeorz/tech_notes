@@ -62,6 +62,7 @@ env:
     - ADMIN_EMAIL
     - ADMIN_PASSWORD
     - RESEND_API_KEY
+    - MAILER_FROM_ADDRESS
   clear:
     RAILS_ENV: production
 
