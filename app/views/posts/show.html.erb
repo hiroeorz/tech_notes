@@ -24,6 +24,7 @@
       <span>▦ <%= @post.display_date.strftime("%Y-%m-%d") %></span>
       <span>↻ <%= t("posts.show.updated") %> <%= @post.updated_at.strftime("%Y-%m-%d") %></span>
       <span>◷ <%= @post.reading_minutes %><%= t("posts.show.minutes") %></span>
+      <span class="views-count">◉ <%= @post.views_count %></span>
       <span>♙ <%= current_site_setting.profile_name %></span>
       <% @post.tags.each do |tag| %>
         <%= link_to tag.name, posts_path(tag: tag.slug), class: "chip" %>

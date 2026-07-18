@@ -20,6 +20,9 @@
       </label>
 
       <div class="editor-actions">
+        <% if post.persisted? %>
+          <span class="editor-views-count">◉ <%= post.views_count %> <%= t("admin.posts.form.views_label") %></span>
+        <% end %>
         <button type="submit" name="commit_status" value="draft" class="secondary-button" formnovalidate><%= t("admin.posts.form.draft_save") %></button>
         <% if post.persisted? %>
           <%= link_to t("admin.posts.form.preview"), preview_admin_post_path(post.slug), class: "secondary-button" %>

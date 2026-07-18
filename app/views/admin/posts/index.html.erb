@@ -45,6 +45,7 @@
           <th><%= t("admin.posts.index.header_category") %></th>
           <th><%= t("admin.posts.index.header_status") %></th>
           <th><%= t("admin.posts.index.header_updated") %></th>
+          <th><%= t("admin.posts.index.header_views") %></th>
           <th><%= t("admin.posts.index.header_actions") %></th>
         </tr>
       </thead>
@@ -68,6 +69,7 @@
             </td>
             <td><span class="status-badge <%= post.status %>">● <%= status_label(post.status) %></span></td>
             <td><%= post.updated_at.strftime("%Y/%m/%d %H:%M") %></td>
+            <td class="views-cell"><%= post.views_count %></td>
             <td class="action-cell">
               <%= link_to t("admin.posts.index.preview"), preview_admin_post_path(post.slug), class: "small-button" %>
               <%= link_to t("admin.posts.index.edit"), edit_admin_post_path(post.slug), class: "small-button" %>
