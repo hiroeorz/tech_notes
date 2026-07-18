@@ -1,5 +1,5 @@
 <main class="page-grid list-public-page">
-  <% list_path = ->(query = {}) { @kind == "experiment" ? experiments_path(query) : posts_path(query) } %>
+  <% list_path = ->(query = {}) { posts_path(query) } %>
   <% preserved_filter_params = request.query_parameters.slice("q", "tag", "month", "sort") %>
   <% search_params = request.query_parameters.slice("category", "tag", "month") %>
 
@@ -7,11 +7,11 @@
     <nav class="breadcrumbs">
       <%= link_to t("posts.index.home"), root_path %>
       <span>›</span>
-      <span><%= @kind == "experiment" ? t("posts.index.title_experiments") : t("posts.index.title_articles") %></span>
+      <span><%= t("posts.index.title_articles") %></span>
     </nav>
 
     <div class="page-title-row">
-      <h1><%= @kind == "experiment" ? t("posts.index.title_experiments") : t("posts.index.title_articles") %></h1>
+      <h1><%= t("posts.index.title_articles") %></h1>
       <%= form_with url: list_path.call, method: :get, class: "search-inline" do |form| %>
         <% search_params.each do |key, value| %>
           <%= hidden_field_tag key, value %>

@@ -19,7 +19,6 @@ class CommentMailerTest < ActionMailer::TestCase
       admin_user: @admin_user,
       status: :published,
       published_at: 1.day.ago,
-      kind: :article
     )
 
     @site_setting = SiteSetting.current

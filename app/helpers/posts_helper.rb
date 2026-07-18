@@ -3,10 +3,6 @@ module PostsHelper
     t("helpers.post.status_#{status}", default: status)
   end
 
-  def kind_label(kind)
-    t("helpers.post.kind_#{kind}", default: kind)
-  end
-
   def extract_headings(markdown)
     MarkdownRenderer.new(markdown).headings
   end

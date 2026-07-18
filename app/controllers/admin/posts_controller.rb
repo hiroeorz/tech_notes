@@ -44,7 +44,7 @@ module Admin
     end
 
     def new
-      @post = Post.new(status: :draft, kind: :article, published_at: Time.current)
+      @post = Post.new(status: :draft, published_at: Time.current)
       prepare_form(use_localized_content: false)
     end
 
@@ -88,7 +88,7 @@ module Admin
     end
 
     def post_params
-      permitted = params.require(:post).permit(:title, :slug, :excerpt, :body, :category_id, :status, :kind, :published_at, :generate_audio)
+      permitted = params.require(:post).permit(:title, :slug, :excerpt, :body, :category_id, :status, :published_at, :generate_audio)
       permitted[:status] = params[:commit_status] if Post.statuses.key?(params[:commit_status])
       permitted
     end

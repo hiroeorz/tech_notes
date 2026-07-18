@@ -14,7 +14,7 @@ Rails.application.routes.draw do
     resources :posts, only: [ :index, :show ], param: :slug do
       resources :comments, only: [ :create ]
     end
-    get "experiments", to: "posts#index", defaults: { kind: "experiment" }, as: :experiments
+    get "experiments", to: redirect(status: :moved_permanently) { |_params, request| request.fullpath.sub("/experiments", "/posts") }, as: :experiments
     get "categories", to: "posts#categories", as: :categories
     get "tags", to: "posts#tags", as: :tags
     get "archives", to: "posts#archives", as: :archives

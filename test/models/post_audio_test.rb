@@ -16,7 +16,6 @@ class PostAudioTest < ActiveSupport::TestCase
       excerpt: "Test excerpt",
       body: "## Hello\nThis is a test article.",
       status: :published,
-      kind: :article,
       published_at: Time.current
     )
   end

@@ -2,9 +2,7 @@
 
 class PostsController < ApplicationController
   def index
-    @kind = params[:kind].presence || "article"
     @posts = Post.publicly_visible.includes(:category, :tags, :post_translations).recent
-    @posts = @posts.where(kind: Post.kinds[@kind]) if Post.kinds.key?(@kind)
     @posts = @posts.joins(:category).where(categories: { slug: params[:category] }) if params[:category].present?
     @posts = @posts.joins(:tags).where(tags: { slug: params[:tag] }) if params[:tag].present?
     @posts = T.unsafe(@posts).search_by_title(params[:q], locale: I18n.locale) if params[:q].present?

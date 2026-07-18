@@ -9,8 +9,7 @@
   <% unless controller_path == "admin/sessions" %>
     <nav class="global-nav" aria-label="<%= t("shared.header.nav_aria") %>" data-menu-nav>
       <%= link_to t("shared.header.home"), root_path, class: ("active" if current_page?(root_path)) %>
-      <%= link_to t("shared.header.articles"), posts_path, class: ("active" if controller_name == "posts" && action_name != "tags" && params[:kind] != "experiment" && request.path != experiments_path) %>
-      <%= link_to t("shared.header.experiments"), experiments_path, class: ("active" if request.path == experiments_path || params[:kind] == "experiment") %>
+      <%= link_to t("shared.header.articles"), posts_path, class: ("active" if controller_name == "posts" && !%w[tags categories archives].include?(action_name)) %>
       <%= link_to t("shared.header.tags"), tags_path, class: ("active" if current_page?(tags_path)) %>
       <% if current_site_setting.profile_visible? %>
         <%= link_to t("shared.header.profile"), profile_path, class: ("active" if current_page?(profile_path)) %>

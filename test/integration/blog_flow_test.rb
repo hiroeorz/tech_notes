@@ -21,7 +21,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "Terraformのリモートステートを設計するためのメモです。",
       body: "## 構成例\n- S3\n- DynamoDB\n```hcl\nterraform {}\n```",
       status: :published,
-      kind: :article,
       published_at: Time.current
     )
     @post.tags << @tag
@@ -107,12 +106,12 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_select ".markdown-body .article-image img.article-image-viewer-trigger[role='button'][tabindex='0'][src='/icon.png'][alt='構成図']"
   end
 
-  test "post filters tolerate invalid month and experiment search stays on experiments path" do
+  test "post filters tolerate invalid month and search covers all posts" do
     get "/en/posts", params: { month: "not-a-month" }
     assert_response :success
     assert_includes response.body, @post.title
 
-    experiment = Post.create!(
+    post = Post.create!(
       admin_user: @admin,
       category: @category,
       title: "実験ログ検索対象",
@@ -120,16 +119,19 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "実験ログです。",
       body: "## 実験",
       status: :published,
-      kind: :experiment,
       published_at: Time.current
     )
 
-    get "/en/experiments", params: { q: "実験ログ検索対象" }
+    get "/en/posts", params: { q: "実験ログ検索対象" }
     assert_response :success
-    assert_includes response.body, experiment.title
-    assert_select "form[action='/en/experiments']"
-    assert_select ".global-nav a.active", text: "Experiments"
-    assert_select ".filter-tabs a[href^='/en/experiments'][href*='category=aws']", text: @category.localized_name
+    assert_includes response.body, post.title
+    assert_select "form[action='/en/posts']"
+    assert_select ".global-nav a.active", text: "Articles"
+    assert_select ".filter-tabs a[href^='/en/posts'][href*='category=aws']", text: @category.localized_name
+
+    get "/en/experiments", params: { q: "実験ログ検索対象" }
+    assert_response :moved_permanently
+    assert_redirected_to "/en/posts?q=%E5%AE%9F%E9%A8%93%E3%83%AD%E3%82%B0%E6%A4%9C%E7%B4%A2%E5%AF%BE%E8%B1%A1"
   end
 
   test "public post list can change sort order and reset filters" do
@@ -141,7 +143,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "古い公開記事です。",
       body: "## 古い記事",
       status: :published,
-      kind: :article,
       published_at: 3.days.ago
     )
 
@@ -165,8 +166,8 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_select ".page-count", text: "1 / 1 pages (1 total)"
   end
 
-  test "top daily log prefers experiment posts over regular articles" do
-    experiment = Post.create!(
+  test "top daily log displays the newest published post regardless of type" do
+    older_post = Post.create!(
       admin_user: @admin,
       category: @category,
       title: "今日の実験ログ",
@@ -174,7 +175,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "今日の実験ログです。",
       body: "## 実験",
       status: :published,
-      kind: :experiment,
       published_at: 1.day.ago
     )
 
@@ -186,14 +186,13 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "さらに新しい通常記事です。",
       body: "## 記事",
       status: :published,
-      kind: :article,
       published_at: Time.current
     )
 
     get "/en"
 
     assert_response :success
-    assert_select ".daily-card h2", text: experiment.title
+    assert_select ".daily-card h2", text: "さらに新しい通常記事"
   end
 
   test "top popular articles are ordered by views and published date in both locales" do
@@ -205,7 +204,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "最も読まれている記事です。",
       body: "## 人気記事",
       status: :published,
-      kind: :article,
       published_at: 3.days.ago
     )
     newer_tied = Post.create!(
@@ -216,7 +214,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "同数閲覧の新しい記事です。",
       body: "## 新しい記事",
       status: :published,
-      kind: :article,
       published_at: 1.day.ago
     )
     older_tied = Post.create!(
@@ -227,7 +224,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "同数閲覧の古い記事です。",
       body: "## 古い記事",
       status: :published,
-      kind: :article,
       published_at: 2.days.ago
     )
     draft = Post.create!(
@@ -238,9 +234,8 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "下書きの人気記事です。",
       body: "## 下書き",
       status: :draft,
-      kind: :article
     )
-    experiment = Post.create!(
+    popular_post = Post.create!(
       admin_user: @admin,
       category: @category,
       title: "人気の実験ログ",
@@ -248,7 +243,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "人気の実験ログです。",
       body: "## 実験",
       status: :published,
-      kind: :experiment,
       published_at: Time.current
     )
 
@@ -257,9 +251,9 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     newer_tied.update!(views_count: 30)
     older_tied.update!(views_count: 30)
     draft.update!(views_count: 100)
-    experiment.update!(views_count: 100)
+    popular_post.update!(views_count: 100)
 
-    expected_titles = [ most_viewed, newer_tied, older_tied, @post ].map(&:title)
+    expected_titles = [ popular_post, most_viewed, newer_tied ].map(&:title)
 
     get "/ja"
     assert_response :success
@@ -270,6 +264,39 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select ".latest-posts h2", text: "Most Read Articles"
     assert_equal expected_titles, css_select(".latest-posts .article-lines .article-line strong").map(&:text)
+    assert_equal 3, css_select(".latest-posts .article-lines .article-line").size
+  end
+
+  test "latest post cards include the 21 newest published posts" do
+    oldest = Post.create!(
+      admin_user: @admin,
+      category: @category,
+      title: "最古の公開記事",
+      slug: "oldest-latest-post",
+      excerpt: "最古の公開記事です。",
+      body: "本文",
+      status: :published,
+      published_at: 23.minutes.ago
+    )
+    22.times do |index|
+      Post.create!(
+        admin_user: @admin,
+        category: @category,
+        title: "最新記事 #{index}",
+        slug: "latest-post-#{index}",
+        excerpt: "最新記事です。",
+        body: "本文",
+        status: :published,
+        published_at: (index + 1).minutes.ago
+      )
+    end
+
+    get "/en"
+
+    assert_response :success
+    assert_equal 21, css_select(".experiments-section .experiment-card").size
+    assert_select ".experiments-section .experiment-card", text: /最新記事 0/
+    assert_select ".experiments-section .experiment-card", text: oldest.title, count: 0
   end
 
   test "top daily log does not reveal draft experiments" do
@@ -281,18 +308,17 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "非公開の実験ログです。",
       body: "## 実験",
       status: :draft,
-      kind: :experiment
     )
 
     get "/en"
 
     assert_response :success
     assert_not_includes response.body, "非公開の実験ログ"
-    assert_select ".daily-card h2", text: "TerraformでS3バケットを作ってみる"
+    assert_select ".daily-card h2", text: @post.title
   end
 
-  test "top experiment cards show body image preview when post has markdown image" do
-    experiment = Post.create!(
+  test "latest post cards show body image preview when post has markdown image" do
+    post = Post.create!(
       admin_user: @admin,
       category: @category,
       title: "画像あり実験",
@@ -300,22 +326,21 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "画像付き実験ログです。",
       body: "![構成図](https://example.com/diagram.png)\n\n実験内容です。",
       status: :published,
-      kind: :experiment,
       published_at: Time.current
     )
 
     get "/en"
     assert_response :success
-    assert_select ".experiment-card[href='#{post_path(experiment)}']" do
-      assert_select "time", text: experiment.display_date.strftime("%Y-%m-%d")
-      assert_select "h3", text: experiment.title
+    assert_select ".experiments-section .experiment-card[href='#{post_path(post)}']" do
+      assert_select "time", text: post.display_date.strftime("%Y-%m-%d")
+      assert_select "h3", text: post.title
       assert_select ".experiment-card-preview img.experiment-card-image[src='https://example.com/diagram.png'][alt='構成図']"
-      assert_select "p", text: experiment.excerpt
+      assert_select "p", text: post.excerpt
     end
   end
 
-  test "top experiment cards show code preview when post has code block" do
-    experiment = Post.create!(
+  test "latest post cards show code preview when post has code block" do
+    post = Post.create!(
       admin_user: @admin,
       category: @category,
       title: "コード実験",
@@ -323,22 +348,21 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "コード付き実験ログです。",
       body: "```ruby\nputs 'hello'\n```\n\n実験内容です。",
       status: :published,
-      kind: :experiment,
       published_at: Time.current
     )
 
     get "/en"
     assert_response :success
-    assert_select ".experiment-card[href='#{post_path(experiment)}']" do
-      assert_select "time", text: experiment.display_date.strftime("%Y-%m-%d")
-      assert_select "h3", text: experiment.title
+    assert_select ".experiments-section .experiment-card[href='#{post_path(post)}']" do
+      assert_select "time", text: post.display_date.strftime("%Y-%m-%d")
+      assert_select "h3", text: post.title
       assert_select ".experiment-card-preview pre.experiment-card-code"
-      assert_select "p", text: experiment.excerpt
+      assert_select "p", text: post.excerpt
     end
   end
 
-  test "top experiment card ignores inline triple backticks when extracting code preview" do
-    experiment = Post.create!(
+  test "latest post card ignores inline triple backticks when extracting code preview" do
+    post = Post.create!(
       admin_user: @admin,
       category: @category,
       title: "行内コード記法あり実験",
@@ -346,11 +370,10 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "行内コード記法付き実験ログです。",
       body: "環境変数を ```CLOUDFLARE_AI_API_TOKEN``` に設定します。\r\n\r\n  ```bash\r\n  export CLOUDFLARE_AI_API_TOKEN=\"...\"\r\n  ```\r\n",
       status: :published,
-      kind: :experiment,
       published_at: Time.current
     )
 
-    preview = experiment.body_preview
+    preview = post.body_preview
     assert_equal :code, preview[:type]
     assert_equal "export CLOUDFLARE_AI_API_TOKEN=\"...\"", preview[:code]
     assert_equal "bash", preview[:language]
@@ -358,21 +381,20 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     get "/en"
 
     assert_response :success
-    assert_select ".experiment-card[href='#{post_path(experiment)}'] .experiment-card-code code", text: "export CLOUDFLARE_AI_API_TOKEN=\"...\""
+    assert_select ".experiments-section .experiment-card[href='#{post_path(post)}'] .experiment-card-code code", text: "export CLOUDFLARE_AI_API_TOKEN=\"...\""
   end
 
   test "post body_preview supports long code fences" do
-    experiment = Post.new(
+    post = Post.new(
       title: "長いコードフェンス",
       body: "````ruby\nputs 'hello'\n`````",
-      kind: :experiment
     )
 
-    assert_equal({ type: :code, code: "puts 'hello'", language: "ruby" }, experiment.body_preview)
+    assert_equal({ type: :code, code: "puts 'hello'", language: "ruby" }, post.body_preview)
   end
 
-  test "top experiment card hides preview when post has no image or code block" do
-    experiment = Post.create!(
+  test "latest post card hides preview when post has no image or code block" do
+    post = Post.create!(
       admin_user: @admin,
       category: @category,
       title: "プレビューなし実験",
@@ -380,14 +402,13 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "プレビューなし実験ログです。",
       body: "実験内容のみの本文です。",
       status: :published,
-      kind: :experiment,
       published_at: Time.current
     )
 
     get "/en"
     assert_response :success
-    assert_select ".experiment-card[href='#{post_path(experiment)}']" do
-      assert_select "h3", text: experiment.title
+    assert_select ".experiments-section .experiment-card[href='#{post_path(post)}']" do
+      assert_select "h3", text: post.title
       assert_select ".experiment-card-preview", count: 0
     end
   end
@@ -401,7 +422,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "テスト用",
       body: "![画像1](/img1.png) ![画像2](/img2.png)\n```ruby\nputs 'ignored'\n```",
       status: :published,
-      kind: :experiment,
       published_at: Time.current
     )
 
@@ -418,7 +438,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "テスト用",
       body: "本文\n```javascript\nconsole.log('hi')\n```\n以上",
       status: :published,
-      kind: :experiment,
       published_at: Time.current
     )
 
@@ -435,7 +454,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "テスト用",
       body: "本文のみ",
       status: :published,
-      kind: :experiment,
       published_at: Time.current
     )
 
@@ -449,7 +467,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "テスト用",
       body: "```ruby:resend-test.rb\nrequire \"resend\"\n\nResend.api_key = \"re_xxx\"\n```",
       status: :published,
-      kind: :experiment,
       published_at: Time.current
     )
 
@@ -466,7 +483,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "テスト用",
       body: "説明文\n```ruby:\nputs \"hello\"\n```\nおわり",
       status: :published,
-      kind: :experiment,
       published_at: Time.current
     )
 
@@ -487,7 +503,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "下書き記事です。",
       body: "## 下書き",
       status: :draft,
-      kind: :article
     )
     draft.tags << draft_tag
 
@@ -568,6 +583,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
     get edit_admin_post_path(@post.slug)
     assert_response :success
+    assert_select "[name='post[kind]']", count: 0
     assert_includes response.body, "data-open-publish-modal"
     assert_includes response.body, "data-publish-modal-backdrop"
     assert_includes response.body, I18n.t("admin.posts.form.modal_title")
@@ -601,6 +617,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
     get new_admin_post_path
     assert_response :success
+    assert_select "[name='post[kind]']", count: 0
     assert_includes response.body, "data-open-editor-preview"
     assert_includes response.body, I18n.t("admin.posts.form.image_help_draft")
     assert_select "input[data-post-image-input]", count: 0
@@ -789,8 +806,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
         excerpt: "未ログイン投稿です。",
         body: "## 本文",
         category_id: @category.id,
-        status: "published",
-        kind: "article"
+        status: "published"
       }
     }
     assert_redirected_to admin_login_path
@@ -1008,7 +1024,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
         body: @post.body,
         category_id: @category.id,
         status: "published",
-        kind: "article",
         tag_names: "Terraform, AWS"
       }
     }
@@ -1032,7 +1047,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
         body: @post.body,
         category_id: @category.id,
         status: "published",
-        kind: "article",
         tag_names: @post.tag_names
       }
     }
@@ -1055,7 +1069,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
         body: @post.body,
         category_id: @category.id,
         status: "published",
-        kind: "article",
         tag_names: @post.tag_names
       }
     }
@@ -1071,7 +1084,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
         body: @post.body,
         category_id: @category.id,
         status: "draft",
-        kind: "article",
         tag_names: @post.tag_names
       }
     }
@@ -1093,7 +1105,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
           body: "下書き本文です。",
           category_id: @category.id,
           status: "published",
-          kind: "article",
           tag_names: ""
         }
       }
@@ -1116,7 +1127,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "古い記事です。",
       body: "## 古い記事",
       status: :published,
-      kind: :article,
       published_at: 2.days.ago,
       updated_at: 2.days.ago
     )
@@ -1129,7 +1139,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "新しい記事です。",
       body: "## 新しい記事",
       status: :published,
-      kind: :article,
       published_at: 1.day.ago,
       updated_at: 1.day.ago
     )
@@ -1188,7 +1197,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "下書きです。",
       body: "## 下書き",
       status: :draft,
-      kind: :article
     )
 
     Post.create!(
@@ -1199,7 +1207,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "未来の記事です。",
       body: "## 未来",
       status: :published,
-      kind: :article,
       published_at: 3.days.from_now
     )
 
@@ -1422,7 +1429,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
           body: "## 検証内容\n1. 準備\n2. 実行\n3. 確認",
           category_id: @category.id,
           status: "draft",
-          kind: "experiment",
           tag_names: "検証, AWS"
         }
       }
@@ -1444,7 +1450,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
         body: created.body,
         category_id: @category.id,
         status: "published",
-        kind: "experiment",
         tag_names: created.tag_names
       }
     }
@@ -1468,7 +1473,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
         body: "## 予約公開\n公開前の本文です。",
         category_id: @category.id,
         status: "published",
-        kind: "article",
         published_at: future_time.strftime("%Y-%m-%dT%H:%M"),
         tag_names: "Terraform"
       }
@@ -1795,7 +1799,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
             body: "## 更新後の本文\n\n日本語の内容です。",
             category_id: @category.id,
             status: "draft",
-            kind: "article",
             tag_names: @post.tag_names
           }
         },
@@ -1823,7 +1826,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
             body: "#{status} body",
             category_id: @category.id,
             status: "published",
-            kind: "article",
             tag_names: @post.tag_names
           }
         }
@@ -2109,7 +2111,6 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       excerpt: "Post with audio",
       body: "## Audio\nTest.",
       status: :published,
-      kind: :article,
       published_at: Time.current
     )
     post_audio = audio_post.post_audios.create!(

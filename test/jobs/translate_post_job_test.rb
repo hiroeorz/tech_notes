@@ -31,7 +31,6 @@ class TranslatePostJobTest < ActiveJob::TestCase
       excerpt: "Source excerpt",
       body: "Source body",
       status: :published,
-      kind: :article
     )
     @digest = PostTranslation.digest_for(title: @post.title, body: @post.body, excerpt: @post.excerpt)
     @post.post_translations.create!(

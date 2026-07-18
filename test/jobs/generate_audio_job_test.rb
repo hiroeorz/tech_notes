@@ -16,7 +16,6 @@ class GenerateAudioJobTest < ActiveJob::TestCase
       excerpt: "Test",
       body: "## Hello\nTest body.",
       status: :published,
-      kind: :article,
       published_at: Time.current
     )
     @digest = PostAudio.digest_for(@post.body)
