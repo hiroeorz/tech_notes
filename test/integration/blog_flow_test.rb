@@ -2164,6 +2164,12 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_select ".views-count", text: /◉ \d+/
   end
 
+  test "bot user agent does not increment views count" do
+    assert_no_difference -> { @post.reload.views_count } do
+      get "/en/posts/#{@post.slug}", headers: { "User-Agent" => "Googlebot/2.1 (+http://www.google.com/bot.html)" }
+    end
+  end
+
   def with_category_name_translator(translator)
     original_new = CategoryNameTranslator.method(:new)
     CategoryNameTranslator.define_singleton_method(:new) { |*| translator }
