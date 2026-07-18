@@ -2,7 +2,7 @@
 
 class HomeController < ApplicationController
   def index
-    @latest_posts = Post.publicly_visible.article.includes(:category, :tags, :post_translations).recent.limit(5)
+    @popular_posts = T.unsafe(Post.publicly_visible.article.includes(:category, :tags, :post_translations)).most_viewed.limit(5)
     @experiments = Post.publicly_visible.experiment.includes(:tags, :post_translations).recent.limit(21)
     @daily_log = Post.publicly_visible.experiment.includes(:post_translations).recent.first
     @top_filter_categories = Category.where(slug: %w[infrastructure aws automation programming security ai-development]).index_by(&:slug)

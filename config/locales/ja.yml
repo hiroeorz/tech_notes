@@ -106,7 +106,7 @@ ja:
       daily_log: "# 今日のひとことログ"
       memo: "# メモ: バージョニングも有効化しておく<br># → 実験ログに続く..."
       continue_to_experiments: "実験ログに続く →"
-      latest_posts: "最新の記事"
+      popular_posts: "よく読まれている記事"
       all: "すべて"
       view_all_articles: "記事一覧へ →"
       experiments: "実験ログ"
