@@ -106,7 +106,7 @@ en:
       daily_log: "# Today's Log"
       memo: "# Memo: Enable versioning too<br># → Continues in experiments..."
       continue_to_experiments: "Continue to experiments →"
-      latest_posts: "Latest Posts"
+      popular_posts: "Most Read Articles"
       all: "All"
       view_all_articles: "View all articles →"
       experiments: "Experiments"

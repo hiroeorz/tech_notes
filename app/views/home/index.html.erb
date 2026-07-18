@@ -38,7 +38,7 @@
 
     <section class="note-section latest-posts">
       <div class="section-heading">
-        <h2><%= t("home.index.latest_posts") %></h2>
+        <h2><%= t("home.index.popular_posts") %></h2>
         <div class="filter-tabs">
           <%= link_to t("home.index.all"), posts_path, class: "active" %>
           <% %w[infrastructure aws automation programming security ai-development].each do |slug| %>
@@ -50,7 +50,7 @@
       </div>
 
       <div class="article-lines">
-        <% @latest_posts.each do |post| %>
+        <% @popular_posts.each do |post| %>
           <%= link_to post_path(post), class: "article-line" do %>
             <time><%= post.display_date.strftime("%Y-%m-%d") %></time>
             <strong><%= post.localized_title %></strong>

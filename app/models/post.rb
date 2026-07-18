@@ -29,6 +29,7 @@ class Post < ApplicationRecord
   before_save :set_published_at
 
   scope :recent, -> { order(published_at: :desc, updated_at: :desc) }
+  scope :most_viewed, -> { order(views_count: :desc, published_at: :desc) }
   scope :publicly_visible, -> { published.where("published_at IS NULL OR published_at <= ?", Time.current) }
 
   def self.search_by_title(query, locale: I18n.locale)

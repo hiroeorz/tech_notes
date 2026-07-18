@@ -196,6 +196,82 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_select ".daily-card h2", text: experiment.title
   end
 
+  test "top popular articles are ordered by views and published date in both locales" do
+    most_viewed = Post.create!(
+      admin_user: @admin,
+      category: @category,
+      title: "最も読まれている記事",
+      slug: "most-viewed-article",
+      excerpt: "最も読まれている記事です。",
+      body: "## 人気記事",
+      status: :published,
+      kind: :article,
+      published_at: 3.days.ago
+    )
+    newer_tied = Post.create!(
+      admin_user: @admin,
+      category: @category,
+      title: "同数閲覧の新しい記事",
+      slug: "newer-tied-article",
+      excerpt: "同数閲覧の新しい記事です。",
+      body: "## 新しい記事",
+      status: :published,
+      kind: :article,
+      published_at: 1.day.ago
+    )
+    older_tied = Post.create!(
+      admin_user: @admin,
+      category: @category,
+      title: "同数閲覧の古い記事",
+      slug: "older-tied-article",
+      excerpt: "同数閲覧の古い記事です。",
+      body: "## 古い記事",
+      status: :published,
+      kind: :article,
+      published_at: 2.days.ago
+    )
+    draft = Post.create!(
+      admin_user: @admin,
+      category: @category,
+      title: "下書きの人気記事",
+      slug: "draft-popular-article",
+      excerpt: "下書きの人気記事です。",
+      body: "## 下書き",
+      status: :draft,
+      kind: :article
+    )
+    experiment = Post.create!(
+      admin_user: @admin,
+      category: @category,
+      title: "人気の実験ログ",
+      slug: "popular-experiment-log",
+      excerpt: "人気の実験ログです。",
+      body: "## 実験",
+      status: :published,
+      kind: :experiment,
+      published_at: Time.current
+    )
+
+    @post.update!(views_count: 10)
+    most_viewed.update!(views_count: 50)
+    newer_tied.update!(views_count: 30)
+    older_tied.update!(views_count: 30)
+    draft.update!(views_count: 100)
+    experiment.update!(views_count: 100)
+
+    expected_titles = [ most_viewed, newer_tied, older_tied, @post ].map(&:title)
+
+    get "/ja"
+    assert_response :success
+    assert_select ".latest-posts h2", text: "よく読まれている記事"
+    assert_equal expected_titles, css_select(".latest-posts .article-lines .article-line strong").map(&:text)
+
+    get "/en"
+    assert_response :success
+    assert_select ".latest-posts h2", text: "Most Read Articles"
+    assert_equal expected_titles, css_select(".latest-posts .article-lines .article-line strong").map(&:text)
+  end
+
   test "top daily log does not reveal draft experiments" do
     Post.create!(
       admin_user: @admin,
