@@ -70,10 +70,12 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
 
   # Static type checking with Sorbet
-  gem "sorbet-runtime"
   gem "sorbet", require: false
   gem "tapioca", require: false
 end
+
+# Sorbet runtime type checking (available in all environments, including production)
+gem "sorbet-runtime"
 
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
