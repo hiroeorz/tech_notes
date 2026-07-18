@@ -1812,6 +1812,28 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_select "textarea[name='post[excerpt]']", text: "管理画面の日本語要約"
   end
 
+  test "admin post list displays views count column" do
+    @post.update!(views_count: 5)
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+    follow_redirect!
+
+    get admin_posts_path
+    assert_response :success
+    assert_select "thead th", text: I18n.t("admin.posts.index.header_views")
+    assert_select "td.views-cell", text: "5"
+  end
+
+  test "admin post edit form displays views count" do
+    @post.update!(views_count: 3)
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+    follow_redirect!
+
+    get edit_admin_post_path(@post.slug)
+    assert_response :success
+    assert_select ".editor-views-count", text: /3/
+    assert_select ".editor-views-count", text: /#{I18n.t("admin.posts.form.views_label")}/
+  end
+
   private
 
   def with_post_summary_generator(generator)
@@ -2044,6 +2066,25 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     get "/en/posts/terraform-remote-state"
     assert_response :success
     assert_select ".audio-player-wrapper", count: 0
+  end
+
+  test "public post view increments views count" do
+    assert_difference -> { @post.reload.views_count }, 1 do
+      get "/en/posts/#{@post.slug}"
+    end
+  end
+
+  test "admin view does not increment views count" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+    assert_no_difference -> { @post.reload.views_count } do
+      get "/en/posts/#{@post.slug}"
+    end
+  end
+
+  test "public post page displays views count" do
+    get "/en/posts/#{@post.slug}"
+    assert_response :success
+    assert_select ".views-count", text: /◉ \d+/
   end
 
   def with_category_name_translator(translator)

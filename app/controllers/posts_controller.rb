@@ -25,6 +25,7 @@ class PostsController < ApplicationController
 
   def show
     @post = Post.publicly_visible.includes(:category, :tags, :post_translations, :post_audios).find_by!(slug: params[:slug])
+    @post.increment!(:views_count) unless admin_signed_in?
     @comment = @post.comments.build
     @comments = @post.comments.oldest
     set_post_meta(@post)

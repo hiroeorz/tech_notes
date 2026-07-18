@@ -820,6 +820,11 @@ textarea {
   margin-bottom: 12px;
 }
 
+.views-count {
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .article-actions {
   margin-bottom: 16px;
 }
@@ -1794,6 +1799,12 @@ pre[data-filename]::before {
   display: inline;
 }
 
+.views-cell {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .pagination {
   display: flex;
   justify-content: center;
@@ -1861,6 +1872,12 @@ pre[data-filename]::before {
   gap: 16px;
   align-items: end;
   padding-bottom: 1px;
+}
+
+.editor-views-count {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
 }
 
 .publish-menu {
