@@ -1,3 +1,5 @@
+# typed: true
+
 require "digest"
 require "json"
 

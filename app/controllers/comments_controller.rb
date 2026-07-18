@@ -1,6 +1,8 @@
+# typed: true
+
 class CommentsController < ApplicationController
   before_action :set_post
-  rate_limit to: 5, within: 1.minute, only: :create, by: -> { request.remote_ip }, with: -> { render_too_many_requests }
+  rate_limit to: 5, within: 1.minute, only: :create, by: -> { T.unsafe(self).request.remote_ip }, with: -> { T.unsafe(self).render_too_many_requests }
 
   def create
     @comment = @post.comments.new(comment_params)

@@ -1,3 +1,5 @@
+# typed: true
+
 module Admin
   class CategoriesController < BaseController
     def index

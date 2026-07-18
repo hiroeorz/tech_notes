@@ -1,3 +1,5 @@
+# typed: true
+
 require "digest"
 require "nokogiri"
 require "rouge"
@@ -62,7 +64,7 @@ class MarkdownRenderer
 
   def normalized_markdown
     normalized = []
-    previous_list_item = false
+    previous_list_item = T.let(false, T::Boolean)
 
     @markdown.each_line do |line|
       current_list_item = line.match?(/\A\s*(?:[-*+]|\d+\.)\s+/)

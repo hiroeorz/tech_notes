@@ -1,3 +1,5 @@
+# typed: true
+
 module Admin
   class SessionsController < ApplicationController
     def new

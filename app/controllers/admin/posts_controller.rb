@@ -1,10 +1,12 @@
+# typed: true
+
 module Admin
   class PostsController < BaseController
     before_action :set_post, only: [ :show, :preview, :edit, :update, :destroy ]
 
     def index
       @posts = Post.includes(:category, :tags, :post_translations).recent
-      @posts = @posts.search_by_title(params[:q], locale: I18n.locale) if params[:q].present?
+      @posts = T.unsafe(@posts).search_by_title(params[:q], locale: I18n.locale) if params[:q].present?
       @posts = @posts.where(category_id: params[:category_id]) if params[:category_id].present?
       @posts = @posts.where(status: params[:status]) if params[:status].present? && Post.statuses.key?(params[:status])
       @posts = @posts.reorder(updated_at: :asc) if params[:sort] == "oldest"
@@ -96,7 +98,7 @@ module Admin
     end
 
     def save_post
-      saved = false
+      saved = T.let(false, T::Boolean)
       Post.transaction do
         saved = @post.save
         raise ActiveRecord::Rollback unless saved

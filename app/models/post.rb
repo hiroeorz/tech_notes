@@ -1,3 +1,5 @@
+# typed: true
+
 require "digest"
 
 class Post < ApplicationRecord
@@ -59,7 +61,7 @@ class Post < ApplicationRecord
   end
 
   def display_date
-    (published_at || created_at || Time.current).to_date
+    (T.unsafe(published_at) || T.unsafe(created_at) || Time.current).to_date
   end
 
   def localized_content(locale = I18n.locale)
@@ -95,7 +97,7 @@ class Post < ApplicationRecord
         next unless opening
 
         closing_pattern = /\A[ \t]{0,3}`{#{opening[:fence].length},}[ \t]*\r?\n?\z/
-        closing_index = nil
+        closing_index = T.let(nil, T.nilable(Integer))
         lines.each_with_index do |candidate, index|
           next unless index > opening_index && candidate.match?(closing_pattern)
 
@@ -137,7 +139,7 @@ class Post < ApplicationRecord
   end
 
   def validate_images
-    images.each do |image|
+    T.unsafe(images).each do |image|
       unless image.blob.content_type.in?(IMAGE_CONTENT_TYPES)
         errors.add(:images, :invalid_type)
       end

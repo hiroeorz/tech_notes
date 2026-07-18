@@ -1,3 +1,5 @@
+# typed: true
+
 class LlmsTxtController < ApplicationController
   skip_before_action :redirect_to_localized_url
   skip_after_action :set_content_language

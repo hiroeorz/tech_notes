@@ -1,3 +1,5 @@
+# typed: true
+
 module Admin
   class PostImagesController < BaseController
     before_action :set_post
