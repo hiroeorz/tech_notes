@@ -1,6 +1,18 @@
 # typed: true
 
 class PostsController < ApplicationController
+  BOT_USER_AGENT_PATTERNS = %r{
+    bot|crawler|spider|scraper|curl|wget|python|java|go-http|libwww|http-client|node-fetch|
+    facebookexternalhit|twitterbot|linkedinbot|slackbot|discordbot|telegrambot|whatsapp|
+    googlebot|google-inspectiontool|bingbot|yandex|baiduspider|duckduckbot|yahoo|
+    ahrefsbot|semrushbot|mj12bot|dotbot|rogerbot|screaming|sitebulb|
+    petalbot|applebot|bytespider|claudebot|gptbot|chatgpt|anthropic|cohere|perplexity|
+    amazonbot|oai-searchbot|diffbot|seznambot|sogou|yisouspider|
+    feedburner|feedly|newsblur|superfeedr|feedbin|inoreader|feeder|theoldreader|
+    monitoring|uptime|pingdom|newrelic|statuscake|checkly|site24x7|datadog|
+    lighthouse|pagespeed|chrome-lighthouse|webpagetest|speedcurve
+  }xi
+
   def index
     @posts = Post.publicly_visible.includes(:category, :tags, :post_translations).recent
     @posts = @posts.joins(:category).where(categories: { slug: params[:category] }) if params[:category].present?
@@ -23,7 +35,7 @@ class PostsController < ApplicationController
 
   def show
     @post = Post.publicly_visible.includes(:category, :tags, :post_translations, :post_audios).find_by!(slug: params[:slug])
-    @post.increment!(:views_count) unless admin_signed_in?
+    @post.increment!(:views_count) if count_view?
     @comment = @post.comments.build
     @comments = @post.comments.oldest
     set_post_meta(@post)
@@ -61,6 +73,15 @@ class PostsController < ApplicationController
   end
 
   private
+
+  def count_view?
+    !admin_signed_in? && !bot_request?
+  end
+
+  def bot_request?
+    ua = request.user_agent.to_s
+    ua.present? && BOT_USER_AGENT_PATTERNS.match?(ua)
+  end
 
   def parsed_month
     return if params[:month].blank?
