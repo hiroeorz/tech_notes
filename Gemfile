@@ -68,6 +68,11 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+
+  # Static type checking with Sorbet
+  gem "sorbet-runtime"
+  gem "sorbet", require: false
+  gem "tapioca", require: false
 end
 
 group :development do

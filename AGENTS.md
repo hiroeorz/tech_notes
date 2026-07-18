@@ -41,8 +41,9 @@
 - 機能追加は、要件整理、設計、実装、テスト実装、テスト実行、Rubocopなどのリンター実行の順で進める。
 - UIや画面挙動を追加・変更する場合は、実装前に `docs/requirements.md` の該当セクションへ要件を追記または更新する。
 
-## リンター / セキュリティスキャン
+## リンター / 型チェック / セキュリティスキャン
 
+- 型チェック: `bundle exec srb tc` で Sorbet の静的型検査を実行。`# typed: true` 以上のファイルでエラーがないことを確認する。
 - スタイルは Rails Omakase 準拠: `bin/rubocop` で `rubocop-rails-omakase` 設定を実行。CI では `bin/rubocop -f github`。
 - `bin/brakeman --no-pager` と `bin/bundler-audit` を CI で実行（追加引数なし）。
 - JS 依存関係は `bin/importmap audit` で監査。

@@ -1,3 +1,5 @@
+# typed: true
+
 class ActiveStoragePublicUrl
   def self.for(attachment_or_blob)
     new(attachment_or_blob).to_s

@@ -1,3 +1,5 @@
+# typed: true
+
 class PostsController < ApplicationController
   def index
     @kind = params[:kind].presence || "article"
@@ -5,7 +7,7 @@ class PostsController < ApplicationController
     @posts = @posts.where(kind: Post.kinds[@kind]) if Post.kinds.key?(@kind)
     @posts = @posts.joins(:category).where(categories: { slug: params[:category] }) if params[:category].present?
     @posts = @posts.joins(:tags).where(tags: { slug: params[:tag] }) if params[:tag].present?
-    @posts = @posts.search_by_title(params[:q], locale: I18n.locale) if params[:q].present?
+    @posts = T.unsafe(@posts).search_by_title(params[:q], locale: I18n.locale) if params[:q].present?
     if (month = parsed_month)
       @posts = @posts.where(published_at: month.beginning_of_month..month.end_of_month)
     end

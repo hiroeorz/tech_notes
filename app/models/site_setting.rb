@@ -1,3 +1,5 @@
+# typed: true
+
 require "uri"
 
 class SiteSetting < ApplicationRecord

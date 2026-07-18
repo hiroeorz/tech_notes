@@ -190,7 +190,15 @@ Rubocop + ユニットテスト + システムテスト
 
 ## フェーズ8: 静的解析・テスト
 
-### 8.1 Rubocop
+### 8.1 型チェック（Sorbet）
+
+```bash
+bundle exec srb tc
+```
+
+モデル・コントローラを変更した場合は、型エラーが発生していないか必ず確認すること。`# typed: true` 以上のファイルで新たなエラーが出た場合は、シグネチャ追加または `T.unsafe` / `T.let` で対処すること。
+
+### 8.2 Rubocop
 
 ```bash
 bin/rubocop
@@ -198,14 +206,14 @@ bin/rubocop
 
 指摘がある場合は修正すること。
 
-### 8.2 セキュリティスキャン
+### 8.3 セキュリティスキャン
 
 ```bash
 bin/brakeman --no-pager
 bin/bundler-audit
 ```
 
-### 8.3 ユニットテスト / 統合テスト
+### 8.4 ユニットテスト / 統合テスト
 
 ```bash
 bin/rails test
@@ -213,7 +221,7 @@ bin/rails test
 
 新規テストを追加し、既存テストが全てパスすることを確認する。
 
-### 8.4 システムテスト
+### 8.5 システムテスト
 
 ```bash
 bin/rails test:system

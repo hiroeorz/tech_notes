@@ -200,8 +200,9 @@ rbenv install --list | grep '{アップグレード先のバージョン}'
 
 1. **修正**: 1つのファイル（または密接に関連するファイル群）を修正する
 2. **ユニットテスト実行**: `bin/rails test` でテストがパスすることを確認する
-3. **Rubocop**: `bin/rubocop` を実行し、指摘があれば修正する
-4. **セキュリティテスト**: `bin/brakeman --no-pager` と `bin/bundler-audit` を実行する
+3. **Sorbet 型チェック**: `bundle exec srb tc` を実行し、型エラーがあれば修正する
+4. **Rubocop**: `bin/rubocop` を実行し、指摘があれば修正する
+5. **セキュリティテスト**: `bin/brakeman --no-pager` と `bin/bundler-audit` を実行する
 5. **コードレビュー**: 別エージェント（`Task` ツール使用）によるレビューを依頼する
 6. **問題があれば修正してループ**: 上記のいずれかで問題が見つかった場合は修正して再度ループする
 7. **問題なければ次の修正へ**: 次のファイル/グループの修正に進む
@@ -230,6 +231,9 @@ bin/rails test
 
 # システムテスト（必要な場合）
 bin/rails test:system
+
+# 型チェック
+bundle exec srb tc
 
 # Rubocop
 bin/rubocop

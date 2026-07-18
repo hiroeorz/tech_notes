@@ -1,3 +1,5 @@
+# typed: true
+
 module Admin
   class ProfileTranslationsController < BaseController
     SUPPORTED_FIELDS = %w[title bio].freeze

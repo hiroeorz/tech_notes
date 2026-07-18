@@ -1,3 +1,5 @@
+# typed: true
+
 class PostAudio < ApplicationRecord
   AUDIO_STORAGE_SERVICE = Rails.env.production? ? :cloudflare_r2_audio : :local
 

@@ -1,3 +1,5 @@
+# typed: true
+
 class LocaleController < ApplicationController
   skip_before_action :redirect_to_localized_url
 
@@ -11,7 +13,7 @@ class LocaleController < ApplicationController
     if referrer.present?
       begin
         uri = URI.parse(referrer)
-        new_path = uri.path.sub(%r{^/(en|ja)?(/?)}, "/#{locale}\\2")
+        new_path = T.must(uri.path).sub(%r{^/(en|ja)?(/?)}, "/#{locale}\\2")
         new_path = "/#{locale}" if new_path.empty? || new_path == "/"
         uri.path = new_path
         redirect_to uri.to_s, status: 303

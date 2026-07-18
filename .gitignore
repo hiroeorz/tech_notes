@@ -36,3 +36,6 @@
 
 # Ignore key files for decrypting credentials and more.
 /config/*.key
+
+# Ignore auto-generated Sorbet gem RBI files (regenerated via `bundle exec tapioca gem`).
+/sorbet/rbi/gems/

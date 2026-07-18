@@ -1,3 +1,5 @@
+# typed: true
+
 class HomeController < ApplicationController
   def index
     @latest_posts = Post.publicly_visible.article.includes(:category, :tags, :post_translations).recent.limit(5)
