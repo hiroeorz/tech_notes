@@ -32,7 +32,7 @@
         ].join("\n") %>
         <pre class="code-card highlight language-terraform"><code class="highlight"><%= highlight_code(daily_code, language: "terraform") %></code></pre>
         <p class="memo"><%= t("home.index.memo").html_safe %></p>
-        <%= link_to t("home.index.continue_to_experiments"), experiments_path, class: "daily-link" %>
+        <%= link_to t("home.index.continue_to_articles"), posts_path, class: "daily-link" %>
       </article>
     </section>
 
@@ -55,7 +55,7 @@
             <time><%= post.display_date.strftime("%Y-%m-%d") %></time>
             <strong><%= post.localized_title %></strong>
             <span class="line-tags">
-              <% post.tags.limit(2).each do |tag| %>
+              <% post.tags.to_a.first(2).each do |tag| %>
                 <span class="chip"><%= tag.name %></span>
               <% end %>
             </span>
@@ -67,10 +67,10 @@
 
     <section class="note-section experiments-section">
       <div class="section-heading">
-        <h2><%= t("home.index.experiments") %> <span><%= t("home.index.experiments_sub") %></span></h2>
+        <h2><%= t("home.index.latest_posts") %> <span><%= t("home.index.latest_posts_sub") %></span></h2>
       </div>
       <div class="experiment-cards">
-        <% @experiments.each do |post| %>
+        <% @latest_posts.each do |post| %>
           <%= link_to post_path(post), class: "experiment-card" do %>
             <time><%= post.display_date.strftime("%Y-%m-%d") %></time>
             <h3><%= post.localized_title %></h3>
@@ -91,7 +91,7 @@
           <% end %>
         <% end %>
       </div>
-      <%= link_to t("home.index.view_all_experiments"), experiments_path, class: "text-link align-right" %>
+      <%= link_to t("home.index.view_all_latest_posts"), posts_path, class: "text-link align-right" %>
     </section>
   </section>
 

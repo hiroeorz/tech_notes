@@ -8,7 +8,7 @@ class MobileHomeLayoutTest < ApplicationSystemTestCase
       password_digest: AdminUser.digest_password("password123", "salt")
     )
     category = Category.create!(name: "AWS", slug: "aws", icon_key: "aws", position: 1)
-    experiment = Post.create!(
+    post = Post.create!(
       admin_user: admin,
       category: category,
       title: "OpenCodeのスキルを使ってRuby 4.0.5にアップグレード完了",
@@ -26,10 +26,9 @@ class MobileHomeLayoutTest < ApplicationSystemTestCase
         ```
       MARKDOWN
       status: :published,
-      kind: :experiment,
       published_at: Time.current
     )
-    experiment.tags << Tag.create!(name: "Terraform", slug: "terraform")
+    post.tags << Tag.create!(name: "Terraform", slug: "terraform")
   end
 
   test "top page fits within mobile viewport" do
@@ -38,16 +37,16 @@ class MobileHomeLayoutTest < ApplicationSystemTestCase
     visit root_path
 
     assert_selector ".daily-card"
-    assert_selector ".experiment-card"
+    assert_selector ".experiments-section h2", text: /Latest Posts|最新/
 
     viewport_width = page.evaluate_script("document.documentElement.clientWidth")
     page_width = page.evaluate_script("document.documentElement.scrollWidth")
     daily_card_width = page.evaluate_script("document.querySelector('.daily-card').getBoundingClientRect().width")
-    experiment_card_width = page.evaluate_script("document.querySelector('.experiment-card').getBoundingClientRect().width")
+    latest_card_width = page.evaluate_script("document.querySelector('.experiment-card').getBoundingClientRect().width")
 
     assert_operator page_width, :<=, viewport_width
     assert_operator daily_card_width, :<=, viewport_width
-    assert_operator experiment_card_width, :<=, viewport_width
+    assert_operator latest_card_width, :<=, viewport_width
   end
 
   private

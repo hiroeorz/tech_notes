@@ -16,7 +16,6 @@ class Post < ApplicationRecord
   IMAGE_MAX_SIZE = 10.megabytes
 
   enum :status, { draft: 0, published: 1, reviewing: 2 }
-  enum :kind, { article: 0, experiment: 1 }
 
   validates :title, :slug, :excerpt, :body, presence: true
   validates :slug, uniqueness: true

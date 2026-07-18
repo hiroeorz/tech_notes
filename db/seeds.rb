@@ -112,7 +112,6 @@ posts = [
       excerpt: "Terraformでチーム開発や複数環境の管理を行う上で欠かせないリモートステートについて、S3とDynamoDBを使った構成例や運用上の注意点をまとめました。",
       body: body_remote_state,
       status: :published,
-      kind: :article,
       published_at: Time.zone.parse("2025-05-21 10:00")
     },
     category: categories["infrastructure"],
@@ -125,7 +124,6 @@ posts = [
       excerpt: "AWS Control Towerを使い、組織単位とガードレールの考え方を整理しました。",
       body: "## はじめに\nAWS Control Towerでマルチアカウント管理を試しました。\n\n## わかったこと\n- 組織単位の設計が重要\n- 最小権限の運用ルールを先に決める\n- 監査用アカウントを分離する",
       status: :published,
-      kind: :article,
       published_at: Time.zone.parse("2025-05-18 09:00")
     },
     category: categories["aws"],
@@ -138,7 +136,6 @@ posts = [
       excerpt: "Terraformで複数リソースを扱うときに迷いやすいfor_eachとcountの選び方を整理しました。",
       body: "## 判断基準\n安定したキーを持つ集合は `for_each`、単純な個数指定は `count` が扱いやすいです。",
       status: :published,
-      kind: :article,
       published_at: Time.zone.parse("2025-05-14 09:00")
     },
     category: categories["infrastructure"],
@@ -151,7 +148,6 @@ posts = [
       excerpt: "Terraform plan/applyをGitHub Actionsで安全に実行するための構成をまとめました。",
       body: "## ワークフロー\nPull Requestではplan、mainへのmergeでapplyする構成を基本にしました。",
       status: :published,
-      kind: :article,
       published_at: Time.zone.parse("2025-05-10 09:00")
     },
     category: categories["automation"],
@@ -164,7 +160,6 @@ posts = [
       excerpt: "S3アクセスログをAthenaで集計し、アクセス傾向を調べました。",
       body: "## 検証\nS3アクセスログをGlue Data Catalogに登録し、Athenaでクエリしました。",
       status: :published,
-      kind: :article,
       published_at: Time.zone.parse("2025-05-06 09:00")
     },
     category: categories["aws"],
@@ -177,7 +172,6 @@ posts = [
       excerpt: "logrotateを参考に、ログローテーションの基本処理をシェルで実装しました。",
       body: "## 実装\n日付付きファイルへの退避、圧縮、世代管理を順番に実装しました。",
       status: :published,
-      kind: :article,
       published_at: Time.zone.parse("2025-05-01 09:00")
     },
     category: categories["operations"],
@@ -190,7 +184,6 @@ posts = [
       excerpt: "Kubernetesを学ぶ上で押さえておきたいコンポーネントの役割を整理しました。",
       body: "## コンポーネント\nControl PlaneとWorker Nodeの役割を分けて考えると理解しやすいです。",
       status: :reviewing,
-      kind: :article,
       published_at: nil
     },
     category: categories["infrastructure"],
@@ -203,39 +196,51 @@ posts = [
       excerpt: "topやhtop、systemd、ulimitなどを使ってサーバーの安定運用に必要な基本をまとめました。",
       body: "## 基本\nプロセス状態とリソース制限を見ながら、異常時の切り分けを行います。",
       status: :draft,
-      kind: :article,
       published_at: nil
     },
     category: categories["operations"],
     tags: [ "Linux", "運用", "パフォーマンス" ]
+  },
+  {
+    attrs: {
+      title: "Cloudflare Tunnelを使って自宅サーバーを安全に公開する",
+      slug: "cloudflare-tunnel-home-server",
+      excerpt: "Argo Tunnelでローカル環境を公開。設定のつまずきどころとハマりポイントを整理。",
+      body: "## 実験メモ\nArgo Tunnelでローカル環境を公開。設定のつまずきどころとハマりポイントを整理。\n\n## 結果\n小さく試すことで、運用時に気をつける点が見えてきました。",
+      status: :published,
+      published_at: Time.zone.parse("2025-05-19 09:00")
+    },
+    category: categories["infrastructure"],
+    tags: [ "networking" ]
+  },
+  {
+    attrs: {
+      title: "Ansibleで複数サーバーに共通設定を適用してみる",
+      slug: "ansible-common-server-settings",
+      excerpt: "Playbookのベストプラクティスを意識しつつ、冪等性の大切さを再確認。",
+      body: "## 実験メモ\nPlaybookのベストプラクティスを意識しつつ、冪等性の大切さを再確認。\n\n## 結果\n小さく試すことで、運用時に気をつける点が見えてきました。",
+      status: :published,
+      published_at: Time.zone.parse("2025-05-13 09:00")
+    },
+    category: categories["automation"],
+    tags: [ "ansible" ]
+  },
+  {
+    attrs: {
+      title: "Amazon SQSの可視性タイムアウトを調整してみた",
+      slug: "sqs-visibility-timeout",
+      excerpt: "処理時間が長いワーカーでの再試行問題を可視性タイムアウトで解決。",
+      body: "## 実験メモ\n処理時間が長いワーカーでの再試行問題を可視性タイムアウトで解決。\n\n## 結果\n小さく試すことで、運用時に気をつける点が見えてきました。",
+      status: :published,
+      published_at: Time.zone.parse("2025-05-07 09:00")
+    },
+    category: categories["aws"],
+    tags: [ "aws" ]
   }
 ]
 
 posts.each do |entry|
   upsert_post(admin: admin, category: entry[:category], attrs: entry[:attrs], tags: entry[:tags])
-end
-
-experiments = [
-  [ "Cloudflare Tunnelを使って自宅サーバーを安全に公開する", "cloudflare-tunnel-home-server", "Argo Tunnelでローカル環境を公開。設定のつまずきどころとハマりポイントを整理。", categories["infrastructure"], [ "networking" ], "2025-05-19" ],
-  [ "Ansibleで複数サーバーに共通設定を適用してみる", "ansible-common-server-settings", "Playbookのベストプラクティスを意識しつつ、冪等性の大切さを再確認。", categories["automation"], [ "ansible" ], "2025-05-13" ],
-  [ "Amazon SQSの可視性タイムアウトを調整してみた", "sqs-visibility-timeout", "処理時間が長いワーカーでの再試行問題を可視性タイムアウトで解決。", categories["aws"], [ "aws" ], "2025-05-07" ]
-]
-
-experiments.each do |title, slug, excerpt, category, tags, date|
-  upsert_post(
-    admin: admin,
-    category: category,
-    tags: tags,
-    attrs: {
-      title: title,
-      slug: slug,
-      excerpt: excerpt,
-      body: "## 実験メモ\n#{excerpt}\n\n## 結果\n小さく試すことで、運用時に気をつける点が見えてきました。",
-      status: :published,
-      kind: :experiment,
-      published_at: Time.zone.parse("#{date} 09:00")
-    }
-  )
 end
 
 puts "Seeded #{Category.count} categories, #{Tag.count} tags, #{Post.count} posts."

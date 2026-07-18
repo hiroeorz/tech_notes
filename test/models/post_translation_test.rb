@@ -16,7 +16,6 @@ class PostTranslationTest < ActiveSupport::TestCase
       excerpt: "Original excerpt",
       body: "Original body",
       status: :published,
-      kind: :article
     )
   end
 

@@ -18,7 +18,6 @@ class PostTranslationSchedulerTest < ActiveSupport::TestCase
       excerpt: "Source excerpt",
       body: "Source body",
       status: :published,
-      kind: :article
     )
   end
 

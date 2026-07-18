@@ -19,7 +19,6 @@ class PostTest < ActiveSupport::TestCase
       excerpt: "要約です",
       body: "あ" * 1200,
       status: :published,
-      kind: :article
     )
 
     assert post.valid?
@@ -37,7 +36,6 @@ class PostTest < ActiveSupport::TestCase
       excerpt: "要約",
       body: "本文",
       status: :published,
-      kind: :article
     )
     post.tag_names = "Ruby, Rails, Web"
     post.save!

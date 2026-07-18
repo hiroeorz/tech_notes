@@ -16,7 +16,6 @@ class PostAudioSchedulerTest < ActiveJob::TestCase
       excerpt: "Test",
       body: "## Hello\nTest body here.",
       status: :published,
-      kind: :article,
       published_at: Time.current
     )
   end

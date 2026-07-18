@@ -16,7 +16,6 @@ class ArticleImageLightboxTest < ApplicationSystemTestCase
       excerpt: "画像拡大の確認用記事です。",
       body: "## 構成例\n\n![構成図](/icon.png)",
       status: :published,
-      kind: :article,
       published_at: Time.current
     )
   end

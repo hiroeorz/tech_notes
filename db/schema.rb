@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_18_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_18_000001) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -116,7 +116,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_18_000000) do
     t.datetime "created_at", null: false
     t.text "excerpt", null: false
     t.boolean "generate_audio", default: true, null: false
-    t.integer "kind", default: 0, null: false
     t.datetime "published_at"
     t.integer "reading_minutes", default: 1, null: false
     t.string "slug", null: false
@@ -127,7 +126,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_18_000000) do
     t.index ["admin_user_id"], name: "index_posts_on_admin_user_id"
     t.index ["category_id"], name: "index_posts_on_category_id"
     t.index ["slug"], name: "index_posts_on_slug", unique: true
-    t.index ["status", "kind", "published_at"], name: "index_posts_on_status_and_kind_and_published_at"
+    t.index ["status", "published_at"], name: "index_posts_on_status_and_published_at"
   end
 
   create_table "site_settings", force: :cascade do |t|
