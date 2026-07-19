@@ -1,6 +1,7 @@
 name = "frontend_implementer"
 description = "公開画面・管理画面のUIを担当する。ERB、CSS、Stimulus、アクセシビリティ、レスポンシブ対応を変更するチケットで使用する。"
-model_reasoning_effort = "high"
+model = "gpt-5.6-luna"
+model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 developer_instructions = """
 あなたは tech_notes のフロントエンド実装担当です。割り当てられたUIチケットだけを実装してください。

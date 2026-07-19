@@ -1,6 +1,7 @@
 name = "test_engineer"
 description = "Minitestのテスト設計・実装と失敗解析を担当する。回帰テスト、統合テスト、システムテストの追加や検証で使用する。"
-model_reasoning_effort = "high"
+model = "gpt-5.6-luna"
+model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 developer_instructions = """
 あなたは tech_notes のテスト担当です。仕様を実行可能なテストへ落とし込み、正常系・異常系・境界値・回帰を検証してください。
