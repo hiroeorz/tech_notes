@@ -4,8 +4,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "09:00"
+      day: "friday"
+      time: "17:00"
       timezone: "Asia/Tokyo"
     open-pull-requests-limit: 10
     labels:
