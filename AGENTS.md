@@ -40,6 +40,20 @@
 
 - 機能追加は、要件整理、設計、実装、テスト実装、テスト実行、Rubocopなどのリンター実行の順で進める。
 - UIや画面挙動を追加・変更する場合は、実装前に `docs/requirements.md` の該当セクションへ要件を追記または更新する。
+- Ruby、テスト、JavaScript、importmap、依存関係、ビルド・テスト設定を変更した場合は、完了前に `.agents/skills/code-change-verification/SKILL.md` を使用し、変更内容に応じた検証を実行する。ドキュメントのみの変更では、実行手順や設定変更を含む場合を除き使用しない。
+
+## スキルのトリガー条件
+
+作業内容が複数の条件に該当する場合は、該当するスキルを組み合わせて使用する。特に、コード変更を伴う作業では、作業種別のスキルに加えて `code-change-verification` を使用する。
+
+- **`feature-implementation`**: 新機能の追加、既存機能の仕様変更、画面・API・データモデルの機能拡張を依頼された場合。要件整理、設計、実装、テスト、全体チェック、コミット・PR作成までの手順として使用する。
+- **`bug-fix`**: 不具合、エラー、期待動作との差異、再現可能な回帰の修正を依頼された場合。再現、原因調査、修正、回帰テスト、検証の手順として使用する。
+- **`rails-upgrade`**: Railsのバージョンまたはパッチレベルを更新する場合。Rails本体、関連設定、互換性、依存Gemの影響を調査・修正・検証する手順として使用する。
+- **`ruby-upgrade`**: Rubyのバージョンまたはパッチレベルを更新する場合。Ruby本体、`.ruby-version`、Gem、互換性、実行環境の影響を調査・修正・検証する手順として使用する。
+- **`dependabot-pr`**: Dependabotが作成したPRの調査、依存関係更新の検証、マージ判断を行う場合。Dependabot以外の通常の依存関係更新には、変更内容に応じて `feature-implementation` または `bug-fix` と `code-change-verification` を使用する。
+- **`deploy`**: `kamal deploy`、初回の `kamal setup`、本番デプロイ前の確認、デプロイ障害の調査、ロールバックを行う場合。デプロイ実行前に必ず使用する。
+- **`code-change-verification`**: Ruby、Rails、テスト、JavaScript、Stimulus、importmap、Gem依存関係、DB、CI、Docker、ビルド・テスト設定を変更した場合。変更内容に応じて関連テスト、Sorbet、Rubocop、Brakeman、bundler-audit、importmap audit、全テスト、システムテストを選択して実行する。ドキュメントのみの変更では、実行手順や設定変更を含む場合を除き使用しない。
+- **`security-check`**: `git commit` を実行する前、またはリポジトリ内の機密情報漏洩を監査するよう依頼された場合。コミット前には必ず使用し、CriticalまたはHighの指摘があればコミットを中断する。
 
 ## リンター / 型チェック / セキュリティスキャン
 
