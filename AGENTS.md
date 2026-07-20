@@ -41,6 +41,7 @@
 - 機能追加は、要件整理、設計、実装、テスト実装、テスト実行、Rubocopなどのリンター実行の順で進める。
 - UIや画面挙動を追加・変更する場合は、実装前に `docs/requirements.md` の該当セクションへ要件を追記または更新する。
 - Ruby、テスト、JavaScript、importmap、依存関係、ビルド・テスト設定を変更した場合は、完了前に `.agents/skills/code-change-verification/SKILL.md` を使用し、変更内容に応じた検証を実行する。ドキュメントのみの変更では、実行手順や設定変更を含む場合を除き使用しない。
+- 実装・設定・テスト・運用の変更で仕様書、README、デプロイ・バックアップ文書との同期が必要な場合は、`.codex/agents/documentation_manager.toml` の `documentation_manager` を起動する。監査のみの場合は先に差分と根拠を報告し、更新の明示委譲を受けてから編集する。
 
 ## スキルのトリガー条件
 

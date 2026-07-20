@@ -47,6 +47,26 @@ bin/brakeman --no-pager          # セキュリティスキャン
 bin/bundler-audit                # Gem脆弱性チェック
 ```
 
+## Codex サブエージェント
+
+`.codex/agents/` には、作業内容に応じて親エージェントから起動するサブエージェントを定義しています。サブエージェントは担当範囲を越えて編集・コミット・プッシュ・PR操作を行いません。
+
+| サブエージェント | 起動条件 | 主な担当 |
+|---|---|---|
+| `solution_architect` | 新機能・大きな仕様変更の実装前で、設計案、影響範囲、DB変更、互換性、チケット分割の検討が必要な場合 | 読み取り専用の設計補佐 |
+| `bug_investigator` | 不具合の原因調査、再現確認、ログ・履歴・コード追跡が必要な場合 | 読み取り専用の不具合調査 |
+| `rails_implementer` | モデル、コントローラー、サービス、ジョブ、ルーティング、Markdown処理などRailsバックエンドの実装チケットを委譲する場合 | Railsバックエンド実装 |
+| `frontend_implementer` | ERB、CSS、Stimulus、アクセシビリティ、レスポンシブ表示など公開・管理画面のUI変更チケットを委譲する場合 | フロントエンド実装 |
+| `test_engineer` | 回帰テスト、単体・統合・システムテストの設計・追加・失敗解析を委譲する場合 | Minitestのテスト実装・検証 |
+| `database_reviewer` | マイグレーション、DB設計、インデックス、データ整合性、SQLite／PostgreSQL互換性のレビューが必要な場合 | 読み取り専用のDBレビュー |
+| `code_reviewer` | 実装差分の独立レビュー、バグ、回帰、設計不整合、テスト不足の確認が必要な場合 | 読み取り専用のコードレビュー |
+| `security_auditor` | 認証認可、入力処理、XSS、CSRF、SQLインジェクション、SSRF、アップロード、機密情報、依存脆弱性の監査が必要な場合 | 読み取り専用のセキュリティ監査 |
+| `documentation_manager` | 実装・設定・テスト・運用の変更に伴い、仕様書、README、デプロイ・バックアップ文書の同期や監査が必要な場合 | コードを根拠にしたドキュメント管理 |
+| `repository_operator` | 親エージェントが明示的にGit／GitHub操作を割り当てた場合 | Git状態確認、ステージング、コミット、プッシュ、PR操作 |
+| `release_operator` | 親エージェントが明示的にデプロイ、ロールバック、DB変更、コンテナ操作、リリース確認、GitHub操作を割り当てた場合 | Kamalによるリリース・運用 |
+
+特に、`repository_operator` と `release_operator` による外部状態の変更は明示割り当てを必須とします。コミット前には `security-check` を実行し、`git reset --hard`、`git clean`、force push、履歴書き換え、無断マージは実行しません。
+
 ## 環境変数一覧
 
 以下の変数をデプロイ実行環境（`kamal deploy` を実行するPC）で設定します。値はサンプルです。
