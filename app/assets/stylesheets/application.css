@@ -401,6 +401,8 @@ textarea {
   font-size: 47px;
   line-height: 1.35;
   font-weight: 900;
+  overflow-wrap: normal;
+  word-break: keep-all;
 }
 
 .hero-copy p {
@@ -2728,6 +2730,17 @@ pre[data-filename]::before {
   .article-line {
     grid-template-columns: 1fr;
     padding: 10px 0;
+  }
+}
+
+@media (min-width: 1051px) and (max-width: 1300px) {
+  .hero-section {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 42%);
+    gap: 28px;
+  }
+
+  .hero-copy h1 {
+    font-size: 42px;
   }
 }
 
