@@ -389,14 +389,14 @@ GEM
       fugit (~> 1.11)
       railties (>= 7.1)
       thor (>= 1.3.1)
-    sorbet (0.6.13359)
-      sorbet-static (= 0.6.13359)
-    sorbet-runtime (0.6.13359)
-    sorbet-static (0.6.13359-aarch64-linux)
-    sorbet-static (0.6.13359-x86_64-linux)
-    sorbet-static-and-runtime (0.6.13359)
-      sorbet (= 0.6.13359)
-      sorbet-runtime (= 0.6.13359)
+    sorbet (0.6.13403)
+      sorbet-static (= 0.6.13403)
+    sorbet-runtime (0.6.13403)
+    sorbet-static (0.6.13403-aarch64-linux)
+    sorbet-static (0.6.13403-x86_64-linux)
+    sorbet-static-and-runtime (0.6.13403)
+      sorbet (= 0.6.13403)
+      sorbet-runtime (= 0.6.13403)
     spoom (1.8.4)
       erubi (>= 1.10.0)
       prism (>= 0.28.0)
@@ -648,11 +648,11 @@ CHECKSUMS
   solid_cable (4.0.2) sha256=084636a67679ad00d23088b33c84047e614bcf41ee559db24b414d83cdc42d03
   solid_cache (1.0.10) sha256=bc05a2fb3ac78a6f43cbb5946679cf9db67dd30d22939ededc385cb93e120d41
   solid_queue (1.5.0) sha256=329f29caab9cc68eefe489013eb5a38ea4a66708ed2bee301384dbed91890f7f
-  sorbet (0.6.13359) sha256=772eabba1cadbfdba4cd8416d342e4ad5f195b8e57bf08467cf1fb103fc5a415
-  sorbet-runtime (0.6.13359) sha256=5edcd198c678d69f07ec2758b9d0f277bce2e322efd7d5bd902a34c1056a2e5a
-  sorbet-static (0.6.13359-aarch64-linux) sha256=d6ffbc62c2189d6d02ae2d7b054e78565f404a5d254b34c876dd2adade621f63
-  sorbet-static (0.6.13359-x86_64-linux) sha256=08bb9cc0db2d0a6f9e181af0259c54455bfa66577b1581a4f11e928ad58190bd
-  sorbet-static-and-runtime (0.6.13359) sha256=cea6c6c1e930becdaadf6bbe732c119441ef206bf16c74e8bc11d11975dcb181
+  sorbet (0.6.13403) sha256=9ccecebec3fd4f8da4c9d8d37fcb0ae499d32f1d9dbdd9bd46b29e5c14a24d8b
+  sorbet-runtime (0.6.13403) sha256=8545fc4cd55fbf820f2000f6d13c0ea1c2e5f7b67369e76ebf39fea81fc490b3
+  sorbet-static (0.6.13403-aarch64-linux) sha256=c8623298bfac3a4f86ed3eee74b8d79ebb3018db76095429cd7572c6657ee5d2
+  sorbet-static (0.6.13403-x86_64-linux) sha256=3ddbef33a1397f079c889507674799faed5015a9b5a16b7a7cd6ffecdad77c6a
+  sorbet-static-and-runtime (0.6.13403) sha256=47c4ddb6c4395cd069747a60f08be97abfa6470dedc12fb88c112480b9939d85
   spoom (1.8.4) sha256=7283c94a7bbfdfe8764af9027cee2929ef6e1a14271f285e6924e896ca52e880
   sqlite3 (2.9.5-aarch64-linux-gnu) sha256=78075b6337d3d182c6d2b4691049ed45cd220826160c9ea18946bf6a1de200dc
   sqlite3 (2.9.5-aarch64-linux-musl) sha256=18c801185deb4adc01ddb281e8f672a39e3d1729979ca91e39439cd3eac0402d
