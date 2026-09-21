@@ -59,17 +59,17 @@ Codexのレビューは通常5分程度で完了する。**5シグナル**を毎
 # 依頼直後にベースラインを取る（since は依頼投稿時刻。PR本体の古い👍を除外するために使う）
 since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 # gh api は1ページ最大30件。--paginate で全ページ取得し、--jq がページごとに出力する件数を awk で合算する
-issue_base=$(env -u GH_TOKEN gh api --paginate repos/hiroeorz/tech_notes/issues/<PR番号>/comments --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector"))] | length' | awk '{s+=$1} END {print s+0}')
-inline_base=$(env -u GH_TOKEN gh api --paginate repos/hiroeorz/tech_notes/pulls/<PR番号>/comments --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector"))] | length' | awk '{s+=$1} END {print s+0}')
-review_base=$(env -u GH_TOKEN gh pr view <PR番号> --json reviews --jq '[.reviews[] | select(.author.login | startswith("chatgpt-codex-connector"))] | length')
+issue_base=$(env -u GH_TOKEN -u GITHUB_TOKEN gh api --paginate repos/hiroeorz/tech_notes/issues/<PR番号>/comments --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector"))] | length' | awk '{s+=$1} END {print s+0}')
+inline_base=$(env -u GH_TOKEN -u GITHUB_TOKEN gh api --paginate repos/hiroeorz/tech_notes/pulls/<PR番号>/comments --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector"))] | length' | awk '{s+=$1} END {print s+0}')
+review_base=$(env -u GH_TOKEN -u GITHUB_TOKEN gh pr view <PR番号> --json reviews --jq '[.reviews[] | select(.author.login | startswith("chatgpt-codex-connector"))] | length')
 
 for i in $(seq 1 15); do
   sleep 60
-  issue_count=$(env -u GH_TOKEN gh api --paginate repos/hiroeorz/tech_notes/issues/<PR番号>/comments --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector"))] | length' | awk '{s+=$1} END {print s+0}')
-  inline_count=$(env -u GH_TOKEN gh api --paginate repos/hiroeorz/tech_notes/pulls/<PR番号>/comments --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector"))] | length' | awk '{s+=$1} END {print s+0}')
-  review_count=$(env -u GH_TOKEN gh pr view <PR番号> --json reviews --jq '[.reviews[] | select(.author.login | startswith("chatgpt-codex-connector"))] | length')
-  pr_plus=$(env -u GH_TOKEN gh api --paginate repos/hiroeorz/tech_notes/issues/<PR番号>/reactions --jq "[.[] | select(.user.login | startswith(\"chatgpt-codex-connector\")) | select(.content == \"+1\") | select(.created_at > \"$since\")] | length" | awk '{s+=$1} END {print s+0}')
-  plus_count=$(env -u GH_TOKEN gh api --paginate repos/hiroeorz/tech_notes/issues/comments/<依頼コメントID>/reactions --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector")) | select(.content == "+1")] | length' 2>/dev/null | awk '{s+=$1} END {print s+0}')
+  issue_count=$(env -u GH_TOKEN -u GITHUB_TOKEN gh api --paginate repos/hiroeorz/tech_notes/issues/<PR番号>/comments --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector"))] | length' | awk '{s+=$1} END {print s+0}')
+  inline_count=$(env -u GH_TOKEN -u GITHUB_TOKEN gh api --paginate repos/hiroeorz/tech_notes/pulls/<PR番号>/comments --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector"))] | length' | awk '{s+=$1} END {print s+0}')
+  review_count=$(env -u GH_TOKEN -u GITHUB_TOKEN gh pr view <PR番号> --json reviews --jq '[.reviews[] | select(.author.login | startswith("chatgpt-codex-connector"))] | length')
+  pr_plus=$(env -u GH_TOKEN -u GITHUB_TOKEN gh api --paginate repos/hiroeorz/tech_notes/issues/<PR番号>/reactions --jq "[.[] | select(.user.login | startswith(\"chatgpt-codex-connector\")) | select(.content == \"+1\") | select(.created_at > \"$since\")] | length" | awk '{s+=$1} END {print s+0}')
+  plus_count=$(env -u GH_TOKEN -u GITHUB_TOKEN gh api --paginate repos/hiroeorz/tech_notes/issues/comments/<依頼コメントID>/reactions --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector")) | select(.content == "+1")] | length' 2>/dev/null | awk '{s+=$1} END {print s+0}')
   echo "try $i: issue=$issue_count inline=$inline_count review=$review_count pr_plus=$pr_plus plus=$plus_count"
   if [ "$issue_count" -gt "$issue_base" ] || [ "$inline_count" -gt "$inline_base" ] || [ "$review_count" -gt "$review_base" ] || [ "$pr_plus" -gt 0 ] || [ "$plus_count" -gt 0 ]; then
     break
@@ -79,11 +79,13 @@ done
 
 - カウントは「新着あり/なし」の判定に使い、**最終判定は本文**で行う（件数だけでは「指摘なし」と `Something went wrong` を区別できない）
 - `gh api` は1ページ最大30件のため、ベースライン・ポーリング・最終ダンプでは `--paginate` を付けて全ページを対象にする（`--paginate` と `--jq` の併用時はページごとに出力されるため `awk` で合算する）
+- `gh` は環境変数 `GH_TOKEN` / `GITHUB_TOKEN` が保存済み認証より優先されるため、無効なトークンが残っている環境では `env -u GH_TOKEN -u GITHUB_TOKEN` で両方を無効化してから実行する
+- 過去ラウンドの完了報告・インライン指摘は最新ラウンドのシグナルとして扱わない。判定は依頼時刻（`since`）以降に生成されたもの、または現在のHEADを指すものに限定する
 - ループを抜けたら（時間切れでも）**5箇所すべてをフィルタなしで全件ダンプ（`gh api` は `--paginate` を付ける）**して本文を確認する:
   - issue comments に `Didn't find any major issues` → 指摘なし完了。ただし**依頼時刻以降に投稿されたもの、または `Reviewed commit:` が現在のHEADと一致するもの**のみ有効とする。どちらも満たさない過去ラウンドの完了コメントは無効で、最新ラウンドの完了シグナルとは扱わない（タイムアウト時は全件ダンプのうえユーザーに報告する）
   - PR本体に 👍 → 指摘なし完了（Reviewed commit の記載は無くてもよい）。ただし依頼時刻より前に付いた古い👍は無効で、最新ラウンドの完了シグナルとは扱わない。古い👍しかない場合は issue comments の完了報告を待ち、タイムアウト時は全件ダンプのうえユーザーに報告する
   - issue comments に `Something went wrong` → `@codex review` で再依頼する
-  - インラインに Pバッジ（P1/P2）→ 指摘あり。妥当性を検証する
+  - インラインに Pバッジ（P1/P2）→ 指摘あり。妥当性を検証する。ただし**依頼時刻より前に付いた過去ラウンドのインライン指摘は無効**とし、最新ラウンドで新たに付いたものだけを対象にする（修正済みの指摘を再対応しない）
   - 👀（eyes）リアクションのみ → 処理中。完了ではない
 - `gh` の一時的な空出力や jq 実行時エラー（exit 0 のまま空 stdout）を「新着あり」と誤判定しない。出力が JSON 配列であることを確認してから判定する
 - 待機中の進捗報告は不要。コメント到着またはタイムアウト時に報告する

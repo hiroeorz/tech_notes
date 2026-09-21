@@ -278,7 +278,7 @@ git branch --show-current
 
 ### 9.2 機密情報スキャン
 
-コミット前に `.agents/skills/security-check/SKILL.md` の手順に従い、リポジトリ全体の機密情報スキャンを実行する。
+コミット前に `.agents/skills/security-check/SKILL.md` の手順に従い、コミット対象の変更ファイルを対象とした機密情報スキャンを実行する（リポジトリ全体のスキャンはユーザーが明示的に指定した場合のみ）。
 
 - 🔴 CRITICAL または 🟠 HIGH の指摘がある場合はコミットを中断し、ユーザーに報告して指示を仰ぐ
 
