@@ -229,14 +229,18 @@ kamal accessory logs db -n 100          # 最新100行
 
 ### 手動バックアップ
 
+バックアップはWebコンテナ内では実行できない（Railsイメージに `docker` / `rclone` が無く、`docs/backup-requirements.md` でも非採用）。VMホスト上へ配置済みのスクリプトをSSH経由で実行する（`POSTGRES_USER` / `R2_BUCKET` 等はホスト側で設定済みであること）:
+
 ```bash
-kamal app exec --reuse "script/ops/backup_postgres_to_r2.sh"
+ssh <SSH_USER>@<SERVER_IP> '$HOME/ops/backup_postgres_to_r2.sh'
 ```
 
-またはサーバー上で直接:
+配置先は Kamal の post-deploy hook が配布する `BACKUP_DEPLOY_DIR`（既定 `/home/<SSH_USER>/ops`）。単一DBのダンプだけを手元に取得したい場合は、ホスト上で `docker exec` を使う:
 
 ```bash
-ssh <SSH_USER>@<SERVER_IP> "sudo docker exec tech_notes-db pg_dump -U <POSTGRES_USER> -Fc -d tech_notes_production" > ./manual_backup.dump
+# 実際のコンテナ名を確認してから docker exec する
+ssh <SSH_USER>@<SERVER_IP> 'docker ps --filter label=service=tech_notes-db --format "{{.Names}}"'
+ssh <SSH_USER>@<SERVER_IP> 'docker exec <コンテナ名> pg_dump -U <POSTGRES_USER> -Fc -d tech_notes_production' > ./manual_backup.dump
 ```
 
 ## デプロイ失敗時の対応フロー

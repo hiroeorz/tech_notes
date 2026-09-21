@@ -52,10 +52,15 @@ description: 作業で得た再利用可能なノウハウを ~/ai-memory（hiro
 
 7. コミット・プッシュはユーザーの明示指示がある場合のみ行う（別リポジトリのため、このリポジトリの作業ツリーには触れない）
 
+   - 今回追記したファイル（新しいメモ・`README.md`・`opencode.json`）**だけ**を明示的にステージする。`git add -A` は使わない
+   - 無関係な未コミット変更・削除が残っている場合はステージせず、内容をユーザーに確認する
+   - コミット前に、ステージ対象のファイルを直接読んで機密情報・個人情報・アプリ固有情報が含まれていないか確認する（`.agents/skills/security-check/SKILL.md` の確認項目に準じ、🔴 / 🟠 相当があればコミットを中断する）
+
    ```bash
    git -C ~/ai-memory status --porcelain
-   git -C ~/ai-memory add -A
-   git -C ~/ai-memory commit -m "add knowhow for <概要>"
+   git -C ~/ai-memory add <新しいメモ> README.md opencode.json
+   git -C ~/ai-memory diff --cached --stat
+   git -C ~/ai-memory commit -m "ノウハウ追加: <概要>"
    git -C ~/ai-memory push origin main
    ```
 

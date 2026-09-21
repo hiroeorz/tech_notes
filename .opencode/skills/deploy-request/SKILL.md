@@ -52,7 +52,13 @@ curl -s -o /dev/null -w "%{http_code}\n" "https://$APP_HOST/up"   # 200 を期�
 ```
 
 - PRブランチのリビジョンを先に確認したい場合は、`git checkout <ブランチ名>` してから `kamal deploy` する（本番反映の標準はマージ後の main）。未レビューのリビジョンを本番へ出す場合はそのリスクを添える
-- 対象リビジョンにDBマイグレーションや破壊的変更がある場合は、事前に手動バックアップ（`kamal app exec --reuse "script/ops/backup_postgres_to_r2.sh"`）を案内する
+- 対象リビジョンにDBマイグレーションや破壊的変更がある場合は、事前に手動バックアップを案内する。バックアップはWebコンテナ内では実行できない（Railsイメージに `docker` / `rclone` が無く、`docs/backup-requirements.md` でも非採用）。VMホスト上へ配置済みのスクリプトをSSH経由で実行する（`POSTGRES_USER` / `R2_BUCKET` 等はホスト側で設定済みであること）:
+
+  ```bash
+  ssh "$SSH_USER@$SERVER_IP" '$HOME/ops/backup_postgres_to_r2.sh'
+  ```
+
+  配置先は Kamal の post-deploy hook が配布する `BACKUP_DEPLOY_DIR`（既定 `/home/<SSH_USER>/ops`）
 
 ### 3. 失敗時の案内
 
