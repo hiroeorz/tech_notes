@@ -5,6 +5,8 @@ description: Kamal を使った本番デプロイの事前準備・実行手順�
 
 `kamal deploy` による本番デプロイを実行する前に、このスキルの手順に従うこと（AGENTS.md のトリガー条件により、デプロイ実行前の使用は必須）。
 
+エージェント実行環境に `kamal` や環境変数が無い場合（サンドボックス等）はデプロイを実行できない。その場合は `.opencode/skills/deploy-request/SKILL.md` に従い、ユーザーがWSL側で実行するコマンドを提示する。
+
 運用正本は `docs/deployment.md` である。本プロジェクトは単一本番のみを扱う（Kamal + PostgreSQL accessory + Kamal proxy + Let's Encrypt、サービス名 `tech_notes`）。
 外部状態を変更する操作（`kamal setup` / `kamal deploy` / `kamal rollback` / `kamal app exec` / accessory 操作 / バックアップ実行など）は、親エージェントまたはユーザーから対象操作を明示的に割り当てられた場合のみ実行する。
 秘密値（パスワード、トークン、`RAILS_MASTER_KEY` 類）、接続URL、実IP、ドメインの実値は出力・記録しない。コマンド例・ログ貼付時は変数名または伏せ字で示す。

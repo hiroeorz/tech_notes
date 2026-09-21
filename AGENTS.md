@@ -53,6 +53,7 @@
 - **`ruby-upgrade`**: Rubyのバージョンまたはパッチレベルを更新する場合。Ruby本体、`.ruby-version`、Gem、互換性、実行環境の影響を調査・修正・検証する手順として使用する。
 - **`dependabot-pr`**: Dependabotが作成したPRの調査、依存関係更新の検証、マージ判断を行う場合。Dependabot以外の通常の依存関係更新には、変更内容に応じて `feature-implementation` または `bug-fix` と `code-change-verification` を使用する。
 - **`deploy`**: `kamal deploy`、初回の `kamal setup`、本番デプロイ前の確認、デプロイ障害の調査、ロールバックを行う場合。デプロイ実行前に必ず使用する。
+- **`deploy-request`**: ユーザーから「デプロイしたい」と依頼され、エージェントは実行せず、ユーザーがWSL側で実行するデプロイ／ロールバックのコマンド提示のみを行う場合。
 - **`code-change-verification`**: Ruby、Rails、テスト、JavaScript、Stimulus、importmap、Gem依存関係、DB、CI、Docker、ビルド・テスト設定を変更した場合。変更内容に応じて関連テスト、Sorbet、Rubocop、Brakeman、bundler-audit、importmap audit、全テスト、システムテストを選択して実行する。ドキュメントのみの変更では、実行手順や設定変更を含む場合を除き使用しない。
 - **`security-check`**: `git commit` を実行する前、またはリポジトリ内の機密情報漏洩を監査するよう依頼された場合。コミット前には必ず使用し、CriticalまたはHighの指摘があればコミットを中断する。
 - **`issue-handling`**: GitHubのオープンIssueを確認・分類し、不具合は `bug-fix`、機能追加・仕様変更は `feature-implementation` で順次対応する場合。対応計画の承認後に1グループずつ対応する。
@@ -62,6 +63,7 @@
 - **`internationalization`**: Railsアプリの国際化・多言語化（ユーザー向け文言のI18n移行、locale切替、対象localeでの表示確認）を行う場合。
 - **`translation`**: コード変更後に全localeの翻訳キー欠落や直書きのユーザー向け文言を検出し、抜けがなくなるまで翻訳を補完する場合。
 - **`visual-adjustment`**: ブラウザでの画面の見た目を調整する場合。CSS・レイアウト・余白・色・フォント・テーマ・レスポンシブ崩れなどをデザイン要件と照合しながら修正する。
+- **`save-memory-knowhow`**: マージ後のノウハウ保存、`~/ai-memory`（hiroeorz/ai-memory）への追記を行う場合。`feature-implementation` / `bug-fix` / `rails-upgrade` / `ruby-upgrade` の完了後フローから使用する。
 
 ## サブエージェントのトリガー条件
 
@@ -99,7 +101,7 @@
 
 - Dependabot が起票した PR の処理は `.agents/skills/dependabot-pr/SKILL.md` の手順に従うこと。
 - patch 更新は `.github/workflows/auto-merge-patches.yml` により PR の CI を待たずに自動マージされる（CI は `main` への push 時のみ実行されるため）。main の CI が唯一の自動検証であり、失敗時は通常フローで修正する。
-- Dependabot 設定は `.github/dependabot.yml` にある。更新頻度や対象を変更する場合は、同スキルの提案内容を参照してユーザーと相談すること。
+- Dependabot 設定は `.github/dependabot.yml` にあり、Bundler と GitHub Actions を週次（金曜17:00 JST）で更新する。更新頻度や対象を変更する場合は、同スキルの提案内容を参照してユーザーと相談すること。
 
 ## コミット前のセキュリティチェック
 
