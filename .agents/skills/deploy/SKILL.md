@@ -5,6 +5,8 @@ description: Kamal を使った本番デプロイの事前準備・実行手順�
 
 `kamal deploy` による本番デプロイを実行する前に、このスキルの手順に従うこと（AGENTS.md のトリガー条件により、デプロイ実行前の使用は必須）。
 
+エージェント実行環境に `kamal` や環境変数が無い場合（サンドボックス等）はデプロイを実行できない。その場合は `.opencode/skills/deploy-request/SKILL.md` に従い、ユーザーがWSL側で実行するコマンドを提示する。
+
 運用正本は `docs/deployment.md` である。本プロジェクトは単一本番のみを扱う（Kamal + PostgreSQL accessory + Kamal proxy + Let's Encrypt、サービス名 `tech_notes`）。
 外部状態を変更する操作（`kamal setup` / `kamal deploy` / `kamal rollback` / `kamal app exec` / accessory 操作 / バックアップ実行など）は、親エージェントまたはユーザーから対象操作を明示的に割り当てられた場合のみ実行する。
 秘密値（パスワード、トークン、`RAILS_MASTER_KEY` 類）、接続URL、実IP、ドメインの実値は出力・記録しない。コマンド例・ログ貼付時は変数名または伏せ字で示す。
@@ -227,14 +229,18 @@ kamal accessory logs db -n 100          # 最新100行
 
 ### 手動バックアップ
 
+バックアップはWebコンテナ内では実行できない（Railsイメージに `docker` / `rclone` が無く、`docs/backup-requirements.md` でも非採用）。VMホスト上へ配置済みのスクリプトをSSH経由で実行する（`POSTGRES_USER` / `R2_BUCKET` 等はホスト側で設定済みであること）:
+
 ```bash
-kamal app exec --reuse "script/ops/backup_postgres_to_r2.sh"
+ssh <SSH_USER>@<SERVER_IP> '$HOME/ops/backup_postgres_to_r2.sh'
 ```
 
-またはサーバー上で直接:
+配置先は Kamal の post-deploy hook が配布する `BACKUP_DEPLOY_DIR`（既定 `/home/<SSH_USER>/ops`）。単一DBのダンプだけを手元に取得したい場合は、ホスト上で `docker exec` を使う:
 
 ```bash
-ssh <SSH_USER>@<SERVER_IP> "sudo docker exec tech_notes-db pg_dump -U <POSTGRES_USER> -Fc -d tech_notes_production" > ./manual_backup.dump
+# 実際のコンテナ名を確認してから docker exec する
+ssh <SSH_USER>@<SERVER_IP> 'docker ps --filter label=service=tech_notes-db --format "{{.Names}}"'
+ssh <SSH_USER>@<SERVER_IP> 'docker exec <コンテナ名> pg_dump -U <POSTGRES_USER> -Fc -d tech_notes_production' > ./manual_backup.dump
 ```
 
 ## デプロイ失敗時の対応フロー
