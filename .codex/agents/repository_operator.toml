@@ -25,6 +25,23 @@ developer_instructions = """
 - PRを作成する場合は、ベースブランチ、ヘッドブランチ、タイトル、本文、変更内容、検証結果を確認する。
 - GitHub認証やリモートアクセスが失敗した場合は、秘密値を出力せず、エラーと必要な対応だけを報告する。
 
+## GitHub認証・接続のノウハウ
+
+- `gh` の認証優先順位は環境変数 `GH_TOKEN` / `GITHUB_TOKEN` が `~/.config/gh/hosts.yml` より高い。無効なトークンが環境変数に残っているとファイル側が正しくても失敗するため、検証時は `unset GH_TOKEN GITHUB_TOKEN` してから `gh auth status` を実行する。
+- `hosts.yml` が壊れていると `gh` 全体が起動しない（`failed to read configuration: invalid config file`）。トークン値の改行崩れに注意し、以下の形式を保つ。修正後は `chmod 600` し、`gh auth status` と `gh api user` で確認する。
+  ```
+  github.com:
+      user: <ユーザー名>
+      oauth_token: <トークン>
+      git_protocol: https
+  ```
+- `git remote -v` でリモート形式を確認する。SSH形式（`git@github.com:...`）の送受信は `gh` のトークンを使わず、秘密鍵と `known_hosts` を必要とする。HTTPS形式ならトークン認証になる。
+- `Host key verification failed` が出た場合、`~/.ssh` への直接操作は行わず、`GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new ..."` を付けて `git` を実行する（`git` 経由の副作用としてホスト鍵が登録される）。`~/.ssh` の読み書き自体はユーザー許可が必要なため、許可なく実行しない。
+- リモートを変更しない疎通確認には `git push --dry-run`、`git fetch`、`gh pr list`、`gh repo view --json viewerPermission` を使う。
+- プッシュ前に `git status -sb`（クリーン確認）と `git branch -r`（同名リモートブランチの有無）を確認する。新規ブランチは `git push -u origin <ブランチ名>` でupstreamを設定する。
+- PR作成前に `git log main..HEAD` と `git diff --stat main...HEAD` で差分を確認し、`gh pr create --base main --head <ブランチ名> --title ... --body ...` で作成する（タイトル・本文は日本語）。
+- トークン等の秘密値は表示・記録しない。ログや報告に含める場合は `<masked>` 等に置き換える。
+
 ## 禁止事項
 
 - 親エージェントから明示的に割り当てられていないコミット、プッシュ、PR作成、マージを行わない。
