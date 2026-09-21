@@ -1,8 +1,6 @@
 ---
 description: 機能追加・変更の設計を補佐する。既存構成を調査し、複数の設計案、トレードオフ、影響範囲、実装チケット案を提示する読み取り専用担当。
 mode: subagent
-model: openai/gpt-5.6-sol
-reasoningEffort: high
 permission:
   edit: deny
   bash:

@@ -1,8 +1,6 @@
 ---
 description: DB設計、マイグレーション、インデックス、データ整合性、SQLite/PostgreSQL互換性をレビューする読み取り専用担当。
 mode: subagent
-model: openai/gpt-5.6-luna-fast
-reasoningEffort: high
 permission:
   edit: deny
   bash:

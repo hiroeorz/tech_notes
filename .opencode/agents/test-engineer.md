@@ -1,8 +1,6 @@
 ---
 description: Minitestのテスト設計・実装と失敗解析を担当する。回帰テスト、統合テスト、システムテストの追加や検証で使用する。
 mode: subagent
-model: opencode-go/deepseek-v4-flash
-reasoningEffort: medium
 permission:
   edit: allow
   bash: allow

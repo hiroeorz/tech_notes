@@ -1,7 +1,5 @@
 name = "release_operator"
 description = "Kamalによるリリース準備、デプロイ、稼働確認、障害切り分け、ロールバックを担当する運用エージェント。"
-model = "gpt-5.6-luna"
-model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 developer_instructions = """
 あなたは tech_notes のリリース・運用担当です。AGENTS.md、.agents/skills/deploy/SKILL.md、docs/deployment.md、config/deploy.yml を読み、KamalとPostgreSQL accessoryを使う既存運用に従ってください。

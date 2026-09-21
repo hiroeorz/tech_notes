@@ -3,7 +3,21 @@ name: deploy
 description: Kamal を使った本番デプロイの事前準備・実行手順・トラブルシューティング・ロールバック手順を定義する。docker build からコンテナ起動確認までをカバーする。
 ---
 
-`kamal deploy` による本番デプロイを実行する前に、このスキルの手順に従うこと。
+`kamal deploy` による本番デプロイを実行する前に、このスキルの手順に従うこと（AGENTS.md のトリガー条件により、デプロイ実行前の使用は必須）。
+
+運用正本は `docs/deployment.md` である。本プロジェクトは単一本番のみを扱う（Kamal + PostgreSQL accessory + Kamal proxy + Let's Encrypt、サービス名 `tech_notes`）。
+外部状態を変更する操作（`kamal setup` / `kamal deploy` / `kamal rollback` / `kamal app exec` / accessory 操作 / バックアップ実行など）は、親エージェントまたはユーザーから対象操作を明示的に割り当てられた場合のみ実行する。
+秘密値（パスワード、トークン、`RAILS_MASTER_KEY` 類）、接続URL、実IP、ドメインの実値は出力・記録しない。コマンド例・ログ貼付時は変数名または伏せ字で示す。
+
+## 固定前提
+
+- 対象は単一本番のみ。複数環境の切替は存在しない。
+- Kamal proxy（Traefik）が TLS を終端し、Let's Encrypt 証明書を自動取得する。`config/deploy.yml` の `proxy.host` が公開ドメイン、`APP_HOST` が SSL・Rails ホスト解決用。
+- PostgreSQL は Kamal accessory（サービス名 `tech_notes`、コンテナ `tech_notes-db`、ホストエイリアス `tech_notes-db`）。本番では `tech_notes_production{,_cache,_queue,_cable}` の4論理DBを持ち、Solid Cache / Queue / Cable は `cache` / `queue` / `cable` ロールに配線される。
+- シークレット（`RAILS_MASTER_KEY`、`POSTGRES_PASSWORD`、`ADMIN_PASSWORD` 等）は `.kamal/secrets` 経由で環境変数から注入する。生の値をコミットしない。
+- 本番は `RAILS_ENV=production`（`config/deploy.yml` の `env.clear` で設定）。`assume_ssl` / `force_ssl` / `host_authorization` が有効。
+- `kamal deploy` はローカルのファイルから Docker イメージをビルドし、Docker Hub（`IMAGE`、`REGISTRY_USERNAME`）へプッシュしてからサーバー上で切り替える。ヘルスチェック `/up` 成功まで旧コンテナを維持する。
+- バックアップはサーバー上 cron による `script/ops/backup_postgres_to_r2.sh` が正本（詳細は「バックアップ」節）。
 
 ## 事前準備
 
@@ -236,3 +250,14 @@ ssh <SSH_USER>@<SERVER_IP> "sudo docker exec tech_notes-db pg_dump -U <POSTGRES_
 ## デプロイ仕様参照
 
 デプロイアーキテクチャの詳細は `docs/deployment.md` を参照すること。
+
+## 完了報告
+
+デプロイ・ロールバック・障害調査の完了時は、以下を日本語で報告する。秘密値は必ず伏せる。
+
+- 対象（単一本番）・リビジョン（Git SHA）
+- 実行コマンドとその目的（例: 初回 `setup`、通常 `deploy`、切戻し `rollback`、確認のための `logs` / `details`）
+- container / proxy / DB の状態（`kamal app details`、`kamal accessory details db`、`/up` の結果）
+- 受入結果（HTTP 応答、ヘルスチェック、ログ上の異常有無）
+- ロールバック可否（Docker Hub 上の旧イメージ有無、DB マイグレーションの互換性）
+- 未確認事項（残る懸念、手動確認が必要な項目）

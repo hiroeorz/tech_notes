@@ -55,10 +55,17 @@
 - **`deploy`**: `kamal deploy`、初回の `kamal setup`、本番デプロイ前の確認、デプロイ障害の調査、ロールバックを行う場合。デプロイ実行前に必ず使用する。
 - **`code-change-verification`**: Ruby、Rails、テスト、JavaScript、Stimulus、importmap、Gem依存関係、DB、CI、Docker、ビルド・テスト設定を変更した場合。変更内容に応じて関連テスト、Sorbet、Rubocop、Brakeman、bundler-audit、importmap audit、全テスト、システムテストを選択して実行する。ドキュメントのみの変更では、実行手順や設定変更を含む場合を除き使用しない。
 - **`security-check`**: `git commit` を実行する前、またはリポジトリ内の機密情報漏洩を監査するよう依頼された場合。コミット前には必ず使用し、CriticalまたはHighの指摘があればコミットを中断する。
+- **`issue-handling`**: GitHubのオープンIssueを確認・分類し、不具合は `bug-fix`、機能追加・仕様変更は `feature-implementation` で順次対応する場合。対応計画の承認後に1グループずつ対応する。
+- **`codex-review`**: PR作成後にCodexへレビューを依頼し、指摘対応後にmainへマージして後片付けする場合。`feature-implementation` / `bug-fix` などの完了後フローから使用する。
+- **`ci-verification`**: `main` へのpush後にGitHub ActionsのCI結果を確認し、失敗時は原因分析・最小修正・再プッシュのループを回す場合。CIは `main` へのpush時のみ実行されるため、PRブランチでは確認できない。
+- **`documentation-authoring`**: 要件定義書、機能仕様書、設計書、運用手順書、README、利用者向けガイドなどの技術文書を新規作成・更新・レビューする場合。根拠の分類と最小差分で記述する。
+- **`internationalization`**: Railsアプリの国際化・多言語化（ユーザー向け文言のI18n移行、locale切替、対象localeでの表示確認）を行う場合。
+- **`translation`**: コード変更後に全localeの翻訳キー欠落や直書きのユーザー向け文言を検出し、抜けがなくなるまで翻訳を補完する場合。
+- **`visual-adjustment`**: ブラウザでの画面の見た目を調整する場合。CSS・レイアウト・余白・色・フォント・テーマ・レスポンシブ崩れなどをデザイン要件と照合しながら修正する。
 
 ## サブエージェントのトリガー条件
 
-`.codex/agents/` に定義されたサブエージェントは、作業内容が条件に該当し、親エージェントが明示的に委譲した場合に起動する。サブエージェントは担当範囲を越えて編集・コミット・プッシュ・PR操作を行わない。
+`.codex/agents/` と `.opencode/agents/` に定義されたサブエージェントは、作業内容が条件に該当し、親エージェントが明示的に委譲した場合に起動する。サブエージェントは担当範囲を越えて編集・コミット・プッシュ・PR操作を行わない。サブエージェントのモデル指定は原則なし（既定モデルを使用する）。画像の読解を行う `visual_reference_analyzer` のみ、画像解読に必要なモデルを指定している。
 
 | サブエージェント | 起動条件 | 主な担当 |
 |---|---|---|
@@ -73,24 +80,30 @@
 | `documentation_manager` | 実装・設定・テスト・運用の変更に伴い、仕様書、README、デプロイ・バックアップ文書の同期や監査が必要な場合 | コードを根拠にしたドキュメント管理 |
 | `repository_operator` | 親エージェントが明示的にGit／GitHub操作を割り当てた場合 | Git状態確認、ステージング、コミット、プッシュ、PR操作 |
 | `release_operator` | 親エージェントが明示的にデプロイ、ロールバック、DB変更、コンテナ操作、リリース確認、GitHub操作を割り当てた場合 | Kamalによるリリース・運用 |
+| `internationalization_implementer` | ユーザー向け文言のI18n移行、locale切替、関連テストの実装チケットを委譲する場合 | 国際化・多言語化の実装 |
+| `translation` | 全localeの翻訳キー欠落や直書き文言の検出・補完を委譲する場合 | 翻訳完全性のチェック・補完 |
+| `visual_reference_analyzer` | `docs/images/` などの見本画像を読み込み、再現可能な粒度の仕様レポートが必要な場合 | 読み取り専用の見本画像解析 |
+
+サブエージェントの識別子は実行環境で表記が異なる。`.opencode/agents/` はハイフン表記（例: `bug-investigator`、`code-reviewer`）、`.codex/agents/` はアンダースコア表記（例: `bug_investigator`、`code_reviewer`）で定義されている。スキル本文中の表記が実行環境と異なる場合は、実行環境の定義に合わせて読み替えて task ツールに指定すること。
 
 特に、`repository_operator` と `release_operator` による外部状態の変更は明示割り当てを必須とする。コミット前には `security-check` を実行し、`git reset --hard`、`git clean`、force push、履歴書き換え、無断マージは実行しない。
 
 ## リンター / 型チェック / セキュリティスキャン
 
-- 型チェック: `bundle exec srb tc` で Sorbet の静的型検査を実行。`# typed: true` 以上のファイルでエラーがないことを確認する。
+- 型チェック: `bundle exec srb tc` で Sorbet の静的型検査を実行。`# typed: true` 以上のファイルでエラーがないことを確認する。`sorbet/rbi/gems/` はgit管理外のため、クリーンなチェックアウトでは先に `bin/tapioca gem` でgem RBIを生成する。
 - スタイルは Rails Omakase 準拠: `bin/rubocop` で `rubocop-rails-omakase` 設定を実行。CI では `bin/rubocop -f github`。
-- `bin/brakeman --no-pager` と `bin/bundler-audit` を CI で実行（追加引数なし）。
-- JS 依存関係は `bin/importmap audit` で監査。
+- CI（`.github/workflows/ci.yml`）は `main` への push 時のみ実行され、単一ジョブ `ci` で Lint・gem RBI生成（`bin/tapioca gem`）・Sorbet 型チェック・全テスト（`bin/rails test` と `bin/rails test:system`）のみを順に実行する。PR ブランチでは実行されない。
+- `bin/brakeman --no-pager`、`bin/bundler-audit`、`bin/importmap audit` は GitHub Actions では実行しない。セキュリティ関連の変更時などに `code-change-verification` スキルに従いローカルで実行する（`bin/ci` はこれらを含むローカルCIランナー）。
 
 ## Dependabot PR の処理
 
 - Dependabot が起票した PR の処理は `.agents/skills/dependabot-pr/SKILL.md` の手順に従うこと。
-- 本リポジトリに Dependabot 設定ファイル（`.github/dependabot.yml`）がない場合は、同スキルの提案内容を参照してユーザーと相談すること。
+- patch 更新は `.github/workflows/auto-merge-patches.yml` により PR の CI を待たずに自動マージされる（CI は `main` への push 時のみ実行されるため）。main の CI が唯一の自動検証であり、失敗時は通常フローで修正する。
+- Dependabot 設定は `.github/dependabot.yml` にある。更新頻度や対象を変更する場合は、同スキルの提案内容を参照してユーザーと相談すること。
 
 ## コミット前のセキュリティチェック
 
-- `git commit` を実行する**前に必ず** `.agents/skills/security-check/SKILL.md` の手順に従い、リポジトリ全体の機密情報スキャンを実行すること。
+- `git commit` を実行する**前に必ず** `.agents/skills/security-check/SKILL.md` の手順に従い、コミット対象の変更ファイルを対象とした機密情報スキャンを実行すること（リポジトリ全体のスキャンは明示的に指定された場合のみ）。
 - 🔴 CRITICAL または 🟠 HIGH の指摘が見つかった場合は、**コミットを中断し**、発見内容をユーザーに報告して指示を仰ぐこと。
 - 🟡 MEDIUM 以下の指摘のみの場合は、報告は行うがユーザーの判断でコミットを継続してよい。
 - チェックで問題がなければ通常通りコミットを進めてよい。
@@ -120,7 +133,7 @@
 
 ## 注意点
 
-- `/storage` ディレクトリは `.keep` を除き gitignore — 新規クローンでは `bin/rails db:prepare`（または `db:migrate` + `db:seed`）で SQLite ファイルを作成する必要がある。CI では `bin/rails db:test:prepare test` を実行。
+- `/storage` ディレクトリは `.keep` を除き gitignore — 新規クローンでは `bin/rails db:prepare`（または `db:migrate` + `db:seed`）で SQLite ファイルを作成する必要がある。CI では `bin/rails db:test:prepare test` と `bin/rails db:test:prepare test:system` を実行。
 - `config/master.key` は gitignore されており、**コミットしてはならない**。`bin/rails credentials` ワークフローでのみ再生成可能。紛失した場合は `credentials.yml.enc` を再暗号化する必要がある。
 - `SiteSetting.current` の `site_url` と `profile_email` のデフォルトはサンプル値 — 本番環境の seed は `db/seeds.rb` で上書きすることを前提としている。本番ロジックで `SiteSetting.current` のデフォルトを信用せず、明示的な seeding を必須とすること。
 - `MarkdownRenderer` の許可リスト（`ALLOWED_TAGS` / `ALLOWED_ATTRIBUTES`）は意図的に厳格に設定されている。新しい markdown 機能（例: 新しい HTML 要素）を追加する場合は `app/models/markdown_renderer.rb` の許可リストを更新しないと内容が黙って除去される — 合わせて `test/models/markdown_renderer_test.rb` にテストを追加すること。

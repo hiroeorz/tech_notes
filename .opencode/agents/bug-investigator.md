@@ -1,8 +1,6 @@
 ---
 description: 不具合の再現、ログ・履歴・コード追跡、直接原因と根本原因の特定を行う読み取り専用の調査担当。
 mode: subagent
-model: openai/gpt-5.6-luna-fast
-reasoningEffort: high
 permission:
   edit: deny
   bash:

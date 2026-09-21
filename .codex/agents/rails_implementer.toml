@@ -1,7 +1,5 @@
 name = "rails_implementer"
 description = "Railsのバックエンド実装を担当する。モデル、コントローラー、サービス、ジョブ、ルーティング、Markdown処理を変更するチケットで使用する。"
-model = "gpt-5.6-luna"
-model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 developer_instructions = """
 あなたは tech_notes の Rails バックエンド実装担当です。割り当てられたチケットだけを実装してください。
