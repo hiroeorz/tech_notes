@@ -58,17 +58,18 @@ Codexのレビューは通常5分程度で完了する。**5シグナル**を毎
 ```bash
 # 依頼直後にベースラインを取る（since は依頼投稿時刻。PR本体の古い👍を除外するために使う）
 since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-issue_base=$(env -u GH_TOKEN gh api repos/hiroeorz/tech_notes/issues/<PR番号>/comments --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector"))] | length')
-inline_base=$(env -u GH_TOKEN gh api repos/hiroeorz/tech_notes/pulls/<PR番号>/comments --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector"))] | length')
+# gh api は1ページ最大30件。--paginate で全ページ取得し、--jq がページごとに出力する件数を awk で合算する
+issue_base=$(env -u GH_TOKEN gh api --paginate repos/hiroeorz/tech_notes/issues/<PR番号>/comments --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector"))] | length' | awk '{s+=$1} END {print s+0}')
+inline_base=$(env -u GH_TOKEN gh api --paginate repos/hiroeorz/tech_notes/pulls/<PR番号>/comments --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector"))] | length' | awk '{s+=$1} END {print s+0}')
 review_base=$(env -u GH_TOKEN gh pr view <PR番号> --json reviews --jq '[.reviews[] | select(.author.login | startswith("chatgpt-codex-connector"))] | length')
 
 for i in $(seq 1 15); do
   sleep 60
-  issue_count=$(env -u GH_TOKEN gh api repos/hiroeorz/tech_notes/issues/<PR番号>/comments --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector"))] | length')
-  inline_count=$(env -u GH_TOKEN gh api repos/hiroeorz/tech_notes/pulls/<PR番号>/comments --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector"))] | length')
+  issue_count=$(env -u GH_TOKEN gh api --paginate repos/hiroeorz/tech_notes/issues/<PR番号>/comments --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector"))] | length' | awk '{s+=$1} END {print s+0}')
+  inline_count=$(env -u GH_TOKEN gh api --paginate repos/hiroeorz/tech_notes/pulls/<PR番号>/comments --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector"))] | length' | awk '{s+=$1} END {print s+0}')
   review_count=$(env -u GH_TOKEN gh pr view <PR番号> --json reviews --jq '[.reviews[] | select(.author.login | startswith("chatgpt-codex-connector"))] | length')
-  pr_plus=$(env -u GH_TOKEN gh api repos/hiroeorz/tech_notes/issues/<PR番号>/reactions --jq "[.[] | select(.user.login | startswith(\"chatgpt-codex-connector\")) | select(.content == \"+1\") | select(.created_at > \"$since\")] | length")
-  plus_count=$(env -u GH_TOKEN gh api repos/hiroeorz/tech_notes/issues/comments/<依頼コメントID>/reactions --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector")) | select(.content == "+1")] | length' 2>/dev/null || echo 0)
+  pr_plus=$(env -u GH_TOKEN gh api --paginate repos/hiroeorz/tech_notes/issues/<PR番号>/reactions --jq "[.[] | select(.user.login | startswith(\"chatgpt-codex-connector\")) | select(.content == \"+1\") | select(.created_at > \"$since\")] | length" | awk '{s+=$1} END {print s+0}')
+  plus_count=$(env -u GH_TOKEN gh api --paginate repos/hiroeorz/tech_notes/issues/comments/<依頼コメントID>/reactions --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector")) | select(.content == "+1")] | length' 2>/dev/null | awk '{s+=$1} END {print s+0}')
   echo "try $i: issue=$issue_count inline=$inline_count review=$review_count pr_plus=$pr_plus plus=$plus_count"
   if [ "$issue_count" -gt "$issue_base" ] || [ "$inline_count" -gt "$inline_base" ] || [ "$review_count" -gt "$review_base" ] || [ "$pr_plus" -gt 0 ] || [ "$plus_count" -gt 0 ]; then
     break
@@ -77,7 +78,8 @@ done
 ```
 
 - カウントは「新着あり/なし」の判定に使い、**最終判定は本文**で行う（件数だけでは「指摘なし」と `Something went wrong` を区別できない）
-- ループを抜けたら（時間切れでも）**5箇所すべてをフィルタなしで全件ダンプ**して本文を確認する:
+- `gh api` は1ページ最大30件のため、ベースライン・ポーリング・最終ダンプでは `--paginate` を付けて全ページを対象にする（`--paginate` と `--jq` の併用時はページごとに出力されるため `awk` で合算する）
+- ループを抜けたら（時間切れでも）**5箇所すべてをフィルタなしで全件ダンプ（`gh api` は `--paginate` を付ける）**して本文を確認する:
   - issue comments に `Didn't find any major issues` → 指摘なし完了。`Reviewed commit:` が記載されていて現在のHEADと一致しない（古い）場合のみ再依頼する
   - PR本体に 👍 → 指摘なし完了（Reviewed commit の記載は無くてもよい）。ただし依頼時刻より前に付いた古い👍は無効で、最新ラウンドの完了シグナルとは扱わない。古い👍しかない場合は issue comments の完了報告を待ち、タイムアウト時は全件ダンプのうえユーザーに報告する
   - issue comments に `Something went wrong` → `@codex review` で再依頼する
