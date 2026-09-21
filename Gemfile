@@ -54,7 +54,7 @@ gem "commonmarker"
 gem "rouge"
 
 # Resend for email delivery via API (production)
-gem "resend", "~> 1.6"
+gem "resend", "~> 1.16"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
