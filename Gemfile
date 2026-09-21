@@ -41,7 +41,12 @@ gem "kamal", require: false
 gem "thruster", require: false
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
-gem "image_processing", "~> 1.2"
+# image_processing 2.x no longer depends on a backend; ruby-vips is required
+# explicitly because Rails 8.1 defaults active_storage.variant_processor to :vips.
+gem "image_processing", "~> 2.1"
+# Loaded lazily by Active Storage only when processing variants (which needs
+# the system libvips library, installed via Dockerfile/CI, not Bundler).
+gem "ruby-vips", "~> 2.0", require: false
 
 # Use Cloudflare R2 through Active Storage's S3-compatible service.
 gem "aws-sdk-s3", require: false
