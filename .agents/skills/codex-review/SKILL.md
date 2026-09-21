@@ -40,9 +40,10 @@ gh pr comment <PR番号> --body "@codex レビューお願い"
 
 - PR作成・draft ready時の初回レビューは自動で付くことが多いが、付かないこともある。10分待ってもレビューが無ければ明示依頼へ切り替える
 - **PR本体への👍は「指摘なし」の完了シグナルとしてそのまま扱ってよい**（Reviewed commit の記載は無くてもよい）。ただし、👍が出た後に push した場合は評価対象が古くなるため、最新HEADで再依頼する
+- **過去ラウンドの👍と最新ラウンドの👍を区別する**: 修正push後の再レビューでは、依頼時刻より前に付いたPR本体の👍は過去ラウンドの完了シグナルであり、最新HEADの完了シグナルとして扱わない。最新の依頼時刻を控え、それ以降に生成された完了シグナルのみを判定する
 - 2回目以降（修正push後）は自動で付かないため毎回明示投稿が必要である
 
-依頼コメントのID（`issuecomment-<ID>`）を記録しておく（フェーズ2のリアクション確認に使う）。
+依頼コメントのID（`issuecomment-<ID>`）と依頼時刻（UTC）を記録しておく（フェーズ2のリアクション確認に使う）。
 
 ## フェーズ2: レビューコメントの待機
 
@@ -55,7 +56,8 @@ Codexのレビューは通常5分程度で完了する。**5シグナル**を毎
 5. `issues/comments/<依頼コメントID>/reactions`（依頼コメントへの👍。依頼を投稿した場合のみ）
 
 ```bash
-# 依頼直後にベースラインを取る
+# 依頼直後にベースラインを取る（since は依頼投稿時刻。PR本体の古い👍を除外するために使う）
+since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 issue_base=$(env -u GH_TOKEN gh api repos/hiroeorz/tech_notes/issues/<PR番号>/comments --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector"))] | length')
 inline_base=$(env -u GH_TOKEN gh api repos/hiroeorz/tech_notes/pulls/<PR番号>/comments --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector"))] | length')
 review_base=$(env -u GH_TOKEN gh pr view <PR番号> --json reviews --jq '[.reviews[] | select(.author.login | startswith("chatgpt-codex-connector"))] | length')
@@ -65,7 +67,7 @@ for i in $(seq 1 15); do
   issue_count=$(env -u GH_TOKEN gh api repos/hiroeorz/tech_notes/issues/<PR番号>/comments --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector"))] | length')
   inline_count=$(env -u GH_TOKEN gh api repos/hiroeorz/tech_notes/pulls/<PR番号>/comments --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector"))] | length')
   review_count=$(env -u GH_TOKEN gh pr view <PR番号> --json reviews --jq '[.reviews[] | select(.author.login | startswith("chatgpt-codex-connector"))] | length')
-  pr_plus=$(env -u GH_TOKEN gh api repos/hiroeorz/tech_notes/issues/<PR番号>/reactions --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector")) | select(.content == "+1")] | length')
+  pr_plus=$(env -u GH_TOKEN gh api repos/hiroeorz/tech_notes/issues/<PR番号>/reactions --jq "[.[] | select(.user.login | startswith(\"chatgpt-codex-connector\")) | select(.content == \"+1\") | select(.created_at > \"$since\")] | length")
   plus_count=$(env -u GH_TOKEN gh api repos/hiroeorz/tech_notes/issues/comments/<依頼コメントID>/reactions --jq '[.[] | select(.user.login | startswith("chatgpt-codex-connector")) | select(.content == "+1")] | length' 2>/dev/null || echo 0)
   echo "try $i: issue=$issue_count inline=$inline_count review=$review_count pr_plus=$pr_plus plus=$plus_count"
   if [ "$issue_count" -gt "$issue_base" ] || [ "$inline_count" -gt "$inline_base" ] || [ "$review_count" -gt "$review_base" ] || [ "$pr_plus" -gt 0 ] || [ "$plus_count" -gt 0 ]; then
@@ -77,7 +79,7 @@ done
 - カウントは「新着あり/なし」の判定に使い、**最終判定は本文**で行う（件数だけでは「指摘なし」と `Something went wrong` を区別できない）
 - ループを抜けたら（時間切れでも）**5箇所すべてをフィルタなしで全件ダンプ**して本文を確認する:
   - issue comments に `Didn't find any major issues` → 指摘なし完了。`Reviewed commit:` が記載されていて現在のHEADと一致しない（古い）場合のみ再依頼する
-  - PR本体に 👍 → 指摘なし完了。Reviewed commit の記載は無くてもよい（👍の後に push した場合のみ最新HEADで再依頼する）
+  - PR本体に 👍 → 指摘なし完了（Reviewed commit の記載は無くてもよい）。ただし依頼時刻より前に付いた古い👍は無効で、最新ラウンドの完了シグナルとは扱わない。古い👍しかない場合は issue comments の完了報告を待ち、タイムアウト時は全件ダンプのうえユーザーに報告する
   - issue comments に `Something went wrong` → `@codex review` で再依頼する
   - インラインに Pバッジ（P1/P2）→ 指摘あり。妥当性を検証する
   - 👀（eyes）リアクションのみ → 処理中。完了ではない
@@ -154,7 +156,7 @@ git push origin --delete <ブランチ名>
 - レビュー依頼は指摘対応のたびに再依頼すること。対応したのに再依頼を忘れると、対応漏れのまま進むことになる
 - Codexの指摘はインラインのpull request commentsとして付くことが多いため、フェーズ2では必ず `pulls/<PR番号>/comments` も取得すること
 - 待機ループでは**issue comments・インライン・reviews・PR本体の👍・依頼コメントの👍の5シグナルを取得し、すべてを break 条件に使う**。特に issue comments は「指摘なし完了」の通知先になるため取りこぼしやすい
-- 「指摘なし」は**PR本体への👍**・依頼コメントへの👍・**issue comments の完了報告**のいずれでも来る。特に **PR本体への👍は「指摘なし」の完了シグナルとしてそのまま扱ってよい**（Reviewed commit の記載を待って再依頼を繰り返さない）。ただし 👍 の後に push した場合は最新HEADで再依頼する
+- 「指摘なし」は**PR本体への👍**・依頼コメントへの👍・**issue comments の完了報告**のいずれでも来る。特に **PR本体への👍は「指摘なし」の完了シグナルとしてそのまま扱ってよい**（Reviewed commit の記載を待って再依頼を繰り返さない）。ただし 👍 の後に push した場合は最新HEADで再依頼し、依頼時刻より前に付いた過去ラウンドの👍は無効として扱う
 - 完了報告に `Reviewed commit` が記載されており、現在のHEADと一致しない場合は最新HEADで再依頼すること
 - タイムアウト時や判定に迷った場合は、ユーザーへ報告する前に5箇所すべてをフィルタなしで全件ダンプして本文を確認すること
 - 指摘が妥当でないと判断した場合は、自己判断でスキップせず必ずユーザーに報告して判断を仰ぐこと

@@ -280,24 +280,24 @@ rbenv install --list | grep '{アップグレード先のバージョン}'
 status=0
 
 # 全テスト
-bin/rails test
+bin/rails test || status=1
 
 # システムテスト（必要な場合）
-bin/rails test:system
+bin/rails test:system || status=1
 
 # 型チェック
-bundle exec srb tc
+bundle exec srb tc || status=1
 
 # Rubocop
-bin/rubocop
+bin/rubocop || status=1
 
 # セキュリティスキャン
-bin/brakeman --no-pager
-bin/bundler-audit
-bin/importmap audit
+bin/brakeman --no-pager || status=1
+bin/bundler-audit || status=1
+bin/importmap audit || status=1
 
 # 確認
-ruby --version
+ruby --version || status=1
 
 # ドキュメント内の古いバージョン表記が残っていないか確認（rg: 一致あり=0 / 一致なし=1 / エラー=2）
 # 一致があれば失敗扱いとし、エラー終了も失敗とする（一致なしの1だけが成功）
