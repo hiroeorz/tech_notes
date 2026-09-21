@@ -40,15 +40,15 @@ CI確認（gh run list --branch main）
 gh run list --branch main --limit 5 --json databaseId,headSha,status,conclusion,event
 ```
 
-`headSha` がマージ（push）したコミットと一致することを確認する。まだ実行が登録されていない場合は数秒待って再取得する。
+`headSha` がマージ（push）したコミットと一致することを確認する。まだ実行が登録されていない場合は数秒待って再取得する。特定した `databaseId`（run ID）を控え、以降のポーリングでその実行を追跡する。
 
 ### 1.2 完了までポーリング
 
 ```bash
-sleep 60 && gh run list --branch main --limit 1 --json databaseId,headSha,status,conclusion
+sleep 60 && gh run view <run-id> --json status,conclusion
 ```
 
-`status` が `completed` になるまで、目安として60〜90秒間隔・最大10回（約10〜15分）再試行する。Lint・型チェック・全テスト・システムテストを単一ジョブで順に実行するため、実行時間が長い場合がある。進行状況は `gh run view <run-id>` で確認できる。
+1.1 で特定した run ID を `gh run view <run-id>` で追跡する（`gh run list --branch main --limit 1` で最新実行を取り直すと、待機中に別の main push が発生した場合に別コミットの結果を対象pushの結果と誤認する）。`status` が `completed` になるまで、目安として60〜90秒間隔・最大10回（約10〜15分）再試行する。Lint・型チェック・全テスト・システムテストを単一ジョブで順に実行するため、実行時間が長い場合がある。進行状況は `gh run view <run-id>` で確認できる。
 
 完了したら `conclusion` を判定する:
 

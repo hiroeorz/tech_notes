@@ -84,6 +84,8 @@
 | `translation` | 全localeの翻訳キー欠落や直書き文言の検出・補完を委譲する場合 | 翻訳完全性のチェック・補完 |
 | `visual_reference_analyzer` | `docs/images/` などの見本画像を読み込み、再現可能な粒度の仕様レポートが必要な場合 | 読み取り専用の見本画像解析 |
 
+サブエージェントの識別子は実行環境で表記が異なる。`.opencode/agents/` はハイフン表記（例: `bug-investigator`、`code-reviewer`）、`.codex/agents/` はアンダースコア表記（例: `bug_investigator`、`code_reviewer`）で定義されている。スキル本文中の表記が実行環境と異なる場合は、実行環境の定義に合わせて読み替えて task ツールに指定すること。
+
 特に、`repository_operator` と `release_operator` による外部状態の変更は明示割り当てを必須とする。コミット前には `security-check` を実行し、`git reset --hard`、`git clean`、force push、履歴書き換え、無断マージは実行しない。
 
 ## リンター / 型チェック / セキュリティスキャン
