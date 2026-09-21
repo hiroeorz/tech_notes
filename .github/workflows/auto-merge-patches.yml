@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-      - uses: dependabot/fetch-metadata@v2
+      - uses: dependabot/fetch-metadata@v3
         id: metadata
       - name: Enable auto-merge for patch updates
         if: steps.metadata.outputs.update-type == 'version-update:semver-patch'
