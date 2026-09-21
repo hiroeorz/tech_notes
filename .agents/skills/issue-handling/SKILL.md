@@ -60,14 +60,14 @@ GitHubのIssueを確認して対応するよう指示された場合、このス
 以下を確認する。問題があればユーザーに知らせて対応を仰ぐ。
 
 ```bash
-env -u GH_TOKEN gh auth status
+env -u GH_TOKEN -u GITHUB_TOKEN gh auth status
 git status --short
 git branch --show-current
 git checkout main && git pull origin main
 ```
 
 - 作業ツリーに未コミットの変更が残っていないこと（残っている場合はユーザーに確認する）
-- `gh` が認証済みであること。401 `Bad credentials` が出る場合は `env -u GH_TOKEN` を付けて実行する（無効な `GH_TOKEN` がホスト側認証を上書きするため）
+- `gh` が認証済みであること。401 `Bad credentials` が出る場合は `env -u GH_TOKEN -u GITHUB_TOKEN` を付けて実行する（無効な `GH_TOKEN` がホスト側認証を上書きするため）
 - main が最新であること
 
 ---
@@ -77,7 +77,7 @@ git checkout main && git pull origin main
 オープンなIssueを古い順に取得する。
 
 ```bash
-env -u GH_TOKEN gh issue list --state open --limit 100 \
+env -u GH_TOKEN -u GITHUB_TOKEN gh issue list --state open --limit 100 \
   --json number,title,labels,assignees,milestone,createdAt,updatedAt,body \
   --jq 'sort_by(.number)'
 ```
@@ -85,7 +85,7 @@ env -u GH_TOKEN gh issue list --state open --limit 100 \
 各Issueについて、コメントを含めて詳細を確認する（起票後の補足・仕様変更・追加情報がコメントに書かれている場合がある）。
 
 ```bash
-env -u GH_TOKEN gh issue view <番号> --comments
+env -u GH_TOKEN -u GITHUB_TOKEN gh issue view <番号> --comments
 ```
 
 ### 除外・保留の判定
@@ -94,7 +94,7 @@ env -u GH_TOKEN gh issue view <番号> --comments
 - オープンなPRに紐付いているIssue（対応中・レビュー中）は一覧ではスキップする。紐付けはタイムラインの cross-reference で確認する:
 
 ```bash
-env -u GH_TOKEN gh api repos/{owner}/{repo}/issues/<番号>/timeline --paginate \
+env -u GH_TOKEN -u GITHUB_TOKEN gh api repos/{owner}/{repo}/issues/<番号>/timeline --paginate \
   --jq '[.[] | select(.event == "cross-referenced") | select(.source.issue.pull_request != null) | {number: .source.issue.number, state: .source.issue.state}]'
 ```
 
@@ -224,13 +224,13 @@ Fixes #168
 2. マージ後、対象Issueがクローズされたか確認する:
 
 ```bash
-env -u GH_TOKEN gh issue view <番号> --json state --jq '.state'
+env -u GH_TOKEN -u GITHUB_TOKEN gh issue view <番号> --json state --jq '.state'
 ```
 
 3. `CLOSED` になっていない場合は、手動でクローズする:
 
 ```bash
-env -u GH_TOKEN gh issue close <番号> --comment "PR #<PR番号> のマージにより対応しました。"
+env -u GH_TOKEN -u GITHUB_TOKEN gh issue close <番号> --comment "PR #<PR番号> のマージにより対応しました。"
 ```
 
 4. マージ後のmainをローカルへ取り込む:

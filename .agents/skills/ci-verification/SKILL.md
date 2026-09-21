@@ -48,12 +48,13 @@ gh run list --branch main --limit 5 --json databaseId,headSha,status,conclusion,
 sleep 60 && gh run view <run-id> --json status,conclusion
 ```
 
-1.1 で特定した run ID を `gh run view <run-id>` で追跡する（`gh run list --branch main --limit 1` で最新実行を取り直すと、待機中に別の main push が発生した場合に別コミットの結果を対象pushの結果と誤認する）。`status` が `completed` になるまで、目安として60〜90秒間隔・最大10回（約10〜15分）再試行する。Lint・型チェック・全テスト・システムテストを単一ジョブで順に実行するため、実行時間が長い場合がある。進行状況は `gh run view <run-id>` で確認できる。
+1.1 で特定した run ID を `gh run view <run-id>` で追跡する（`gh run list --branch main --limit 1` で最新実行を取り直すと、待機中に別の main push が発生した場合に別コミットの結果を対象pushの結果と誤認する）。`status` が `completed` になるまで、目安として60〜90秒間隔・最大10回（約10〜15分）再試行する。Lint・型チェック・全テスト・システムテストを単一ジョブで順に実行するため、実行時間が長い場合がある。進行状況は `gh run view <run-id>` で確認できる。上限到達時に `status` が `completed` になっていない場合の扱いは下記の判定に従う。
 
 完了したら `conclusion` を判定する:
 
 - `success` → フェーズ2へ
 - `failure` / `cancelled` / `timed_out` → フェーズ3へ
+- `conclusion` が空で `status` が `in_progress` のまま → 失敗扱いにせず、待機を延長するか、実行中である旨と run URL をユーザーに報告して指示を仰ぐ
 
 ## フェーズ2: 成功時の処理
 
@@ -126,10 +127,9 @@ git commit -m "fix: <失敗内容の概要>
 - 修正: <修正内容>"
 git push origin <ブランチ名>
 gh pr create --base main --head <ブランチ名> --title "fix: <失敗内容の概要>" --body "<原因と修正内容>"
-gh pr merge <PR番号> --merge
 ```
 
-Codexレビューが必要な場合は、通常の開発フロー（`codex-review` スキル）に従う。
+PR作成後は `.agents/skills/codex-review/SKILL.md` の完了フロー（レビュー依頼・指摘対応・最終検証・mainへのマージ）に従う。Codexレビューが利用できない場合のみ、ユーザーの確認を得てからマージする。
 
 ### 3.5 再確認
 
