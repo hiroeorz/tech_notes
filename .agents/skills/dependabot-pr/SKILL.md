@@ -84,7 +84,7 @@ bin/rails test --version 2>&1 || echo "テスト環境が準備できていま�
 gh pr list --author "app/dependabot" --state open --json number,title,createdAt,headRefName,baseRefName,url --jq 'sort_by(.createdAt)'
 ```
 
-このリポジトリの `.github/dependabot.yml` では bundler の更新を週次（金曜17:00 JST、`Asia/Tokyo`）で確認する。設定が変更されている場合は、実ファイルの内容を正として対象エコシステムと更新間隔を報告する。
+このリポジトリの `.github/dependabot.yml` では Bundler と GitHub Actions の更新を週次（金曜17:00 JST、`Asia/Tokyo`）で確認する。設定が変更されている場合は、実ファイルの内容を正として対象エコシステムと更新間隔を報告する。
 
 patch 更新は `.github/workflows/auto-merge-patches.yml` により自動承認・自動マージ（squash）される。処理開始時点で既にマージ済み・クローズ済みの patch PR があれば対象外とし、残りの PR だけを報告する。
 
@@ -119,7 +119,7 @@ gh pr view <PR番号> --json title,body,files,additions,deletions,reviews,state,
 
 以下の情報を整理する:
 
-- **更新対象**: Gem 名 / ライブラリ名（`Gemfile` / `Gemfile.lock` の差分から特定）
+- **更新対象**: Gem 名 / GitHub Action 名（`Gemfile.lock` または `.github/workflows/` の差分から特定）
 - **バージョン変化**: 旧バージョン → 新バージョン（major / minor / patch の種別）
 - **CHANGELOG / Release Notes**: 以下いずれかの方法で確認する
   - GitHub Releases ページを WebFetch で取得
@@ -131,9 +131,9 @@ gh pr view <PR番号> --json title,body,files,additions,deletions,reviews,state,
 
 ### 2.3 依存関係の影響調査
 
-更新対象の Gem が、以下の観点でプロジェクトにどのように影響するか調査する:
+更新対象（Gem または GitHub Action）が、以下の観点でプロジェクトにどのように影響するか調査する:
 
-- `Gemfile` で直接依存しているか、間接依存か
+- Bundler 更新の場合: `Gemfile` で直接依存しているか、間接依存か
 - アプリケーションコード内で該当 Gem のどの機能を使用しているか
 - 既存のテストでカバーされている利用箇所の範囲
 - マイグレーションや設定変更が必要かどうか
@@ -144,6 +144,9 @@ rg "<gem-name>" app/ --type-add 'ruby:*.rb' --type ruby
 rg "<gem-name>" config/ --type-add 'ruby:*.rb' --type ruby
 # Module/Class 名で検索（Gem によっては名前空間が異なる）
 rg "<ModuleName>" app/ --type ruby
+
+# GitHub Actions の使用箇所を検索（GitHub Actions の更新の場合）
+rg "uses: <owner/action>" .github/workflows
 ```
 
 ### 2.4 影響評価レポート
@@ -212,7 +215,7 @@ git checkout main && git pull origin main
 # Dependabot のブランチをローカルにチェックアウト
 gh pr checkout <PR番号>
 
-# Gem を実際にインストール
+# Bundler更新の場合のみGemを実際にインストール（GitHub Actions更新では不要）
 bundle install
 ```
 
@@ -223,6 +226,8 @@ bin/rails test
 ```
 
 差分が `Gemfile.lock` のみ等の低リスク更新では、関連テストと `bundle exec srb tc` に止めてよい。**全体テスト・システムテストは全 PR マージ後の main で各1回実行**し、PR ごとにフルテストを繰り返さない。
+
+GitHub Actions の更新では、変更されたワークフロー YAML、Action の権限（`permissions`）、入力名（`with:`）、ランナー互換性を確認する。ローカルで完全再現できない検証は、PR上のチェック結果と未確認事項を明記する。
 
 失敗した場合は、原因を特定してユーザーに報告する:
 - Dependabot の変更自体に問題がある（互換性のない API 変更など）
@@ -361,7 +366,7 @@ bundle exec srb tc
 
 ### 1. `.github/dependabot.yml` の見直し
 
-現在は bundler を週次（金曜17:00 JST）で更新する設定である。実ファイルの内容を正とし、更新頻度、対象ブランチ、ラベル、レビュー担当、自動マージなどを変更する必要がある場合は、現在の運用とリスクを確認してからユーザーへ提案する。
+現在は Bundler と GitHub Actions を週次（金曜17:00 JST）で更新する設定である。実ファイルの内容を正とし、更新頻度、対象ブランチ、ラベル、レビュー担当、自動マージなどを変更する必要がある場合は、現在の運用とリスクを確認してからユーザーへ提案する。
 
 ### 2. レビューアサイン / 自動マージの運用
 
