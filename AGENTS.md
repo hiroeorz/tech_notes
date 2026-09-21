@@ -53,7 +53,7 @@
 - **`ruby-upgrade`**: Rubyのバージョンまたはパッチレベルを更新する場合。Ruby本体、`.ruby-version`、Gem、互換性、実行環境の影響を調査・修正・検証する手順として使用する。
 - **`dependabot-pr`**: Dependabotが作成したPRの調査、依存関係更新の検証、マージ判断を行う場合。Dependabot以外の通常の依存関係更新には、変更内容に応じて `feature-implementation` または `bug-fix` と `code-change-verification` を使用する。
 - **`deploy`**: `kamal deploy`、初回の `kamal setup`、本番デプロイ前の確認、デプロイ障害の調査、ロールバックを行う場合。デプロイ実行前に必ず使用する。
-- **`deploy-request`**: ユーザーから「デプロイしたい」と依頼され、エージェントは実行せず、ユーザーがWSL側で実行するデプロイ／ロールバックのコマンド提示のみを行う場合。
+- **`deploy-request`**: ユーザーから「デプロイしたい」と依頼された場合、または完了後フローでデプロイ手順の提示を行う場合。エージェントは実行せず、ユーザーがWSL側で実行するデプロイ／ロールバックのコマンド提示のみを行う。
 - **`code-change-verification`**: Ruby、Rails、テスト、JavaScript、Stimulus、importmap、Gem依存関係、DB、CI、Docker、ビルド・テスト設定を変更した場合。変更内容に応じて関連テスト、Sorbet、Rubocop、Brakeman、bundler-audit、importmap audit、全テスト、システムテストを選択して実行する。ドキュメントのみの変更では、実行手順や設定変更を含む場合を除き使用しない。
 - **`security-check`**: `git commit` を実行する前、またはリポジトリ内の機密情報漏洩を監査するよう依頼された場合。コミット前には必ず使用し、CriticalまたはHighの指摘があればコミットを中断する。
 - **`issue-handling`**: GitHubのオープンIssueを確認・分類し、不具合は `bug-fix`、機能追加・仕様変更は `feature-implementation` で順次対応する場合。対応計画の承認後に1グループずつ対応する。

@@ -1,6 +1,6 @@
 ---
 name: deploy-request
-description: ユーザーが「デプロイしたい」「デプロイして」「デプロイ手順」「deploy したい」と言ったときに、対象リビジョンと検証状態を確認し、ユーザー自身がWSL側で実行する kamal デプロイ／ロールバックのコマンドを日本語で提供する。エージェントはデプロイを実行しない。Use ONLY when ユーザーからデプロイ実行の明示的な依頼がある場合。
+description: ユーザーが「デプロイしたい」「デプロイして」「デプロイ手順」「deploy したい」と言ったとき、または完了後フロー（feature-implementation / bug-fix / rails-upgrade / ruby-upgrade / visual-adjustment / codex-review）でデプロイ手順の提示を行うときに、対象リビジョンと検証状態を確認し、ユーザー自身がWSL側で実行する kamal デプロイ／ロールバックのコマンドを日本語で提供する。エージェントはデプロイを実行しない。
 ---
 
 # デプロイ手順の提示（deploy-request）
@@ -18,7 +18,7 @@ git log --oneline origin/main..HEAD   # 未プッシュコミットの有無
 ```
 
 - 対象は単一本番のみ（staging はない）。初回デプロイは `kamal setup`、通常は `kamal deploy`
-- `main` の直近CIが成功していることを確認する（`gh run list --branch main --limit 1`。詳細は `.agents/skills/ci-verification/SKILL.md`）
+- 対象SHAの main CI が成功していることを確認する。`gh run list --branch main --commit <完全SHA> --limit 1 --json databaseId,headSha,status,conclusion` で対象コミットの run を特定し、`headSha` が対象SHAと一致すること、`conclusion` が `success` であることを確認する（詳細は `.agents/skills/ci-verification/SKILL.md`）。連続pushやマージ直後は最新runが別コミットの結果であることがあるため、`--limit 1` の最新runだけで判断しない
 - 未検証のリビジョン（ローカルテスト未実施、main CI未通過、未マージ）の場合は、その旨を明示してユーザーの判断を仰ぐ
 
 ### 2. 提示するコマンド（WSL側）
