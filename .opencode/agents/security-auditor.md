@@ -1,8 +1,6 @@
 ---
 description: 認証認可、入力処理、XSS・CSRF・SQLインジェクション、機密情報、依存脆弱性を監査する読み取り専用担当。
 mode: subagent
-model: openai/gpt-5.6-sol
-reasoningEffort: high
 permission:
   edit: deny
   bash:

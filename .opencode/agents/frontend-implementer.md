@@ -1,8 +1,6 @@
 ---
 description: 公開画面・管理画面のUIを担当する。ERB、CSS、Stimulus、アクセシビリティ、レスポンシブ対応を変更するチケットで使用する。
 mode: subagent
-model: opencode-go/deepseek-v4-flash
-reasoningEffort: medium
 permission:
   edit: allow
   bash: allow

@@ -5,7 +5,37 @@ description: GitHub Dependabot が起票したプルリクエストの調査・�
 
 Dependabot が起票した PR を処理するよう指示された場合、または定期的な依存関係更新の一環として、このスキルの手順に従うこと。
 
+本スキルが実行されたら、定義済みのサブエージェントを積極的に使うこと。
+特に
+* 設計: solution_architect
+* コードレビュー: code_reviewer
+* データベースレビュー: database_reviewer
+* ドキュメント更新: documentation_manager
+* Railsコーディング: rails_implementer
+* フロントエンドコーディング: frontend_implementer
+* セキュリティレビュー: security_auditor
+* テスト: test_engineer
+* git, github 操作: repository_operator
+* 原因調査: bug_investigator
+
+の使用を推奨する。
+他のエージェントについても必要に応じて起動して作業を進めること。
+各サブエージェントが使用するLLMモデルについては、各サブエージェントで定義されているモデルを使用すること。
+
+ユーザー向け文言を追加・変更する場合は `.agents/skills/translation/SKILL.md`（必要に応じて `.agents/skills/internationalization/SKILL.md`）に従うこと。
+
 **各フェーズにおいて、変更内容や影響範囲が不明瞭な場合は、その時点でユーザーに確認し、明確にしてから次に進むこと。**
+
+## 並列実行ポリシー
+
+独立して実行できるタスクは、サブエージェントや並列ツール呼び出しを使って**同時に実行する**こと。直列に並べるだけにしない。
+
+- リサーチ（CHANGELOG確認・使用箇所検索・影響調査）は相互に独立しているため、**同一メッセージで複数のツール呼び出し**を行って並列実行する。
+- 読み取り専用のサブエージェント（code_reviewer、database_reviewer、security_auditor、bug_investigator、test_engineer の調査など）は互いに依存がなければ、**同一メッセージで複数起動**して並列化する。
+- `Gemfile.lock` のコンフリクトを避けるため、PRのマージ自体は古い順に直列で行う。`bin/rails test` と `bin/rails test:system` はテストDB・ブラウザ資源を共有するため並列にせず直列化する。
+- 静的解析（`bundle exec srb tc`、`bin/rubocop`、`bin/brakeman --no-pager`、`bin/bundler-audit`、`bin/importmap audit`）は相互に独立しているため、**同一メッセージで複数の bash ツール呼び出し**を行って並列実行してよい。
+- Dependabotブランチへの直接修正は行わないのが基本である。アプリケーションコードの修正が必要になった場合は通常のトピックブランチで対応し（本スキルの範囲外）、読み取り専用レビューと編集が重なる場合は変更ファイルが重複しないことを確認する。
+- サブエージェントには対象PR番号・ファイル一覧・レビューまたは調査の観点をプロンプトで明示する。シェルを持たず `git diff` を実行できないエージェントがいるため、自分で差分を取得できる前提にしない。
 
 ## 処理フロー概要
 
@@ -24,7 +54,7 @@ PR マージ・クローズ
   ↓
 未処理の PR があれば次の PR へ（古い順にループ）
   ↓
-全 PR 処理後の報告
+全 PR 処理後の報告（全体テスト + gem RBI 同期 + CI 確認）
 ```
 
 ---
@@ -36,7 +66,7 @@ PR マージ・クローズ
 - `gh` CLI がインストールされ、GitHub 認証が済んでいること
 - `git` が正しく設定され、リモートリポジトリにアクセスできること
 - ローカル環境で `bin/rails test` が実行可能な状態であること（bundle 済み、DB 準備済み）
-- `bundle audit` が Gemfile.lock の読み取りに成功すること
+- `bin/bundler-audit` が Gemfile.lock の読み取りに成功すること
 
 ```bash
 gh auth status 2>&1 || echo "gh CLI の認証が必要です"
@@ -54,13 +84,13 @@ bin/rails test --version 2>&1 || echo "テスト環境が準備できていま�
 gh pr list --author "app/dependabot" --state open --json number,title,createdAt,headRefName,baseRefName,url --jq 'sort_by(.createdAt)'
 ```
 
-このリポジトリの Dependabot 設定ファイル（`.github/dependabot.yml`）が存在しない場合、以下の点をユーザーに報告する:
-- Dependabot が有効化されていない可能性がある
-- 必要に応じて `.github/dependabot.yml` の作成を提案する（スキル末尾の「提案事項」参照）
+このリポジトリの `.github/dependabot.yml` では bundler の更新を週次（金曜17:00 JST、`Asia/Tokyo`）で確認する。設定が変更されている場合は、実ファイルの内容を正として対象エコシステムと更新間隔を報告する。
+
+patch 更新は `.github/workflows/auto-merge-patches.yml` により自動承認・自動マージ（squash）される。処理開始時点で既にマージ済み・クローズ済みの patch PR があれば対象外とし、残りの PR だけを報告する。
 
 ### 1.2 全体像の報告
 
-取得した PR 一覧をユーザーに以下の形式で報告する:
+取得した PR 一覧をユーザーに以下の形式で報告する。**報告は日本語で行う**（中国語など他言語を混入させない）:
 
 ```
 📋 Dependabot PR 一覧（全 N 件、古い順）:
@@ -77,7 +107,7 @@ gh pr list --author "app/dependabot" --state open --json number,title,createdAt,
 
 ## フェーズ2: 個別 PR の調査（PR ごとに繰り返す）
 
-以下の手順を古い PR から順に1件ずつ実行する。
+以下の手順を古い PR から順に1件ずつ実行する。独立した調査（リリースノート確認・使用箇所検索・影響調査）は並列実行ポリシーに従い並列化してよい。
 
 ### 2.1 PR 詳細の取得
 
@@ -97,6 +127,7 @@ gh pr view <PR番号> --json title,body,files,additions,deletions,reviews,state,
   - RubyGems ページの changelog リンクを確認
 - **Breaking Changes**: メジャーバージョンアップの場合は特に注意深く確認する
 - **脆弱性修正**: セキュリティ関連の更新かどうか（Dependabot の PR タイトルに `[Security]` と付く場合がある）
+- **patch 自動マージ対象か**: `version-update:semver-patch` であれば自動マージされるため、手動マージ判断は原則不要（CI 失敗などで残っている場合のみ個別判断する）
 
 ### 2.3 依存関係の影響調査
 
@@ -117,7 +148,7 @@ rg "<ModuleName>" app/ --type ruby
 
 ### 2.4 影響評価レポート
 
-以下の形式でユーザーに報告する（各 PR ごと）:
+以下の形式でユーザーに報告する（各 PR ごと）。**報告は日本語で行う**（中国語など他言語を混入させない）:
 
 ```
 ## PR #<番号>: <元のPRタイトル>
@@ -147,7 +178,7 @@ rg "<ModuleName>" app/ --type ruby
 - ❌ マージ非推奨（理由）
 ```
 
-**パッチ / マイナーでコード内の使用箇所が単純かつ互換性に問題ないと判断できる場合**は、フェーズ3のユーザー判断を簡略化してもよい（ユーザーに「互換性に問題なく、テストもパスしているためマージします」と一括で伝えて進める）。ただし不安要素がある場合は必ず個別に確認すること。
+**パッチ / マイナーでコード内の使用箇所が単純かつ互換性に問題ないと判断できる場合**は、フェーズ3のユーザー判断を簡略化してもよい（ユーザーに「互換性に問題なく、テストもパスしているためマージします」と一括で伝えて進める）。ただし不安要素がある場合は必ず個別に確認すること。patch 更新は自動マージされるため、既にマージ済みであれば報告のみでよい。
 
 成果物: 各 PR の影響評価レポート。不明点はユーザーに確認すること。
 
@@ -191,6 +222,8 @@ bundle install
 bin/rails test
 ```
 
+差分が `Gemfile.lock` のみ等の低リスク更新では、関連テストと `bundle exec srb tc` に止めてよい。**全体テスト・システムテストは全 PR マージ後の main で各1回実行**し、PR ごとにフルテストを繰り返さない。
+
 失敗した場合は、原因を特定してユーザーに報告する:
 - Dependabot の変更自体に問題がある（互換性のない API 変更など）
 - 既存のテストが不安定（flaky）
@@ -202,12 +235,17 @@ bin/rails test
 bin/rubocop
 ```
 
+`bin/rubocop` と `bundle exec srb tc` は相互に独立しているため、同一メッセージで並列実行してよい。
+
 ### 4.4 セキュリティスキャン
 
 ```bash
 bin/brakeman --no-pager
 bin/bundler-audit
+bin/importmap audit
 ```
+
+CI（`.github/workflows/ci.yml`）でも `bin/bundler-audit` と `bin/importmap audit` が実行される。3つのスキャンは相互に独立しているため、同一メッセージで並列実行してよい。
 
 ### 4.5 追加の動作確認
 
@@ -218,7 +256,7 @@ bin/bundler-audit
 
 ### 4.6 検証結果の報告
 
-以下の形式で報告する:
+以下の形式で報告する。**報告は日本語で行う**（中国語など他言語を混入させない）:
 
 ```
 ### 検証結果: PR #<番号>
@@ -228,6 +266,7 @@ bin/bundler-audit
 - ✅ / ❌ bin/rubocop（<件数> offenses）
 - ✅ / ❌ bin/brakeman
 - ✅ / ❌ bin/bundler-audit
+- ✅ / ❌ bin/importmap audit
 
 総評: 問題なし / 問題あり（詳細）
 ```
@@ -251,10 +290,12 @@ gh pr merge <PR番号> --merge --subject "<コミットメッセージ>" --body 
 # gh pr merge <PR番号> --squash --subject "<コミットメッセージ>" --body "<ボディ>"
 ```
 
-コミットメッセージは以下の形式を基本とする:
+patch 更新の自動マージは squash で行われる。手動マージはマージコミットを基本とし、squash を使う場合は事前にユーザーと合意すること。
+
+コミットメッセージは以下の形式を基本とする（日本語）:
 
 ```
-chore(deps): bump <gem-name> from <旧バージョン> to <新バージョン>
+chore(deps): <Gem名>を<旧バージョン>から<新バージョン>へ更新
 
 <変更の簡潔な説明や breaking change の注意点>
 ```
@@ -266,13 +307,28 @@ chore(deps): bump <gem-name> from <旧バージョン> to <新バージョン>
 git checkout main && git pull origin main
 ```
 
+### 5.2 gem RBI の同期（Gemfile.lock 更新時）
+
+Dependabot は `Gemfile.lock` しか変更しないため、RBI のファイル名に埋まっている gem バージョン（`sorbet/rbi/gems/<gem>@<version>.rbi`）がずれると型チェックの前提が崩れる。**全 PR のマージ後に main で1回だけ**再生成し、別コミットとして反映する:
+
+```bash
+bundle install
+bin/tapioca gem
+bin/tapioca gem --verify   # 「Nothing to do, all RBIs are up-to-date.」を確認
+bundle exec srb tc
+```
+
+- コミットメッセージ例: `chore(deps): gem RBIをGemfile.lockのバージョンへ同期する（tapioca gem再生成）`
+- sorbet / sorbet-runtime は RBI を生成しないため、この2つだけの更新なら再生成は不要。
+- このコミットの前に全体テスト・システムテスト（最終検証）を実施し、コミット前には `.agents/skills/security-check/SKILL.md` の手順に従い**コミット対象の変更ファイル**を対象とした機密情報スキャンを実行する。リポジトリ全体のスキャンはユーザーが明示的に指定した場合のみ実行すること。
+
 ---
 
 ## フェーズ6: 次の PR へ / 完了報告
 
 未処理の Dependabot PR が残っている場合、フェーズ2に戻り次の PR を処理する。
 
-全 PR の処理が完了したら、以下の内容をユーザーに報告する:
+全 PR の処理が完了したら、全マージ後の main で全体テスト・システムテストを各1回実行し、フェーズ5.2 の RBI 同期を済ませてから、以下の内容をユーザーに報告する。**報告は日本語で行う**（中国語など他言語を混入させない）:
 
 ```
 ## Dependabot PR 処理完了レポート
@@ -295,53 +351,35 @@ git checkout main && git pull origin main
 - デプロイ時の注意点
 ```
 
+マージ後の main の CI 確認は `.agents/skills/ci-verification/SKILL.md` に従う。
+
 ---
 
 ## 提案事項
 
 このスキルを初めて実行する際に、以下の提案を行うことを推奨する:
 
-### 1. `.github/dependabot.yml` の作成
+### 1. `.github/dependabot.yml` の見直し
 
-現在このリポジトリには Dependabot の設定ファイルが存在しない。Dependabot による自動更新を受け取るには、以下の設定ファイルを `.github/dependabot.yml` に作成する必要がある:
+現在は bundler を週次（金曜17:00 JST）で更新する設定である。実ファイルの内容を正とし、更新頻度、対象ブランチ、ラベル、レビュー担当、自動マージなどを変更する必要がある場合は、現在の運用とリスクを確認してからユーザーへ提案する。
 
-```yaml
-version: 2
-updates:
-  - package-ecosystem: "bundler"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Asia/Tokyo"
-    open-pull-requests-limit: 10
-    labels:
-      - "dependencies"
-      - "ruby"
-```
+### 2. レビューアサイン / 自動マージの運用
 
-ユーザーに上記を提案し、作成するかどうか確認すること。
+本リポジトリでは patch 更新の自動マージ（`.github/workflows/auto-merge-patches.yml`）が既に有効である。minor / major の扱いやレビューア自動アサイン（`reviewers:`）を変更する場合は、現在の運用とリスクを確認してからユーザーへ提案する。
 
-### 2. レビューアサイン / 自動マージの検討
+### 3. 依存関係監査の定期実行
 
-PR の数が増えてきた場合、以下の運用を検討してもよい:
-- Dependabot にレビューアを自動アサインする設定（`reviewers:`）
-- patch 更新のみ自動マージする設定（`target-branch:` + GitHub Actions の auto-merge）
+CI では `bin/bundler-audit` と `bin/importmap audit` を実行する。脆弱性が検出された場合の対応手順をあらかじめ決めておくことを推奨する。
 
-### 3. `bundle audit` の定期実行
+### 4. AGENTS.md との同期
 
-CI ですでに `bin/bundler-audit` は実行されている（AGENTS.md より）。脆弱性が検出された場合の対応手順をあらかじめ決めておくことを推奨する。
-
-### 4. AGENTS.md への追記
-
-本スキルに関する参照を AGENTS.md に追記することを提案する（「Dependabot PR の処理は `.agents/skills/dependabot-pr/SKILL.md` の手順に従う」といった一文）。
+Dependabot の対象や運用手順を変更した場合は、`AGENTS.md` の説明と同期する。
 
 ---
 
 ## 注意点
 
 - **ブランチ運用**: このスキルでは `main` ブランチからトピックブランチを作成せず、Dependabot が作成したブランチをそのまま検証・マージする。これは Dependabot PR のマージが依存関係の更新のみであり、アプリケーションコードの修正を伴わないため。
-- **複数 PR の同時依存**: 同じ Gem に対する複数の Dependabot PR（例: major と minor）が同時に開いている場合、古い方（minor）を先にマージすると新しい方（major）がコンフリクトする可能性がある。その場合は major PR のベースブランチを最新の main に更新する必要がある。
-- **手動修正の必要性**: Dependabot が自動生成した変更だけでは不十分で、アプリケーションコードの修正が必要になる場合がある。その場合は通常の feature ブランチを作成して修正すること（本スキルの範囲外）。
+- **複数 PR の同時依存とコンフリクト**: 同じ Gem に対する複数の Dependabot PR（例: major と minor）が同時に開いている場合、古い方を先にマージすると新しい方がコンフリクトする可能性がある。`Gemfile.lock` の `CHECKSUMS` は全 gem の sha256 を列挙するため、無関係な gem 同士でも行が隣接しているとコンフリクトする。その場合は `gh pr comment <PR番号> --body "@dependabot rebase"` を投稿してベースブランチを最新 main に更新させ、**ヘッド更新後に関連検証を再実行してから**マージする。自分でコンフリクト解消した結果を Dependabot ブランチへ push しないこと。
+- **手動修正の必要性**: Dependabot が自動生成した変更だけでは不十分で、アプリケーションコードの修正が必要になる場合がある。その場合は通常のトピックブランチを作成して修正すること（本スキルの範囲外）。修正でユーザー向け文言を変更する場合は `.agents/skills/translation/SKILL.md` に従うこと。
 - **テストが落ちた場合**: Dependabot の変更でテストが落ちた場合、アップストリームの互換性問題である可能性が高い。`git bisect` や CHANGELOG を詳細に確認し、原因を特定してユーザーに報告すること。

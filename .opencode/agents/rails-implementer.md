@@ -1,8 +1,6 @@
 ---
 description: Railsのバックエンド実装を担当する。モデル、コントローラー、サービス、ジョブ、ルーティング、Markdown処理を変更するチケットで使用する。
 mode: subagent
-model: opencode-go/deepseek-v4-flash
-reasoningEffort: medium
 permission:
   edit: allow
   bash: allow

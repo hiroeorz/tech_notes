@@ -1,8 +1,6 @@
 ---
 description: GitとGitHubのリポジトリ操作を高速に担当する。状態確認、差分確認、ブランチ、コミット、プッシュ、PR操作を行う。
 mode: subagent
-model: opencode-go/deepseek-v4-flash
-reasoningEffort: low
 permission:
   edit: allow
   bash: allow

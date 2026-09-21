@@ -1,8 +1,6 @@
 ---
 description: 実装変更と仕様書・README・運用文書の差分を監査し、根拠に基づいてドキュメントを同期する。
 mode: subagent
-model: opencode-go/deepseek-v4-flash
-reasoningEffort: medium
 permission:
   edit: allow
   bash: allow

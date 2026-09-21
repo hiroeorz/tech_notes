@@ -1,8 +1,6 @@
 ---
 description: 変更差分を独立した立場でレビューし、バグ、回帰、設計不整合、テスト不足、保守性の問題を検出する。
 mode: subagent
-model: openai/gpt-5.6-sol
-reasoningEffort: high
 permission:
   edit: deny
   bash:

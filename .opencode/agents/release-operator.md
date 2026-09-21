@@ -1,8 +1,6 @@
 ---
 description: Kamalによるリリース準備、デプロイ、稼働確認、障害切り分け、ロールバックを担当する運用エージェント。
 mode: subagent
-model: opencode-go/deepseek-v4-flash
-reasoningEffort: medium
 permission:
   edit: allow
   bash: allow
