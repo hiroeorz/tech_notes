@@ -127,7 +127,7 @@ gh pr view <PR番号> --json title,body,files,additions,deletions,reviews,state,
   - RubyGems ページの changelog リンクを確認
 - **Breaking Changes**: メジャーバージョンアップの場合は特に注意深く確認する
 - **脆弱性修正**: セキュリティ関連の更新かどうか（Dependabot の PR タイトルに `[Security]` と付く場合がある）
-- **patch 自動マージ対象か**: `version-update:semver-patch` であれば自動マージされるため、手動マージ判断は原則不要（PRブランチではCIが実行されないため、残っている場合は個別判断する）
+- **patch 自動マージ対象か**: `version-update:semver-patch` であれば自動マージされるため、手動マージ判断は原則不要（PRブランチではCIが実行されないため、残っている場合は個別判断する）。patch の自動マージは PR の CI 結果を待たずに main へ入る（main の CI が唯一の自動検証。この無検証マージは受容済みのリスクであり、main の CI が失敗した場合は通常フローで修正する）
 
 ### 2.3 依存関係の影響調査
 

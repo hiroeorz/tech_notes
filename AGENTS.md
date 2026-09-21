@@ -98,7 +98,8 @@
 ## Dependabot PR の処理
 
 - Dependabot が起票した PR の処理は `.agents/skills/dependabot-pr/SKILL.md` の手順に従うこと。
-- 本リポジトリに Dependabot 設定ファイル（`.github/dependabot.yml`）がない場合は、同スキルの提案内容を参照してユーザーと相談すること。
+- patch 更新は `.github/workflows/auto-merge-patches.yml` により PR の CI を待たずに自動マージされる（CI は `main` への push 時のみ実行されるため）。main の CI が唯一の自動検証であり、失敗時は通常フローで修正する。
+- Dependabot 設定は `.github/dependabot.yml` にある。更新頻度や対象を変更する場合は、同スキルの提案内容を参照してユーザーと相談すること。
 
 ## コミット前のセキュリティチェック
 
