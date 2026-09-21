@@ -92,7 +92,7 @@
 
 ## リンター / 型チェック / セキュリティスキャン
 
-- 型チェック: `bundle exec srb tc` で Sorbet の静的型検査を実行。`# typed: true` 以上のファイルでエラーがないことを確認する。`sorbet/rbi/gems/` はgit管理外のため、クリーンなチェックアウトでは先に `bin/tapioca gem` でgem RBIを生成する。
+- 型チェック: `bundle exec srb tc` で Sorbet の静的型検査を実行。`# typed: true` 以上のファイルでエラーがないことを確認する。`sorbet/rbi/gems/` はgit管理外のため、クリーンなチェックアウトでは先に `bin/tapioca gem` でgem RBIを生成する。手書きの型シムは `sorbet/rbi/shims/` に置いてgit管理する（環境依存の未解決参照を補う。例: `Bundler::ConnectionPool`）。シムの陳腐化は依存更新時に `bin/tapioca check-shims` で確認する。
 - スタイルは Rails Omakase 準拠: `bin/rubocop` で `rubocop-rails-omakase` 設定を実行。CI では `bin/rubocop -f github`。
 - CI（`.github/workflows/ci.yml`）は `main` への push 時のみ実行され、単一ジョブ `ci` で Lint・gem RBI生成（`bin/tapioca gem`）・Sorbet 型チェック・全テスト（`bin/rails test` と `bin/rails test:system`）のみを順に実行する。PR ブランチでは実行されない。
 - `bin/brakeman --no-pager`、`bin/bundler-audit`、`bin/importmap audit` は GitHub Actions では実行しない。セキュリティ関連の変更時などに `code-change-verification` スキルに従いローカルで実行する（`bin/ci` はこれらを含むローカルCIランナー）。

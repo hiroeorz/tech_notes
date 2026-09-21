@@ -324,6 +324,7 @@ bundle exec srb tc
 ```
 
 - コミットは不要（`sorbet/rbi/gems/` はgit管理外。CIが実行時に生成する）
+- 手書きの型シム（`sorbet/rbi/shims/`）が不要になっていないか、`bin/tapioca check-shims` で確認する
 - sorbet / sorbet-runtime は RBI を生成しないため、この2つだけの更新なら再生成は不要。
 - 全体テスト・システムテスト（最終検証）は1回だけ実施し、コミット前には `.agents/skills/security-check/SKILL.md` の手順に従い**コミット対象の変更ファイル**を対象とした機密情報スキャンを実行する。リポジトリ全体のスキャンはユーザーが明示的に指定した場合のみ実行すること。
 
