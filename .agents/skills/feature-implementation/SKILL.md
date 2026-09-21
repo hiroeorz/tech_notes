@@ -450,7 +450,7 @@ git push origin <ブランチ名>
 gh pr create --base main --head <ブランチ名> --title "..." --body "..."
 ```
 
-4. **CI確認**: `.agents/skills/ci-verification/SKILL.md` の手順に従い、CIを確認する。CIが失敗した場合は同スキルに従い修正ループを回す。
+4. **CI確認**: CI は `main` への push 時のみ実行されるため、PRブランチでは確認できない。PR作成後は「完了後のフロー」の Codex レビューへ進み、main へのマージ後に `.agents/skills/ci-verification/SKILL.md` の手順に従い CI を確認する。CIが失敗した場合は同スキルに従い修正ループを回す。
 
 5. 以下の内容をユーザーに日本語で報告する:
 
@@ -459,7 +459,7 @@ gh pr create --base main --head <ブランチ名> --title "..." --body "..."
 - 追加したファイルのリスト
 - 変更したファイルのリスト
 - （必要な場合）動作確認方法や注意点
-- CIの確認結果
+- CIの確認結果（PRブランチではCIは実行されないため、mainマージ後に確認する旨）
 - 残課題（未対応・既知の問題・フォローアップが必要な点があれば）
 - PR のURL（レビューを依頼する）
 

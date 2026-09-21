@@ -57,7 +57,7 @@
 - **`security-check`**: `git commit` を実行する前、またはリポジトリ内の機密情報漏洩を監査するよう依頼された場合。コミット前には必ず使用し、CriticalまたはHighの指摘があればコミットを中断する。
 - **`issue-handling`**: GitHubのオープンIssueを確認・分類し、不具合は `bug-fix`、機能追加・仕様変更は `feature-implementation` で順次対応する場合。対応計画の承認後に1グループずつ対応する。
 - **`codex-review`**: PR作成後にCodexへレビューを依頼し、指摘対応後にmainへマージして後片付けする場合。`feature-implementation` / `bug-fix` などの完了後フローから使用する。
-- **`ci-verification`**: PRブランチやmainへのpush後にGitHub ActionsのCI結果を確認し、失敗時は原因分析・最小修正・再プッシュのループを回す場合。
+- **`ci-verification`**: `main` へのpush後にGitHub ActionsのCI結果を確認し、失敗時は原因分析・最小修正・再プッシュのループを回す場合。CIは `main` へのpush時のみ実行されるため、PRブランチでは確認できない。
 - **`documentation-authoring`**: 要件定義書、機能仕様書、設計書、運用手順書、README、利用者向けガイドなどの技術文書を新規作成・更新・レビューする場合。根拠の分類と最小差分で記述する。
 - **`internationalization`**: Railsアプリの国際化・多言語化（ユーザー向け文言のI18n移行、locale切替、対象localeでの表示確認）を行う場合。
 - **`translation`**: コード変更後に全localeの翻訳キー欠落や直書きのユーザー向け文言を検出し、抜けがなくなるまで翻訳を補完する場合。
@@ -88,10 +88,10 @@
 
 ## リンター / 型チェック / セキュリティスキャン
 
-- 型チェック: `bundle exec srb tc` で Sorbet の静的型検査を実行。`# typed: true` 以上のファイルでエラーがないことを確認する。
+- 型チェック: `bundle exec srb tc` で Sorbet の静的型検査を実行。`# typed: true` 以上のファイルでエラーがないことを確認する。`sorbet/rbi/gems/` はgit管理外のため、クリーンなチェックアウトでは先に `bin/tapioca gem` でgem RBIを生成する。
 - スタイルは Rails Omakase 準拠: `bin/rubocop` で `rubocop-rails-omakase` 設定を実行。CI では `bin/rubocop -f github`。
-- `bin/brakeman --no-pager` と `bin/bundler-audit` を CI で実行（追加引数なし）。
-- JS 依存関係は `bin/importmap audit` で監査。
+- CI（`.github/workflows/ci.yml`）は `main` への push 時のみ実行され、単一ジョブ `ci` で Lint・gem RBI生成（`bin/tapioca gem`）・Sorbet 型チェック・全テスト（`bin/rails test` と `bin/rails test:system`）のみを順に実行する。PR ブランチでは実行されない。
+- `bin/brakeman --no-pager`、`bin/bundler-audit`、`bin/importmap audit` は GitHub Actions では実行しない。セキュリティ関連の変更時などに `code-change-verification` スキルに従いローカルで実行する（`bin/ci` はこれらを含むローカルCIランナー）。
 
 ## Dependabot PR の処理
 
@@ -130,7 +130,7 @@
 
 ## 注意点
 
-- `/storage` ディレクトリは `.keep` を除き gitignore — 新規クローンでは `bin/rails db:prepare`（または `db:migrate` + `db:seed`）で SQLite ファイルを作成する必要がある。CI では `bin/rails db:test:prepare test` を実行。
+- `/storage` ディレクトリは `.keep` を除き gitignore — 新規クローンでは `bin/rails db:prepare`（または `db:migrate` + `db:seed`）で SQLite ファイルを作成する必要がある。CI では `bin/rails db:test:prepare test` と `bin/rails db:test:prepare test:system` を実行。
 - `config/master.key` は gitignore されており、**コミットしてはならない**。`bin/rails credentials` ワークフローでのみ再生成可能。紛失した場合は `credentials.yml.enc` を再暗号化する必要がある。
 - `SiteSetting.current` の `site_url` と `profile_email` のデフォルトはサンプル値 — 本番環境の seed は `db/seeds.rb` で上書きすることを前提としている。本番ロジックで `SiteSetting.current` のデフォルトを信用せず、明示的な seeding を必須とすること。
 - `MarkdownRenderer` の許可リスト（`ALLOWED_TAGS` / `ALLOWED_ATTRIBUTES`）は意図的に厳格に設定されている。新しい markdown 機能（例: 新しい HTML 要素）を追加する場合は `app/models/markdown_renderer.rb` の許可リストを更新しないと内容が黙って除去される — 合わせて `test/models/markdown_renderer_test.rb` にテストを追加すること。

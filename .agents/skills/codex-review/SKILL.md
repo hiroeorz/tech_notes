@@ -12,7 +12,7 @@ PRを作成した後は、このスキルの手順に従いCodexの自動レビ�
 - PR作成・draft ready時はCodexが自動で初回レビューを行うことを基本とする（付かない場合は明示依頼する）。2回目以降（修正push後の再レビュー）は自動で付かないため、「@codex レビューお願い」の明示投稿が必要である
 - マージはマージコミット方式（`gh pr merge --merge`）を使用する。squash・rebaseは使わない
 - このスキルの使用指示は、フロー内でのマージの明示委譲を含む。ただし、下記の例外状況では必ずユーザーに確認してからマージすること
-- 本プロジェクトのCIは `pull_request` と `main` への `push` の両方で実行される（`.github/workflows/ci.yml`）。PRブランチへのプッシュでもCIが走るため、必要に応じて `.agents/skills/ci-verification/SKILL.md` で確認する
+- 本プロジェクトのCIは `main` への `push`（マージ含む）時のみ実行される（`.github/workflows/ci.yml`）。PRブランチではCIが走らないため、PRブランチのCI結果は存在しない。CI確認はマージ後に `.agents/skills/ci-verification/SKILL.md` に従って行う
 
 ## ワークフロー
 
@@ -115,7 +115,7 @@ git push origin <ブランチ名>
 gh pr comment <PR番号> --body "@codex レビューお願い"
 ```
 
-PRブランチへのプッシュでも本プロジェクトではCIが実行される（`pull_request` トリガー）。再レビュー依頼をCI完了までブロックする必要はないが、必要に応じて `.agents/skills/ci-verification/SKILL.md` に従いCIを確認する。
+PRブランチへのプッシュではCIは実行されない（CIは `main` への `push` 時のみ）。再レビュー依頼をCI完了までブロックする必要はない（PRブランチで確認できるCIはない）。
 
 妥当な指摘がなくなるまでループする。
 
@@ -160,6 +160,6 @@ git push origin --delete <ブランチ名>
 - 指摘が妥当でないと判断した場合は、自己判断でスキップせず必ずユーザーに報告して判断を仰ぐこと
 - 修正コミットは `fix:` プレフィックス、日本語メッセージで行うこと
 - コミット前の機密情報スキャンは必須（コミットより前に実行すること）
-- プッシュ後の再レビュー依頼をCI完了まで待つ必要はない。必要に応じて `ci-verification` でCIを確認する
+- プッシュ後の再レビュー依頼をCI完了まで待つ必要はない（CIは `main` への push 時のみ実行され、PRブランチでは確認できない）。CI確認はマージ後に `ci-verification` で行う
 - `git reset --hard`、`git clean`、force push、履歴書き換えは実行しない
 - 待機中にユーザーへ進捗を報告する必要はない。コメント到着、タイムアウト、マージ完了時に報告する

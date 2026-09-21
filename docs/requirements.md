@@ -1064,7 +1064,7 @@ Sorbet による静的型チェックを導入する。型チェックの段階�
 ### 18.5 ワークフロー組み込み
 
 - feature-implementation / bug-fix / rails-upgrade / ruby-upgrade の各スキルの静的解析フェーズに `srb tc` を追加する
-- CI での実行は今後の課題とし、今回はスキルへの記載にとどめる
+- CI（`.github/workflows/ci.yml`）の単一ジョブで Lint・`bin/tapioca gem`・`srb tc`・全テスト（`bin/rails test` と `bin/rails test:system`）を実行する
 
 ### 18.6 成功条件
 

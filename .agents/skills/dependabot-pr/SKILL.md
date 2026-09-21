@@ -127,7 +127,7 @@ gh pr view <PR番号> --json title,body,files,additions,deletions,reviews,state,
   - RubyGems ページの changelog リンクを確認
 - **Breaking Changes**: メジャーバージョンアップの場合は特に注意深く確認する
 - **脆弱性修正**: セキュリティ関連の更新かどうか（Dependabot の PR タイトルに `[Security]` と付く場合がある）
-- **patch 自動マージ対象か**: `version-update:semver-patch` であれば自動マージされるため、手動マージ判断は原則不要（CI 失敗などで残っている場合のみ個別判断する）
+- **patch 自動マージ対象か**: `version-update:semver-patch` であれば自動マージされるため、手動マージ判断は原則不要（PRブランチではCIが実行されないため、残っている場合は個別判断する）
 
 ### 2.3 依存関係の影響調査
 
@@ -245,7 +245,7 @@ bin/bundler-audit
 bin/importmap audit
 ```
 
-CI（`.github/workflows/ci.yml`）でも `bin/bundler-audit` と `bin/importmap audit` が実行される。3つのスキャンは相互に独立しているため、同一メッセージで並列実行してよい。
+CI（`.github/workflows/ci.yml`）は `main` への push 時のみ実行され、`bin/brakeman --no-pager`・`bin/bundler-audit`・`bin/importmap audit` は CI では実行されない。3つのスキャンはローカルで実施し、相互に独立しているため同一メッセージで並列実行してよい。
 
 ### 4.5 追加の動作確認
 
@@ -309,7 +309,7 @@ git checkout main && git pull origin main
 
 ### 5.2 gem RBI の同期（Gemfile.lock 更新時）
 
-Dependabot は `Gemfile.lock` しか変更しないため、RBI のファイル名に埋まっている gem バージョン（`sorbet/rbi/gems/<gem>@<version>.rbi`）がずれると型チェックの前提が崩れる。**全 PR のマージ後に main で1回だけ**再生成し、別コミットとして反映する:
+Dependabot は `Gemfile.lock` しか変更しないため、RBI のファイル名に埋まっている gem バージョン（`sorbet/rbi/gems/<gem>@<version>.rbi`）がずれると型チェックの前提が崩れる。`sorbet/rbi/gems/` はgit管理外（`.gitignore`）のため、**全 PR のマージ後に main で1回だけ**ローカルで再生成して `srb tc` を確認する。CI でも `bin/tapioca gem` を実行してから `srb tc` するため、コミットは不要:
 
 ```bash
 bundle install
@@ -318,9 +318,9 @@ bin/tapioca gem --verify   # 「Nothing to do, all RBIs are up-to-date.」を確
 bundle exec srb tc
 ```
 
-- コミットメッセージ例: `chore(deps): gem RBIをGemfile.lockのバージョンへ同期する（tapioca gem再生成）`
+- コミットは不要（`sorbet/rbi/gems/` はgit管理外。CIが実行時に生成する）
 - sorbet / sorbet-runtime は RBI を生成しないため、この2つだけの更新なら再生成は不要。
-- このコミットの前に全体テスト・システムテスト（最終検証）を実施し、コミット前には `.agents/skills/security-check/SKILL.md` の手順に従い**コミット対象の変更ファイル**を対象とした機密情報スキャンを実行する。リポジトリ全体のスキャンはユーザーが明示的に指定した場合のみ実行すること。
+- 全体テスト・システムテスト（最終検証）は1回だけ実施し、コミット前には `.agents/skills/security-check/SKILL.md` の手順に従い**コミット対象の変更ファイル**を対象とした機密情報スキャンを実行する。リポジトリ全体のスキャンはユーザーが明示的に指定した場合のみ実行すること。
 
 ---
 
@@ -369,7 +369,7 @@ bundle exec srb tc
 
 ### 3. 依存関係監査の定期実行
 
-CI では `bin/bundler-audit` と `bin/importmap audit` を実行する。脆弱性が検出された場合の対応手順をあらかじめ決めておくことを推奨する。
+CI ではセキュリティ監査（`bin/bundler-audit`・`bin/importmap audit`）は実行されないため、ローカルで定期的に実行する運用を推奨する。脆弱性が検出された場合の対応手順をあらかじめ決めておくことを推奨する。
 
 ### 4. AGENTS.md との同期
 
