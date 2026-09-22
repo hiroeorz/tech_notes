@@ -165,6 +165,17 @@ class OauthTest < ActionDispatch::IntegrationTest
     assert_includes response.body, I18n.t("oauth.authorize.prompt", locale: :en, client_name: @application.name)
   end
 
+  test "authorization page uses application layout with stylesheet and shared header" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+    assert_redirected_to admin_posts_path
+
+    _verifier, challenge = pkce_pair
+    get oauth_authorization_path(authorization_params(challenge))
+    assert_response :success
+    assert_match(%r{/assets/application-[^"]+\.css}, response.body)
+    assert_includes response.body, "notebook-page"
+  end
+
   test "oauth authorization server metadata exposes endpoints and S256" do
     [ "/.well-known/oauth-authorization-server", "/.well-known/oauth-authorization-server/mcp" ].each do |path|
       get path
