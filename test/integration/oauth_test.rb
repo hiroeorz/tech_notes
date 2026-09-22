@@ -143,6 +143,28 @@ class OauthTest < ActionDispatch::IntegrationTest
     assert_match(%r{\A/oauth/authorize}, session[:return_to])
   end
 
+  test "authorization page renders in Japanese when locale cookie is ja" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+    assert_redirected_to admin_posts_path
+
+    cookies[:locale] = "ja"
+
+    _verifier, challenge = pkce_pair
+    get oauth_authorization_path(authorization_params(challenge))
+    assert_response :success
+    assert_includes response.body, I18n.t("oauth.authorize.prompt", locale: :ja, client_name: @application.name)
+  end
+
+  test "authorization page renders in English by default" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+    assert_redirected_to admin_posts_path
+
+    _verifier, challenge = pkce_pair
+    get oauth_authorization_path(authorization_params(challenge))
+    assert_response :success
+    assert_includes response.body, I18n.t("oauth.authorize.prompt", locale: :en, client_name: @application.name)
+  end
+
   test "oauth authorization server metadata exposes endpoints and S256" do
     [ "/.well-known/oauth-authorization-server", "/.well-known/oauth-authorization-server/mcp" ].each do |path|
       get path
@@ -159,6 +181,7 @@ class OauthTest < ActionDispatch::IntegrationTest
       assert_includes payload["scopes_supported"], "write"
       assert_includes payload["token_endpoint_auth_methods_supported"], "client_secret_basic"
       assert_includes payload["token_endpoint_auth_methods_supported"], "client_secret_post"
+      assert_includes payload["token_endpoint_auth_methods_supported"], "none"
       assert payload["issuer"].present?
     end
   end

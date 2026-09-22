@@ -144,6 +144,7 @@ Doorkeeper.configure do
   # See https://doorkeeper.gitbook.io/guides/configuration/other-configurations#custom-controllers
   #
   # base_controller 'ApplicationController'
+  base_controller "OauthBaseController"
 
   # Reuse access token for the same resource owner within an application (disabled by default).
   #

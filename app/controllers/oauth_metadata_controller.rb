@@ -11,7 +11,7 @@ class OauthMetadataController < ActionController::API
       grant_types_supported: %w[authorization_code refresh_token],
       code_challenge_methods_supported: Doorkeeper.config.pkce_code_challenge_methods_supported.presence || %w[S256],
       scopes_supported: Doorkeeper.config.scopes.to_a,
-      token_endpoint_auth_methods_supported: %w[client_secret_basic client_secret_post]
+      token_endpoint_auth_methods_supported: %w[client_secret_basic client_secret_post none]
     })
   end
 end
