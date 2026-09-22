@@ -361,7 +361,7 @@ v1 の動作確認は **MCP Inspector を正**とする。ChatGPT での疎通�
 
 Doorkeeper の `grant_flows` は `authorization_code` のみ（`config/initializers/doorkeeper.rb`）。implicit / password / client_credentials は無効。リフレッシュは `use_refresh_token` で有効化している。
 
-メタデータの応答項目（`app/controllers/oauth_metadata_controller.rb#show`）: `issuer`、`authorization_endpoint`、`token_endpoint`、`revocation_endpoint`、`response_types_supported`（`code`）、`grant_types_supported`（`authorization_code` / `refresh_token`）、`code_challenge_methods_supported`（`S256`）、`scopes_supported`（`read` / `write`）、`token_endpoint_auth_methods_supported`（`client_secret_basic` / `client_secret_post`）。
+メタデータの応答項目（`app/controllers/oauth_metadata_controller.rb#show`）: `issuer`、`authorization_endpoint`、`token_endpoint`、`revocation_endpoint`、`response_types_supported`（`code`）、`grant_types_supported`（`authorization_code` / `refresh_token`）、`code_challenge_methods_supported`（`S256`）、`scopes_supported`（`read` / `write`）、`token_endpoint_auth_methods_supported`（`client_secret_basic` / `client_secret_post` / `none`：publicクライアント用）。
 
 ### 18.4 スコープ対応
 
