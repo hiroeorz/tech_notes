@@ -118,6 +118,9 @@
 - 記事は `slug`（形式 `[a-z0-9-]+`）でスラッグ化。ルーティングは公開・管理両方の名前空間で `param: :slug` を使用。
 - タグは管理フォームでカンマ区切り入力（`Post#tag_names=` / `=`）。パースはカンマで分割、トリム、重複除去、スラッグで `find_or_create_by!` する。
 - 公開レイアウト（`layouts/application.html.erb`）とパーシャル（`shared/_header.html.erb`、`shared/_sidebar.html.erb`）が唯一のレイアウトファイル。Admin ビューは `app/views/admin/` 下に名前空間化され、同じレイアウトを再利用する（admin専用レイアウトはなし）。テーマ切り替えクラス（`theme-dark`）は `app/javascript/application.js` でトグルされる。
+- `Admin::SettingsController#show/#update` は `@api_keys` が必須（失敗時の `render :show` を含むため、`update` の先頭で設定する）。
+- `McpController` は `ActionController::API` 継承（セッション・CSRF・locale なし）。read キーの書き込みツール呼び出しは `TOOL_SCOPES` で事前拒否し、ツール層でも `write?` で fail-closed にする。
+- `app/mcp/` の4ツール（`SearchPostsTool` 等）はトップレベル定数とする — gem の `MCP` モジュールとの衝突回避のため `Mcp::` 名前空間にしない。
 
 ## デザイン・動作仕様
 

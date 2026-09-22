@@ -1,0 +1,24 @@
+<main class="settings-page">
+  <nav class="breadcrumbs">
+    <%= link_to t("admin.settings.show.home"), root_path %>
+    <span>›</span>
+    <span><%= t("admin.settings.show.admin") %></span>
+    <span>›</span>
+    <%= link_to t("admin.settings.show.title"), admin_settings_path %>
+    <span>›</span>
+    <span><%= t("admin.api_keys.created_title") %></span>
+  </nav>
+
+  <section class="settings-card">
+    <div class="settings-card-title"><span>🔑</span><h2><%= t("admin.api_keys.created_title") %></h2></div>
+    <div class="api-key-created">
+      <p class="api-key-warning" role="alert"><%= t("admin.api_keys.created_warning") %></p>
+      <div class="api-key-plain" data-controller="api-key-copy" data-api-key-copy-copied-value="<%= t("admin.api_keys.copied") %>">
+        <code class="api-key-token" data-api-key-copy-target="source"><%= @plain_token %></code>
+        <button type="button" class="secondary-button" data-api-key-copy-target="button" data-action="api-key-copy#copy"><%= t("admin.api_keys.copy") %></button>
+      </div>
+      <p class="api-key-note"><%= t("admin.api_keys.created_note") %></p>
+      <%= link_to t("admin.api_keys.back_to_settings"), admin_settings_path, class: "secondary-button" %>
+    </div>
+  </section>
+</main>

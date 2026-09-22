@@ -134,4 +134,9 @@
 
     <p class="last-updated"><%= t("admin.settings.show.last_updated") %> <%= @setting.updated_at&.strftime("%Y-%m-%d %H:%M") || Time.current.strftime("%Y-%m-%d %H:%M") %></p>
   <% end %>
+
+  <section class="settings-card">
+    <div class="settings-card-title"><span>🔑</span><h2><%= t("admin.settings.show.api_keys_section") %></h2><p><%= t("admin.settings.show.api_keys_section_desc") %></p></div>
+    <%= render "admin/api_keys/table", api_keys: @api_keys %>
+  </section>
 </main>

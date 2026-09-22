@@ -1,0 +1,44 @@
+<div class="api-key-admin">
+  <%= form_with url: admin_api_keys_path, method: :post, class: "api-key-issue-form", data: { turbo: false } do |form| %>
+    <label><span><%= t("admin.api_keys.name") %></span><%= form.text_field :name, required: true, maxlength: 100, placeholder: t("admin.api_keys.name_placeholder") %></label>
+    <label><span><%= t("admin.api_keys.scope") %></span><%= form.select :scope, [ [ t("admin.api_keys.scope_read"), "read" ], [ t("admin.api_keys.scope_write"), "write" ] ] %></label>
+    <%= form.submit t("admin.api_keys.issue"), class: "primary-button" %>
+  <% end %>
+
+  <% if api_keys.any? %>
+    <div class="admin-table-wrap">
+      <table class="admin-table api-key-table">
+        <thead>
+          <tr>
+            <th scope="col"><%= t("admin.api_keys.name") %></th>
+            <th scope="col"><%= t("admin.api_keys.scope") %></th>
+            <th scope="col"><%= t("admin.api_keys.key_prefix") %></th>
+            <th scope="col"><%= t("admin.api_keys.created_at") %></th>
+            <th scope="col"><%= t("admin.api_keys.last_used_at") %></th>
+            <th scope="col"><%= t("admin.api_keys.status") %></th>
+            <th scope="col"><%= t("admin.api_keys.actions") %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% api_keys.each do |key| %>
+            <tr>
+              <td><%= key.name %></td>
+              <td><%= key.read? ? t("admin.api_keys.scope_read") : t("admin.api_keys.scope_write") %></td>
+              <td><code class="api-key-prefix"><%= key.key_prefix %>…</code></td>
+              <td><%= key.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+              <td><%= key.last_used_at&.strftime("%Y-%m-%d %H:%M") || "—" %></td>
+              <td><span class="status-badge <%= key.active? ? "api-key-active" : "api-key-revoked" %>"><%= key.active? ? t("admin.api_keys.status_active") : t("admin.api_keys.status_revoked") %></span></td>
+              <td>
+                <% if key.active? %>
+                  <%= button_to t("admin.api_keys.revoke"), revoke_admin_api_key_path(key), method: :patch, class: "outline-danger", form: { data: { turbo_confirm: t("admin.api_keys.revoke_confirm") } } %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <p class="api-key-empty"><%= t("admin.api_keys.empty") %></p>
+  <% end %>
+</div>

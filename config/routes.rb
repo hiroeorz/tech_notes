@@ -6,6 +6,8 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
   get "llms.txt", to: "llms_txt#show"
 
+  match "/mcp", to: "mcp#create", via: %i[ get post delete ], as: :mcp
+
   scope "(:locale)", locale: /en|ja/ do
     root "home#index"
 
@@ -43,6 +45,9 @@ Rails.application.routes.draw do
     resources :post_summaries, only: [ :create ]
     resource :profile_translation, only: [ :create ], controller: "profile_translations"
     resources :post_slugs, only: [ :create ]
+    resources :api_keys, only: [ :create ] do
+      member { patch :revoke }
+    end
     resources :comments, only: [ :index, :destroy ]
     resource :settings, only: [ :show, :update ]
     root "posts#index"

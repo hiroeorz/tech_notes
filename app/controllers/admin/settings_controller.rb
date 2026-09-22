@@ -4,10 +4,12 @@ module Admin
   class SettingsController < BaseController
     def show
       @setting = current_site_setting
+      @api_keys = current_admin_user.api_keys.ordered
     end
 
     def update
       @setting = current_site_setting
+      @api_keys = current_admin_user.api_keys.ordered
 
       unless password_change_valid?
         flash.now[:alert] = t("flash.admin.settings.password_failed")

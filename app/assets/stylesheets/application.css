@@ -3387,3 +3387,121 @@ pre[data-filename]::before {
     white-space: normal;
   }
 }
+
+.api-key-issue-form {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+  gap: 14px 24px;
+  align-items: end;
+  margin-bottom: 20px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: rgba(255,252,247,0.52);
+}
+
+.api-key-issue-form label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.api-key-issue-form input,
+.api-key-issue-form select {
+  width: 100%;
+}
+
+.api-key-table {
+  min-width: 760px;
+}
+
+.api-key-empty {
+  margin: 0;
+  color: var(--muted);
+}
+
+.api-key-prefix {
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: rgba(255,252,247,0.6);
+  font-family: var(--mono);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.status-badge.api-key-active {
+  color: #087737;
+  border: 1px solid #acd8bc;
+  background: #e9f7ee;
+  white-space: nowrap;
+}
+
+.status-badge.api-key-revoked {
+  color: var(--muted);
+  border: 1px solid var(--line);
+  background: transparent;
+  white-space: nowrap;
+}
+
+.api-key-table td form {
+  display: inline;
+}
+
+.api-key-table td button {
+  white-space: nowrap;
+}
+
+.api-key-created {
+  display: grid;
+  gap: 16px;
+  justify-items: start;
+}
+
+.api-key-warning {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #ff9b80;
+  border-radius: 6px;
+  color: #b42300;
+  background: rgba(255,120,90,0.08);
+  font-weight: 800;
+}
+
+.api-key-plain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.api-key-token {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(255,252,247,0.6);
+  font-family: var(--mono);
+  word-break: break-all;
+}
+
+.api-key-note {
+  margin: 0;
+  color: var(--muted);
+}
+
+.theme-dark .api-key-issue-form,
+.theme-dark .api-key-prefix,
+.theme-dark .api-key-token {
+  color: var(--ink);
+  background: rgba(39, 35, 30, 0.78);
+}
+
+@media (max-width: 1050px) {
+  .api-key-issue-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

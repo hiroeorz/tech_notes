@@ -5,6 +5,7 @@ require "uri"
 
 class AdminUser < ApplicationRecord
   has_many :posts, dependent: :restrict_with_exception
+  has_many :api_keys, dependent: :restrict_with_exception
 
   validates :email, presence: true, uniqueness: true
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }

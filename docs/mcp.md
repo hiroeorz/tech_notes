@@ -53,6 +53,7 @@
 
 - **Rails アプリ内に MCP エンドポイントを置く**（Streamable HTTP transport）
 - パス: `POST /mcp`（ルート名 `mcp`）
+- Streamable HTTP の `GET`（SSE）/`DELETE`（セッション終了）も同パスで受付（`config/routes.rb`）。いずれも Bearer 認証必須（`McpController#authenticate_api_key!`）
 - 本番は既存の Kamal proxy（HTTPS）経由で到達可能なこと
 - `/mcp` は `Admin::BaseController` のセッション認証を**使わない**（Bearer API キー認証のみ）
 
@@ -80,7 +81,7 @@ v1 の動作確認は **MCP Inspector を正**とする。ChatGPT での疎通�
 
 | 項目 | 仕様 |
 |---|---|
-| 形式 | 例: `tn_<ランダム文字列>`（推測困難な 32 文字以上） |
+| 形式 | `tn_` + base58 32文字（全体35文字、`ApiKey.issue`）。一覧表示は先頭8文字（`key_prefix`） |
 | 送信方法 | `Authorization: Bearer <api_key>` |
 | 保存 | DB には**ハッシュのみ**保存（平文は発行時のみ表示） |
 | 所有者 | 発行した管理者（`admin_user`）に紐付く。ツールの書き込みは**キー所有者の下書き**に対してのみ行う |
@@ -138,6 +139,7 @@ v1 の動作確認は **MCP Inspector を正**とする。ChatGPT での疎通�
 - 有効なキーのみ失効できる
 - 失効後も一覧には残る（監査用）。状態は「失効」
 - 失効キーでの `/mcp` アクセスは即時拒否
+- 失効は発行者本人のキーのみ（他管理者のキーは `current_admin_user.api_keys.find` で見つからず 404）
 
 ### 7.5 UI 要件
 
@@ -160,6 +162,7 @@ v1 の動作確認は **MCP Inspector を正**とする。ChatGPT での疎通�
 - **出力**: 公開済み記事の概要リスト
   - `id`, `slug`, `title`, `published_at`, `tags`, `excerpt`
 - **条件**: `Post.publicly_visible` のみ対象
+- 空クエリ時はツールエラー `"Provide a non-empty 'query' to search."` を返す
 
 ### 8.2 `get_post`
 
@@ -170,6 +173,7 @@ v1 の動作確認は **MCP Inspector を正**とする。ChatGPT での疎通�
 - **出力**:
   - `id`, `slug`, `title`, `body`（Markdown のまま）, `excerpt`, `tags`, `published_at`
 - **条件**: 公開済み記事のみ。下書き・レビュー中は取得不可（`not found` 相当で応答）
+- `slug` と `id` の両方指定時はツールエラーで拒否（どちらか一方のみ）
 
 ### 8.3 `create_draft`
 
@@ -197,6 +201,7 @@ v1 の動作確認は **MCP Inspector を正**とする。ChatGPT での疎通�
   - 対象が `draft` のみ。`published` / `reviewing` は拒否
   - 対象が**この API キーの所有者の下書き**であること。所有者の下書き以外は not found 相当で拒否
   - 公開日時・ステータス変更は不可
+  - `slug` の変更は `id` 指定時のみ可。`slug` で特定した場合は `slug` 変更不可（指定値は無視される）
 
 ### 8.5 提供しないツール
 
@@ -211,16 +216,17 @@ v1 の動作確認は **MCP Inspector を正**とする。ChatGPT での疎通�
 
 ## 10. エラーハンドリング
 
-| 状況 | 挙動 |
-|---|---|
-| API キーなし・不正 | `401` / MCP 認証エラー |
-| 失効キー | `401` |
-| スコープ不足（read キーで create 等） | `403` / MCP エラー |
-| 対象下書きが存在しない | ツールエラー: 記事が見つからない旨の英語メッセージ |
-| published / reviewing を更新 | ツールエラー: 下書きのみ更新可能の旨 |
-| slug 不正・タイトル空 | ツールエラー: バリデーション要旨（内部エラー全文は出さない） |
-| ボディが空 | ツールエラー |
+| 状況 | HTTP | JSON-RPC code | 備考 |
+|---|---|---|---|
+| API キーなし・不正・失効 | `401` | `-32001` | `McpController#authenticate_api_key!` |
+| スコープ不足（read キーで create 等） | `403` | `-32003` | `TOOL_SCOPES` による事前拒否 |
+| 不正 JSON | `400` | `-32700` | SDK（StreamableHTTPTransport）由来 |
+| 未知メソッド | `404` | `-32601` | SDK 由来 |
+| ツール層エラー（対象なし・draft 限定違反・バリデーション・空クエリ等） | `200` | なし（`isError: true` の result） | HTTP は正常、ツール応答がエラー |
+| slug 不正・タイトル空 | `200` | なし（`isError: true`） | バリデーション要旨（内部エラー全文は出さない） |
+| ボディが空 | `200` | なし（`isError: true`） | |
 
+- §14.4 の「不正 JSON・未知メソッド・スコープ不足・存在しない slug」は本表の 3・4・2・5 行目に対応する
 - エラーは AI が自己修正できる簡潔な英語メッセージにする
 - スタックトレース・SQL・API キー・セッション ID は応答・ログに含めない
 
@@ -240,7 +246,7 @@ v1 の動作確認は **MCP Inspector を正**とする。ChatGPT での疎通�
 | `last_used_at` | datetime, null | |
 | `created_at` / `updated_at` | datetime | |
 
-- `belongs_to :admin_user`（`dependent: :restrict_with_exception` を検討。AdminUser と同方針）
+- `belongs_to :admin_user`（`AdminUser` 側 `has_many :api_keys, dependent: :restrict_with_exception` で採用済み。`app/models/admin_user.rb`）
 - インデックス: `key_digest` unique、`admin_user_id`、`revoked_at`
 - 平文キーは DB に保存しない
 
@@ -301,7 +307,7 @@ v1 の動作確認は **MCP Inspector を正**とする。ChatGPT での疎通�
 ## 15. 実装上の指針（設計メモ）
 
 - ツール実行ロジックは `Post` / サービスクラスを再利用し、MCP コントローラには薄く載せる
-- MCP プロトコルのパース／応答は Rails に載せやすい最小実装を検討する（ gem 追加時は `AGENTS.md` のライブラリ選定基準に従う）
+- MCP プロトコルのパース／応答は公式 SDK（`mcp` gem）の Rails controller パターン + stateless モードを採用（`McpController`、`Gemfile`）
 - 管理画面の API キー発行 UI を伴うため、`docs/requirements.md` の管理設定要件への導線を本ドキュメントに置き換える
 - マイグレーションは SQLite（dev/test）と PostgreSQL（本番）の両方で動作すること
 - v1 では ChatGPT 向け OAuth・プラグイン申請・コネクタ UI は実装しない
