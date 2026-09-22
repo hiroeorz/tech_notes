@@ -419,15 +419,18 @@ Doorkeeper の `grant_flows` は `authorization_code` のみ（`config/initializ
 Gemini の設定画面に表示されるリダイレクト URI の値を転記して実行する。
 
 ```ruby
-Doorkeeper::Application.create!(
+app = Doorkeeper::Application.create!(
   name: "Gemini",
   redirect_uri: "<Gemini設定画面の値を転記>",
   scopes: "read write",
   confidential: true
 )
+app.uid    # → Gemini の「OAuth クライアントID」欄へ転記
+app.secret # → Gemini のシークレット欄へ転記
 ```
 
-- `secret` は作成時の戻り値に一度だけ含まれる。以降の再表示はできないため、発行直後に Gemini 側へ登録すること。
+- 作成コマンドの戻り値（`inspect`）の `secret` は `[FILTERED]` 表示になるため、`app.secret` リーダーで取得すること
+- ハッシュ化無効のため `app.secret` は後から再取得できるが、発行直後に Gemini 側へ登録し、使い捨てと同様に慎重に扱うこと
 - シェル履歴・ログに secret を残さないこと（履歴への書き込み抑止、登録後の履歴・クリップボードのクリア）。
 
 ### 19.2 redirect_uri 変更時の更新
