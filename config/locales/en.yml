@@ -339,6 +339,31 @@ en:
         confirm_password_placeholder: "Re-enter new password"
         update_password: "▣ Update password"
         last_updated: "Last updated:"
+        api_keys_section: "MCP API Keys"
+        api_keys_section_desc: "Issue and manage API keys for AI client connections."
+    api_keys:
+      name: "Key name"
+      name_placeholder: "e.g. Claude Desktop"
+      scope: "Scope"
+      scope_read: "Read-only"
+      scope_write: "Read / Write"
+      issue: "Issue API key"
+      key_prefix: "Key prefix"
+      empty: "No API keys issued"
+      created_at: "Created at"
+      last_used_at: "Last used at"
+      status: "Status"
+      actions: "Actions"
+      status_active: "Active"
+      status_revoked: "Revoked"
+      revoke: "Revoke"
+      revoke_confirm: "Revoke this key? This cannot be undone."
+      created_title: "API key issued"
+      created_warning: "This key will only be shown once. Copy it now."
+      created_note: "It cannot be displayed again. Register it in your AI client settings."
+      copy: "Copy"
+      copied: "Copied"
+      back_to_settings: "Back to settings"
   flash:
     comments:
       created: "Comment posted. Thank you!"
@@ -382,6 +407,9 @@ en:
         generation_failed: "Could not generate English name. Check server logs."
       profile_translations:
         generation_failed: "Could not generate translation. Check server logs."
+      api_keys:
+        create_failed: "Could not issue the API key. Please check your input."
+        revoked: "API key revoked."
     profile:
       not_visible: "Profile is not currently public."
   helpers:

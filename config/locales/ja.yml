@@ -339,6 +339,31 @@ ja:
         confirm_password_placeholder: "新しいパスワードを再入力"
         update_password: "▣ パスワードを更新"
         last_updated: "最終更新:"
+        api_keys_section: "MCP API キー"
+        api_keys_section_desc: "AIクライアント接続用のキーを発行・管理します"
+    api_keys:
+      name: "キー名"
+      name_placeholder: "例）Claude Desktop"
+      scope: "スコープ"
+      scope_read: "読み取り専用"
+      scope_write: "読み書き"
+      issue: "API キーを発行"
+      key_prefix: "キー先頭"
+      empty: "発行されたキーはありません"
+      created_at: "作成日時"
+      last_used_at: "最終使用日時"
+      status: "状態"
+      actions: "操作"
+      status_active: "有効"
+      status_revoked: "失効"
+      revoke: "失効"
+      revoke_confirm: "このキーを失効しますか？失効後は元に戻せません。"
+      created_title: "API キーが発行されました"
+      created_warning: "このキーは一度しか表示されません。今すぐコピーしてください"
+      created_note: "閉じた後は再表示できません。AIクライアントの設定に登録してください。"
+      copy: "コピー"
+      copied: "コピーしました"
+      back_to_settings: "管理設定へ戻る"
   flash:
     comments:
       created: "コメントを投稿しました。ありがとうございます。"
@@ -382,6 +407,9 @@ ja:
         generation_failed: "英語名を生成できませんでした。サーバーログを確認してください。"
       profile_translations:
         generation_failed: "翻訳を生成できませんでした。サーバーログを確認してください。"
+      api_keys:
+        create_failed: "API キーを発行できませんでした。入力内容を確認してください。"
+        revoked: "API キーを失効しました。"
     profile:
       not_visible: "プロフィールは現在公開されていません。"
   helpers:
