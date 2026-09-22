@@ -11,7 +11,7 @@
         </ul>
       </div>
     <% end %>
-    <%= form_tag oauth_authorization_path, method: :post do %>
+    <%= form_tag oauth_authorization_path, method: :post, data: { turbo: false } do %>
       <%= hidden_field_tag :client_id, @pre_auth.client.uid, id: nil %>
       <%= hidden_field_tag :redirect_uri, @pre_auth.redirect_uri, id: nil %>
       <%= hidden_field_tag :state, @pre_auth.state, id: nil %>
@@ -22,7 +22,7 @@
       <%= hidden_field_tag :code_challenge_method, @pre_auth.code_challenge_method, id: nil %>
       <%= submit_tag t("oauth.authorize.authorize"), class: "primary-button" %>
     <% end %>
-    <%= form_tag oauth_authorization_path, method: :delete do %>
+    <%= form_tag oauth_authorization_path, method: :delete, data: { turbo: false } do %>
       <%= hidden_field_tag :client_id, @pre_auth.client.uid, id: nil %>
       <%= hidden_field_tag :redirect_uri, @pre_auth.redirect_uri, id: nil %>
       <%= hidden_field_tag :state, @pre_auth.state, id: nil %>

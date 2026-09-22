@@ -207,6 +207,7 @@ class OauthTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match(%r{/assets/application-[^"]+\.css}, response.body)
     assert_includes response.body, "notebook-page"
+    assert_select "form[data-turbo=false]", count: 2
   end
 
   test "oauth authorization server metadata exposes endpoints and S256" do
