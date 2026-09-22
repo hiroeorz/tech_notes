@@ -15,11 +15,11 @@ class CreateDraftTool < MCP::Tool
 
   class << self
     def call(title: nil, body: nil, slug: nil, tags: nil, server_context: nil)
-      api_key = server_context && server_context[:api_key]
-      return error_response("Missing API key context.") unless api_key
-      return error_response("Forbidden: this tool requires write scope.") unless api_key.write?
+      owner = server_context && server_context[:owner]
+      return error_response("Missing API key context.") unless owner
+      return error_response("Forbidden: this tool requires write scope.") unless server_context[:scope] == "write"
 
-      post = Post.new(title: title.to_s, body: body.to_s, admin_user: api_key.admin_user, status: :draft)
+      post = Post.new(title: title.to_s, body: body.to_s, admin_user: owner, status: :draft)
 
       begin
         Post.transaction do

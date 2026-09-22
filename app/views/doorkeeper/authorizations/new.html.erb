@@ -1,0 +1,37 @@
+<main class="settings-page">
+  <section class="settings-card">
+    <div class="settings-card-title"><span>🔑</span><h2><%= t("oauth.authorize.title") %></h2><p><%= t("oauth.authorize.prompt", client_name: @pre_auth.client.name) %></p></div>
+    <% if @pre_auth.scopes.count > 0 %>
+      <div id="oauth-permissions">
+        <p><%= t("oauth.authorize.able_to") %></p>
+        <ul>
+          <% @pre_auth.scopes.each do |scope| %>
+            <li><%= t("oauth.authorize.scopes.#{scope}") %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+    <%= form_tag oauth_authorization_path, method: :post do %>
+      <%= hidden_field_tag :client_id, @pre_auth.client.uid, id: nil %>
+      <%= hidden_field_tag :redirect_uri, @pre_auth.redirect_uri, id: nil %>
+      <%= hidden_field_tag :state, @pre_auth.state, id: nil %>
+      <%= hidden_field_tag :response_type, @pre_auth.response_type, id: nil %>
+      <%= hidden_field_tag :response_mode, @pre_auth.response_mode, id: nil %>
+      <%= hidden_field_tag :scope, @pre_auth.scope, id: nil %>
+      <%= hidden_field_tag :code_challenge, @pre_auth.code_challenge, id: nil %>
+      <%= hidden_field_tag :code_challenge_method, @pre_auth.code_challenge_method, id: nil %>
+      <%= submit_tag t("oauth.authorize.authorize"), class: "primary-button" %>
+    <% end %>
+    <%= form_tag oauth_authorization_path, method: :delete do %>
+      <%= hidden_field_tag :client_id, @pre_auth.client.uid, id: nil %>
+      <%= hidden_field_tag :redirect_uri, @pre_auth.redirect_uri, id: nil %>
+      <%= hidden_field_tag :state, @pre_auth.state, id: nil %>
+      <%= hidden_field_tag :response_type, @pre_auth.response_type, id: nil %>
+      <%= hidden_field_tag :response_mode, @pre_auth.response_mode, id: nil %>
+      <%= hidden_field_tag :scope, @pre_auth.scope, id: nil %>
+      <%= hidden_field_tag :code_challenge, @pre_auth.code_challenge, id: nil %>
+      <%= hidden_field_tag :code_challenge_method, @pre_auth.code_challenge_method, id: nil %>
+      <%= submit_tag t("oauth.authorize.deny"), class: "secondary-button" %>
+    <% end %>
+  </section>
+</main>

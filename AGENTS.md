@@ -119,7 +119,9 @@
 - タグは管理フォームでカンマ区切り入力（`Post#tag_names=` / `=`）。パースはカンマで分割、トリム、重複除去、スラッグで `find_or_create_by!` する。
 - 公開レイアウト（`layouts/application.html.erb`）とパーシャル（`shared/_header.html.erb`、`shared/_sidebar.html.erb`）が唯一のレイアウトファイル。Admin ビューは `app/views/admin/` 下に名前空間化され、同じレイアウトを再利用する（admin専用レイアウトはなし）。テーマ切り替えクラス（`theme-dark`）は `app/javascript/application.js` でトグルされる。
 - `Admin::SettingsController#show/#update` は `@api_keys` が必須（失敗時の `render :show` を含むため、`update` の先頭で設定する）。
-- `McpController` は `ActionController::API` 継承（セッション・CSRF・locale なし）。read キーの書き込みツール呼び出しは `TOOL_SCOPES` で事前拒否し、ツール層でも `write?` で fail-closed にする。
+- `McpController` は `ActionController::API` 継承（セッション・CSRF・locale なし）。read スコープの書き込みツール呼び出しは `TOOL_SCOPES` で事前拒否し、ツール層でも scope 判定で fail-closed にする。
+- OAuth認可サーバーは Doorkeeper（DCRなし・クライアント事前登録方式。`grant_flows` は `authorization_code` のみ＋リフレッシュ有効、トークン有効期限2時間）。
+- `McpController` は ApiKey→Doorkeeperトークンの順に解決し、`server_context` は `{ owner, scope }`。`Admin::SessionsController` の `return_to` 復帰は内部パス（`/` 始まり・`//` 除外）のみ。
 - `app/mcp/` の4ツール（`SearchPostsTool` 等）はトップレベル定数とする — gem の `MCP` モジュールとの衝突回避のため `Mcp::` 名前空間にしない。
 
 ## デザイン・動作仕様

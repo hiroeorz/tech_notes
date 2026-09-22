@@ -4,7 +4,7 @@
 
 本ドキュメントは、Hiroe Tech Notes に MCP（Model Context Protocol）サーバーを追加し、AI クライアントから公開記事の検索・参照と下書きの作成・更新を行えるようにする機能の仕様を定義する。
 
-**v1 は API キー（Bearer）認証のローカル／ヘッダー対応クライアント向け**とする。ChatGPT 本体への接続に必要な OAuth は v2 以降とする。
+**v1 は API キー（Bearer）認証のローカル／ヘッダー対応クライアント向け**とする。ChatGPT 本体への接続に必要な OAuth は v2 以降とする（Gemini向けOAuth認可サーバーは §18 のとおり実装済み）。
 
 要件書本体は `docs/requirements.md`。本機能の詳細要件は本文書を正とする。
 
@@ -32,7 +32,7 @@
 
 - 記事削除
 - 公開・非公開の切り替え（publish / unpublish）
-- OAuth / OpenID Connect（**ChatGPT 本体連携用。v2 以降**）
+- OAuth / OpenID Connect（**ChatGPT 本体連携用。引き続き非対象**。Gemini向けOAuth認可サーバーは v2 として実装済み。詳細は §18）
 - ChatGPT Plugins / カスタム MCP コネクタの接続
 - レート制限（v1 では省略。将来検討）
 - 複数管理者・多テナント対応
@@ -53,9 +53,9 @@
 
 - **Rails アプリ内に MCP エンドポイントを置く**（Streamable HTTP transport）
 - パス: `POST /mcp`（ルート名 `mcp`）
-- Streamable HTTP の `GET`（SSE）/`DELETE`（セッション終了）も同パスで受付（`config/routes.rb`）。いずれも Bearer 認証必須（`McpController#authenticate_api_key!`）
+- Streamable HTTP の `GET`（SSE）/`DELETE`（セッション終了）も同パスで受付（`config/routes.rb`）。いずれも Bearer 認証必須（`McpController#authenticate_credential!`）
 - 本番は既存の Kamal proxy（HTTPS）経由で到達可能なこと
-- `/mcp` は `Admin::BaseController` のセッション認証を**使わない**（Bearer API キー認証のみ）
+- `/mcp` は `Admin::BaseController` のセッション認証を**使わない**（v1 は Bearer API キー認証のみ。v2 では OAuth トークンも受付。詳細は §18.4）
 
 ### 5.2 認証フロー
 
@@ -63,6 +63,8 @@
 2. サーバーは API キーを検証し、スコープ（`read` / `write`）を解決
 3. ツール実行時に、要求スコープが不足していれば実行前に拒否
 4. 不正・失効キーは `401`、スコープ不足は `403`（MCP エラーとして応答）
+
+v1 のフローは API キー認証のみ。v2 では OAuth トークンも受け付け、解決順序は API キー → Doorkeeper トークン（詳細は §18.4）。401 / 403 の形式は v1 と同一（§10）。
 
 ### 5.3 クライアント接続（v1）
 
@@ -218,7 +220,7 @@ v1 の動作確認は **MCP Inspector を正**とする。ChatGPT での疎通�
 
 | 状況 | HTTP | JSON-RPC code | 備考 |
 |---|---|---|---|
-| API キーなし・不正・失効 | `401` | `-32001` | `McpController#authenticate_api_key!` |
+| API キーなし・不正・失効 | `401` | `-32001` | `McpController#authenticate_credential!`（v2 では失効・期限切れの OAuth トークンも同形式で拒否） |
 | スコープ不足（read キーで create 等） | `403` | `-32003` | `TOOL_SCOPES` による事前拒否 |
 | 不正 JSON | `400` | `-32700` | SDK（StreamableHTTPTransport）由来 |
 | 未知メソッド | `404` | `-32601` | SDK 由来 |
@@ -310,7 +312,7 @@ v1 の動作確認は **MCP Inspector を正**とする。ChatGPT での疎通�
 - MCP プロトコルのパース／応答は公式 SDK（`mcp` gem）の Rails controller パターン + stateless モードを採用（`McpController`、`Gemfile`）
 - 管理画面の API キー発行 UI を伴うため、`docs/requirements.md` の管理設定要件への導線を本ドキュメントに置き換える
 - マイグレーションは SQLite（dev/test）と PostgreSQL（本番）の両方で動作すること
-- v1 では ChatGPT 向け OAuth・プラグイン申請・コネクタ UI は実装しない
+- v1 では ChatGPT 向け OAuth・プラグイン申請・コネクタ UI は実装しない（Gemini向けOAuth認可サーバーは §18 で v2 として実装。ChatGPT 本体連携は引き続き非対象）
 
 ## 16. 受け入れ条件
 
@@ -325,9 +327,133 @@ v1 の動作確認は **MCP Inspector を正**とする。ChatGPT での疎通�
 
 ## 17. 将来拡張候補（v2 以降）
 
-- **OAuth による ChatGPT 本体連携**（カスタム MCP / プラグイン接続の前提）
+- ~~OAuth による ChatGPT 本体連携~~ — v2 として Gemini向けOAuth認可サーバーを実装済み（§18）。ChatGPT 本体連携は引き続き非対象
 - レート制限
 - 公開操作（人間承認付き）
 - locale 指定での検索・取得
 - MCP 以外向けの読み取り専用 HTTP API
 - Service Worker / WebMCP との連携（非対象のまま維持）
+
+## 18. v2: OAuth認可サーバー（Gemini連携）
+
+### 18.1 背景・目的
+
+- Gemini のカスタムアプリ登録のように、接続時に OAuth クライアント情報（クライアントID・シークレット・認可／トークンエンドポイント）を必須とするクライアントには、v1 の Bearer API キー直貼りでは接続できない。
+- 本アプリ自身を OAuth 認可サーバーとし、Gemini を事前登録クライアントとして受け入れることで、Gemini から MCP ツール（§8）を利用できるようにする。
+
+### 18.2 アーキテクチャ
+
+- 認可サーバーに Doorkeeper 5.9.7（`Gemfile` の `gem "doorkeeper", "~> 5.9"`、`Gemfile.lock`）を使用する。
+- 認可コードフロー + PKCE（S256）+ リフレッシュトークン（`config/initializers/doorkeeper.rb`）。
+- DCR（Dynamic Client Registration）なし。クライアントは事前登録方式（§19 の手順で `Doorkeeper::Application` を作成）。接続相手が管理者自身の Gemini アプリに限定され、動的登録の必要がなく攻撃面を増やさないため。
+- アプリケーション管理 UI は非公開（`config/routes.rb` の `use_doorkeeper` で `skip_controllers :applications, :authorized_applications`）。
+- 認可サーバーメタデータは自作の `OauthMetadataController`（`app/controllers/oauth_metadata_controller.rb`）で提供する。
+
+### 18.3 エンドポイント
+
+| エンドポイント | 用途 |
+|---|---|
+| `GET/POST /oauth/authorize` | 認可リクエスト・同意（Doorkeeper 標準） |
+| `POST /oauth/token` | トークン交換（`authorization_code`）・更新（`refresh_token`） |
+| `POST /oauth/revoke` | トークン失効 |
+| `GET /.well-known/oauth-authorization-server` | 認可サーバーメタデータ（基底形） |
+| `GET /.well-known/oauth-authorization-server/mcp` | 認可サーバーメタデータ（`/mcp` の path-inserted 形。同一内容を両パスで提供） |
+
+Doorkeeper の `grant_flows` は `authorization_code` のみ（`config/initializers/doorkeeper.rb`）。implicit / password / client_credentials は無効。リフレッシュは `use_refresh_token` で有効化している。
+
+メタデータの応答項目（`app/controllers/oauth_metadata_controller.rb#show`）: `issuer`、`authorization_endpoint`、`token_endpoint`、`revocation_endpoint`、`response_types_supported`（`code`）、`grant_types_supported`（`authorization_code` / `refresh_token`）、`code_challenge_methods_supported`（`S256`）、`scopes_supported`（`read` / `write`）、`token_endpoint_auth_methods_supported`（`client_secret_basic` / `client_secret_post`）。
+
+### 18.4 スコープ対応
+
+- OAuth スコープ `read` / `write`（`config/initializers/doorkeeper.rb` の `optional_scopes :read, :write`）がそのまま MCP スコープ（§6.2）に対応する。
+- `/mcp` の認証解決順序（`app/controllers/mcp_controller.rb#authenticate_credential!`）:
+  1. API キー（`ApiKey.find_active_by_token`）
+  2. Doorkeeper トークン（`Doorkeeper::AccessToken.by_token` + `accessible?`。所有者は `resource_owner_id` の `AdminUser`、スコープは `includes_scope?("write")` で `write` / `read` を判定）
+- `server_context` は `{ owner, scope }` 形（ツール層は `api_key` ではなく `owner` と `scope` で判定。`app/mcp/create_draft_tool.rb`、`app/mcp/update_draft_tool.rb`）。
+- 401 / 403 の形式は v1 と同一（§10）。OAuth トークンの失効・期限切れは 401（`-32001`）、read スコープでの書き込みツール呼び出しは 403（`-32003`）。
+
+### 18.5 トークン有効期限・失効の扱い
+
+- アクセストークン有効期限は 2 時間（`config/initializers/doorkeeper.rb` の `access_token_expires_in 2.hours`）。
+- リフレッシュトークン有効（`use_refresh_token`）。更新時は `grant_type=refresh_token` で `/oauth/token` へリクエストする。
+- 失効は `POST /oauth/revoke` で行う。失効済み・期限切れトークンでの `/mcp` アクセスは 401（`-32001`）で即時拒否される。
+
+### 18.6 同意画面の仕様
+
+- 自作の最小ビュー（`app/views/doorkeeper/authorizations/new.html.erb`）。表示項目:
+  - タイトル（`oauth.authorize.title`）
+  - `「<クライアント名> があなたのアカウントへのアクセスを求めています」`（`oauth.authorize.prompt`）
+  - 操作一覧（`oauth.authorize.able_to` + 要求スコープごとの説明）
+  - 許可ボタン（`oauth.authorize.authorize`）/ 拒否ボタン（`oauth.authorize.deny`）
+- ja / en 対応（`config/locales/ja.yml`・`config/locales/en.yml` の `oauth.authorize.*`）。`read` = `記事の閲覧` / `Read articles`、`write` = `記事の作成・更新` / `Create and update articles`。
+- 拒否時はクライアントへ `access_denied` でリダイレクトし、認可コード・トークンは何も発行しない。
+
+### 18.7 PKCE受容判断
+
+- `force_pkce` + S256 のみ（`config/initializers/doorkeeper.rb` の `force_pkce`、`pkce_code_challenge_methods %w[S256]`）。なお Doorkeeper 標準の `force_pkce` は非 confidential クライアントに適用される。
+- Gemini 想定の confidential クライアントは、トークンエンドポイントでの secret 認証（`client_secret_basic` / `client_secret_post`）に加え、MCP 仕様に沿ってクライアント側で PKCE（`code_challenge` 送信）を実施することを前提として受け入れる。
+
+### 18.8 未ログイン時の認可URL復帰
+
+- 未ログインで `/oauth/authorize` にアクセスした場合、管理者ログインへ誘導する（`config/initializers/doorkeeper.rb` の `resource_owner_authenticator` が `session[:return_to] = request.fullpath` を保存して `admin_login_path` へリダイレクト）。
+- ログイン成功後は元の認可 URL へ復帰する（`app/controllers/admin/sessions_controller.rb`）。復帰先は内部パスのみ（`/` 始まりかつ `//` 除外）。それ以外は管理記事一覧（`admin_posts_path`）へ遷移する。
+
+### 18.9 テスト要件
+
+- 自動テストは `test/integration/oauth_test.rb` で担保する:
+  - 認可フロー: PKCE ありの正常系（認可コード → アクセス + リフレッシュトークン発行、有効期限 2 時間）、PKCE なしの拒否、verifier 不一致の拒否、redirect_uri 不一致の拒否
+  - 同意拒否（`access_denied` でリダイレクトし何も発行しない）、未ログイン誘導（管理者ログインへリダイレクトし `session[:return_to]` に認可パスを保存）
+  - トークン: リフレッシュによる更新、`/oauth/revoke` による失効
+  - メタデータ 2 形式（基底形 + `/mcp` の path-inserted 形）の内容
+  - スコープ: OAuth write トークンでのツール一覧・下書き作成の成功、read トークンでの書き込み 403（`-32003`）
+  - 回帰: 失効トークンの 401（`-32001`）、期限切れトークンの 401（`-32001`）
+- v1 回帰は `test/integration/mcp_test.rb` で担保する（`server_context` は `{ owner, scope }` 形に更新済み）。
+- 手動検証: Gemini のカスタムアプリ登録（§19）による実接続確認。外部 AI サービスへの自動接続テストは行わない。
+
+## 19. 本番runbook: Gemini用クライアント登録
+
+本番 Rails コンソールで実行する。実値（ドメイン・クライアントID・secret）は本書に記載しない。
+
+### 19.1 新規登録
+
+Gemini の設定画面に表示されるリダイレクト URI の値を転記して実行する。
+
+```ruby
+Doorkeeper::Application.create!(
+  name: "Gemini",
+  redirect_uri: "<Gemini設定画面の値を転記>",
+  scopes: "read write",
+  confidential: true
+)
+```
+
+- `secret` は作成時の戻り値に一度だけ含まれる。以降の再表示はできないため、発行直後に Gemini 側へ登録すること。
+- シェル履歴・ログに secret を残さないこと（履歴への書き込み抑止、登録後の履歴・クリップボードのクリア）。
+
+### 19.2 redirect_uri 変更時の更新
+
+```ruby
+app = Doorkeeper::Application.find_by(name: "Gemini")
+app.update!(redirect_uri: "<新しい値を転記>")
+```
+
+変更後は Gemini 側の登録値と一致していることを確認し、認可フロー（§18.9 の手動検証）で疎通を再確認する。
+
+### 19.3 クライアント失効
+
+```ruby
+app = Doorkeeper::Application.find_by(name: "Gemini")
+app.destroy!
+```
+
+`Doorkeeper::Application` の削除時は関連する認可コード・トークンがまとめて削除される（Doorkeeper 5.9.7 の `dependent: :delete_all`）。削除後は Gemini 側の登録も無効化すること。
+
+### 19.4 トークン失効
+
+単発の失効は `/oauth/revoke` へ POST する。コンソールで直接失効させる場合は以下を実行する。
+
+```ruby
+Doorkeeper::AccessToken.by_token("<失効対象トークン>").revoke
+```
+
+失効後は該当トークンでの `/mcp` アクセスが 401（`-32001`）になることを確認する。

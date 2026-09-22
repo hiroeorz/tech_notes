@@ -8,12 +8,12 @@ class McpController < ActionController::API
     "update_draft" => :write
   }.freeze
 
-  before_action :authenticate_api_key!
+  before_action :authenticate_credential!
   after_action :record_api_key_usage
 
   def create
     payload = parse_json_body
-    return deny_write_tool_for_read_key(payload) if read_key_calling_write_tool?(payload)
+    return deny_write_tool_for_read_scope(payload) if read_scope_calling_write_tool?(payload)
 
     server = MCP::Server.new(
       name: "tech-notes",
@@ -21,7 +21,7 @@ class McpController < ActionController::API
       version: "1.0.0",
       instructions: "Search and reference published blog posts. Create and update drafts owned by the API key owner.",
       tools: [ SearchPostsTool, GetPostTool, CreateDraftTool, UpdateDraftTool ],
-      server_context: { api_key: @api_key },
+      server_context: { owner: @credential_owner, scope: @credential_scope },
     )
     transport = MCP::Server::Transports::StreamableHTTPTransport.new(
       server,
@@ -38,9 +38,25 @@ class McpController < ActionController::API
 
   private
 
-  def authenticate_api_key!
-    @api_key = ApiKey.find_active_by_token(bearer_token)
-    return if @api_key
+  def authenticate_credential!
+    token = bearer_token
+    api_key = ApiKey.find_active_by_token(token)
+    if api_key
+      @api_key = api_key
+      @credential_owner = api_key.admin_user
+      @credential_scope = api_key.scope
+      return
+    end
+
+    oauth_token = token.present? ? Doorkeeper::AccessToken.by_token(token) : nil
+    if oauth_token&.accessible?
+      owner = AdminUser.find_by(id: oauth_token.resource_owner_id)
+      if owner
+        @credential_owner = owner
+        @credential_scope = oauth_token.includes_scope?("write") ? "write" : "read"
+        return
+      end
+    end
 
     render json: {
       jsonrpc: "2.0",
@@ -63,7 +79,7 @@ class McpController < ActionController::API
     nil
   end
 
-  def read_key_calling_write_tool?(payload)
+  def read_scope_calling_write_tool?(payload)
     return false unless payload.is_a?(Hash)
     return false unless payload["method"] == "tools/call"
 
@@ -73,10 +89,10 @@ class McpController < ActionController::API
     required_scope = TOOL_SCOPES[params["name"]]
     return false unless required_scope
 
-    required_scope == :write && !@api_key.write?
+    required_scope == :write && @credential_scope != "write"
   end
 
-  def deny_write_tool_for_read_key(payload)
+  def deny_write_tool_for_read_scope(payload)
     tool_name = payload.dig("params", "name")
     observe_request(403, payload)
     render json: {

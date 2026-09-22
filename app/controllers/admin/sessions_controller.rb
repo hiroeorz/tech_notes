@@ -24,9 +24,15 @@ module Admin
       admin = AdminUser.find_by(email: params[:email].to_s.downcase)
 
       if admin&.authenticate(params[:password].to_s)
+        return_to = session[:return_to]
+        reset_session
         session[:admin_user_id] = admin.id
         remember_admin(admin) if params[:remember_me] == "1"
-        redirect_to admin_posts_path, notice: t("flash.admin.sessions.login_success")
+        if return_to.is_a?(String) && return_to.start_with?("/") && !return_to.start_with?("//")
+          redirect_to return_to, notice: t("flash.admin.sessions.login_success")
+        else
+          redirect_to admin_posts_path, notice: t("flash.admin.sessions.login_success")
+        end
       else
         flash.now[:alert] = t("flash.admin.sessions.login_failure")
         render :new, status: :unprocessable_entity
