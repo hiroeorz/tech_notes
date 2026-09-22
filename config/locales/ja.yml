@@ -1,4 +1,14 @@
 ja:
+  oauth:
+    authorize:
+      title: "アクセス許可"
+      prompt: "%{client_name} があなたのアカウントへのアクセスを求めています"
+      able_to: "このアプリケーションは次の操作ができます:"
+      scopes:
+        read: "記事の閲覧"
+        write: "記事の作成・更新"
+      authorize: "許可する"
+      deny: "拒否する"
   layouts:
     application:
       title: "Hiroe Tech Notes"

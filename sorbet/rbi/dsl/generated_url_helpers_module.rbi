@@ -13,6 +13,9 @@ module GeneratedUrlHelpersModule
   def about_url(*args); end
 
   sig { params(args: T.untyped).returns(String) }
+  def admin_api_keys_url(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
   def admin_categories_url(*args); end
 
   sig { params(args: T.untyped).returns(String) }
@@ -88,6 +91,12 @@ module GeneratedUrlHelpersModule
   def markdown_preview_admin_posts_url(*args); end
 
   sig { params(args: T.untyped).returns(String) }
+  def mcp_url(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
+  def native_oauth_authorization_url(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
   def new_admin_category_url(*args); end
 
   sig { params(args: T.untyped).returns(String) }
@@ -98,6 +107,21 @@ module GeneratedUrlHelpersModule
 
   sig { params(args: T.untyped).returns(String) }
   def new_rails_conductor_inbound_email_url(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
+  def oauth_authorization_url(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
+  def oauth_introspect_url(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
+  def oauth_revoke_url(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
+  def oauth_token_info_url(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
+  def oauth_token_url(*args); end
 
   sig { params(args: T.untyped).returns(String) }
   def post_comments_url(*args); end
@@ -181,6 +205,9 @@ module GeneratedUrlHelpersModule
   def rails_representation_url(*args); end
 
   sig { params(args: T.untyped).returns(String) }
+  def rails_resend_inbound_emails_url(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
   def rails_sendgrid_inbound_emails_url(*args); end
 
   sig { params(args: T.untyped).returns(String) }
@@ -194,6 +221,9 @@ module GeneratedUrlHelpersModule
 
   sig { params(args: T.untyped).returns(String) }
   def rails_storage_redirect_url(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
+  def revoke_admin_api_key_url(*args); end
 
   sig { params(args: T.untyped).returns(String) }
   def root_url(*args); end

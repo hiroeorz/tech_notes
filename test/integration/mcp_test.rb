@@ -433,7 +433,7 @@ class McpTest < ActionDispatch::IntegrationTest
         id: @draft_post.id,
         title: "Concurrently published title",
         body: "Concurrently published body.",
-        server_context: { api_key: @write_key }
+        server_context: { owner: @owner, scope: "write" }
       )
     ensure
       Post.define_method(:with_lock, original_with_lock)
@@ -609,7 +609,7 @@ class McpTest < ActionDispatch::IntegrationTest
 
   test "write tools enforce write scope at tool layer" do
     create_response = CreateDraftTool.call(
-      title: "Tool layer draft", body: "Body.", server_context: { api_key: @read_key }
+      title: "Tool layer draft", body: "Body.", server_context: { owner: @owner, scope: "read" }
     )
 
     assert create_response.error?
@@ -617,7 +617,7 @@ class McpTest < ActionDispatch::IntegrationTest
     assert_not Post.exists?(title: "Tool layer draft")
 
     update_response = UpdateDraftTool.call(
-      id: @draft_post.id, title: "Hacked at tool layer", server_context: { api_key: @read_key }
+      id: @draft_post.id, title: "Hacked at tool layer", server_context: { owner: @owner, scope: "read" }
     )
 
     assert update_response.error?
@@ -628,7 +628,7 @@ class McpTest < ActionDispatch::IntegrationTest
   test "create_draft normalizes string tags to a single tag" do
     response = CreateDraftTool.call(
       title: "String tags draft", body: "Body.", tags: "Terraform",
-      server_context: { api_key: @write_key }
+      server_context: { owner: @owner, scope: "write" }
     )
 
     assert_not response.error?
@@ -642,7 +642,7 @@ class McpTest < ActionDispatch::IntegrationTest
 
     response = UpdateDraftTool.call(
       id: @draft_post.id, title: "Retitled without tags",
-      server_context: { api_key: @write_key }
+      server_context: { owner: @owner, scope: "write" }
     )
 
     assert_not response.error?
@@ -722,7 +722,7 @@ class McpTest < ActionDispatch::IntegrationTest
     assert_equal "Invalid 'id': must be an integer.", get_response.content.first[:text]
 
     update_response = UpdateDraftTool.call(
-      id: "abc", title: "Nope", server_context: { api_key: @write_key }
+      id: "abc", title: "Nope", server_context: { owner: @owner, scope: "write" }
     )
 
     assert update_response.error?

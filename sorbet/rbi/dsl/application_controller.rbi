@@ -28,6 +28,7 @@ class ApplicationController
     include ::ApplicationHelper
     include ::Admin::PostImagesHelper
     include ::PostsHelper
+    include ::Doorkeeper::DashboardHelper
 
     sig { returns(T.untyped) }
     def admin_signed_in?; end

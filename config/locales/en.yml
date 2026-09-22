@@ -1,4 +1,14 @@
 en:
+  oauth:
+    authorize:
+      title: "Authorize access"
+      prompt: "%{client_name} is requesting access to your account"
+      able_to: "This application can:"
+      scopes:
+        read: "Read articles"
+        write: "Create and update articles"
+      authorize: "Authorize"
+      deny: "Deny"
   layouts:
     application:
       title: "Hiroe Tech Notes"

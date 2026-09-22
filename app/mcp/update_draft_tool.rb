@@ -15,9 +15,9 @@ class UpdateDraftTool < MCP::Tool
 
   class << self
     def call(id: nil, slug: nil, title: nil, body: nil, tags: nil, server_context: nil)
-      api_key = server_context && server_context[:api_key]
-      return error_response("Missing API key context.") unless api_key
-      return error_response("Forbidden: this tool requires write scope.") unless api_key.write?
+      owner = server_context && server_context[:owner]
+      return error_response("Missing API key context.") unless owner
+      return error_response("Forbidden: this tool requires write scope.") unless server_context[:scope] == "write"
       return error_response("Provide either 'id' or 'slug'.") if id.blank? && slug.blank?
 
       if id.present?
@@ -27,7 +27,7 @@ class UpdateDraftTool < MCP::Tool
         id = parsed_id
       end
 
-      post = locate_post(api_key, id, slug)
+      post = locate_post(owner, id, slug)
       return error_response("Post not found.") unless post
       return error_response("Only draft posts can be updated.") unless post.draft?
 
@@ -67,8 +67,8 @@ class UpdateDraftTool < MCP::Tool
 
     private
 
-    def locate_post(api_key, id, slug)
-      owned_posts = Post.where(admin_user_id: api_key.admin_user_id).includes(:post_translations)
+    def locate_post(owner, id, slug)
+      owned_posts = Post.where(admin_user_id: owner.id).includes(:post_translations)
       if id.present?
         owned_posts.find_by(id: id)
       else

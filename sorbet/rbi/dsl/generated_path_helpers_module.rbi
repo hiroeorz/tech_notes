@@ -13,6 +13,9 @@ module GeneratedPathHelpersModule
   def about_path(*args); end
 
   sig { params(args: T.untyped).returns(String) }
+  def admin_api_keys_path(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
   def admin_categories_path(*args); end
 
   sig { params(args: T.untyped).returns(String) }
@@ -88,6 +91,12 @@ module GeneratedPathHelpersModule
   def markdown_preview_admin_posts_path(*args); end
 
   sig { params(args: T.untyped).returns(String) }
+  def mcp_path(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
+  def native_oauth_authorization_path(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
   def new_admin_category_path(*args); end
 
   sig { params(args: T.untyped).returns(String) }
@@ -98,6 +107,21 @@ module GeneratedPathHelpersModule
 
   sig { params(args: T.untyped).returns(String) }
   def new_rails_conductor_inbound_email_source_path(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
+  def oauth_authorization_path(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
+  def oauth_introspect_path(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
+  def oauth_revoke_path(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
+  def oauth_token_info_path(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
+  def oauth_token_path(*args); end
 
   sig { params(args: T.untyped).returns(String) }
   def post_comments_path(*args); end
@@ -181,6 +205,9 @@ module GeneratedPathHelpersModule
   def rails_representation_path(*args); end
 
   sig { params(args: T.untyped).returns(String) }
+  def rails_resend_inbound_emails_path(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
   def rails_sendgrid_inbound_emails_path(*args); end
 
   sig { params(args: T.untyped).returns(String) }
@@ -194,6 +221,9 @@ module GeneratedPathHelpersModule
 
   sig { params(args: T.untyped).returns(String) }
   def rails_storage_redirect_path(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
+  def revoke_admin_api_key_path(*args); end
 
   sig { params(args: T.untyped).returns(String) }
   def root_path(*args); end

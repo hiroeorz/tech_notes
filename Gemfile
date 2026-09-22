@@ -64,6 +64,9 @@ gem "resend", "~> 1.16"
 # Model Context Protocol SDK for exposing tools over the MCP protocol
 gem "mcp", "~> 1.6"
 
+# OAuth authorization server for MCP clients (Gemini integration)
+gem "doorkeeper", "~> 5.9"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
