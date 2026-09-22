@@ -715,6 +715,33 @@ class McpTest < ActionDispatch::IntegrationTest
     assert_equal "evil?tool??name", sanitize.call("evil tool\n?name")
   end
 
+  test "mcp method name is sanitized for logging" do
+    sanitize = ->(name) { McpController.new.send(:sanitized_method_for_log, name) }
+
+    assert_equal "tools?list?INJECTED??x", sanitize.call("tools/list\nINJECTED: x")
+    assert_equal "a?b", sanitize.call("a\rb")
+    assert_equal 128, sanitize.call("a" * 200).length
+    assert_not_includes sanitize.call("tools/list\nINJECTED: x"), "\n"
+  end
+
+  test "unknown method containing newline is logged as a single line without server error" do
+    malicious_method = "tools/list\nINJECTED: x"
+
+    log_output = StringIO.new
+    original_logger = Rails.logger
+    Rails.logger = Logger.new(log_output)
+    begin
+      rpc_post(@write_token, { jsonrpc: "2.0", id: 7, method: malicious_method })
+    ensure
+      Rails.logger = original_logger
+    end
+
+    assert_not_equal 500, response.status
+    assert_includes log_output.string, "tools?list?INJECTED??x"
+    assert_not_includes log_output.string, malicious_method
+    refute_match(/\nINJECTED: x/, log_output.string)
+  end
+
   test "tools/call with non-object params returns transport error without server error" do
     rpc_post(@write_token, { jsonrpc: "2.0", id: 1, method: "tools/call", params: [] })
 

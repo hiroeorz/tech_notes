@@ -93,7 +93,7 @@ class McpController < ActionController::API
     rpc_method = payload.is_a?(Hash) ? payload["method"] : nil
     params = payload.is_a?(Hash) ? payload["params"] : nil
     tool_name = params.is_a?(Hash) ? params["name"] : nil
-    message = +"[mcp] method=#{rpc_method || "-"}"
+    message = +"[mcp] method=#{sanitized_method_for_log(rpc_method || "-")}"
     message << " tool=#{sanitized_tool_name_for_log(tool_name)}" if tool_name
     message << " status=#{status}"
     Rails.logger.info(message)
@@ -115,6 +115,14 @@ class McpController < ActionController::API
   end
 
   def sanitized_tool_name_for_log(tool_name)
-    tool_name.to_s.gsub(/[^a-zA-Z0-9_\-.]/, "?")
+    sanitized_value_for_log(tool_name)
+  end
+
+  def sanitized_method_for_log(rpc_method)
+    sanitized_value_for_log(rpc_method)
+  end
+
+  def sanitized_value_for_log(value)
+    value.to_s.gsub(/[^a-zA-Z0-9_\-.]/, "?").truncate(128)
   end
 end
