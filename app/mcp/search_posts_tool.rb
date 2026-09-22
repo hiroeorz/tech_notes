@@ -33,9 +33,9 @@ class SearchPostsTool < MCP::Tool
       posts = Post.publicly_visible
         .joins(join)
         .where(
-          "LOWER(COALESCE(localized_post_translations.title, posts.title)) LIKE :pattern " \
-          "OR LOWER(COALESCE(localized_post_translations.excerpt, posts.excerpt)) LIKE :pattern " \
-          "OR LOWER(COALESCE(localized_post_translations.body, posts.body)) LIKE :pattern",
+          "LOWER(COALESCE(localized_post_translations.title, posts.title)) LIKE :pattern ESCAPE '\\' " \
+          "OR LOWER(COALESCE(localized_post_translations.excerpt, posts.excerpt)) LIKE :pattern ESCAPE '\\' " \
+          "OR LOWER(COALESCE(localized_post_translations.body, posts.body)) LIKE :pattern ESCAPE '\\'",
           pattern: pattern
         )
       posts = filter_by_tags(posts, tags)

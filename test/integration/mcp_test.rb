@@ -155,6 +155,65 @@ class McpTest < ActionDispatch::IntegrationTest
     refute_plaintext_tokens_in_response
   end
 
+  test "search_posts matches query containing an underscore literally" do
+    Post.create!(
+      admin_user: @owner,
+      title: "Underscore search target",
+      slug: "underscore-search-target",
+      body: "The body mentions foo_bar_baz.",
+      status: :published,
+      published_at: 1.day.ago
+    )
+
+    rpc_post(@write_token, tools_call_request("search_posts", query: "foo_bar"))
+
+    assert_response :success
+    assert_includes tool_payload.map { it.fetch("slug") }, "underscore-search-target"
+  end
+
+  test "search_posts does not treat an underscore as a wildcard" do
+    Post.create!(
+      admin_user: @owner,
+      title: "Underscore wildcard lookalike",
+      slug: "underscore-wildcard-lookalike",
+      body: "The body mentions fooXbar only.",
+      status: :published,
+      published_at: 1.day.ago
+    )
+
+    rpc_post(@write_token, tools_call_request("search_posts", query: "foo_bar"))
+
+    assert_response :success
+    assert_not_includes tool_payload.map { it.fetch("slug") }, "underscore-wildcard-lookalike"
+  end
+
+  test "search_posts matches query containing a percent literally without wildcard overmatching" do
+    Post.create!(
+      admin_user: @owner,
+      title: "Percent search target",
+      slug: "percent-search-target",
+      body: "We reached 100%達成 this quarter.",
+      status: :published,
+      published_at: 1.day.ago
+    )
+    Post.create!(
+      admin_user: @owner,
+      title: "Percent wildcard lookalike",
+      slug: "percent-wildcard-lookalike",
+      body: "We reached 1000達成 this quarter.",
+      status: :published,
+      published_at: 1.day.ago
+    )
+
+    rpc_post(@write_token, tools_call_request("search_posts", query: "100%"))
+
+    assert_response :success
+    slugs = tool_payload.map { it.fetch("slug") }
+
+    assert_includes slugs, "percent-search-target"
+    assert_not_includes slugs, "percent-wildcard-lookalike"
+  end
+
   test "search_posts narrows by all specified tags" do
     terraform_tag = Tag.create!(name: "Terraform", slug: "terraform")
     aws_tag = Tag.create!(name: "AWS", slug: "aws")
