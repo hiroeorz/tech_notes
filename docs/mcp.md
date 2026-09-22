@@ -416,21 +416,21 @@ Doorkeeper の `grant_flows` は `authorization_code` のみ（`config/initializ
 
 ### 19.1 新規登録
 
-Gemini の設定画面に表示されるリダイレクト URI の値を転記して実行する。
+Gemini の設定画面に表示されるリダイレクト URI の値を転記して、WSL から Kamal 経由で実行する。
 
-```ruby
-app = Doorkeeper::Application.create!(
-  name: "Gemini",
-  redirect_uri: "<Gemini設定画面の値を転記>",
-  scopes: "read write",
-  confidential: true
-)
-app.uid    # → Gemini の「OAuth クライアントID」欄へ転記
-app.secret # → Gemini のシークレット欄へ転記
+```bash
+kamal app exec --reuse "bin/rails oauth:client:create[Gemini,<リダイレクトURI>]"
 ```
 
-- 作成コマンドの戻り値（`inspect`）の `secret` は `[FILTERED]` 表示になるため、`app.secret` リーダーで取得すること
-- ハッシュ化無効のため `app.secret` は後から再取得できるが、発行直後に Gemini 側へ登録し、使い捨てと同様に慎重に扱うこと
+出力例（実値ではない）:
+
+```text
+uid: <OAuth クライアントID>      # → Gemini の「OAuth クライアントID」欄へ転記
+secret: <シークレット>            # → Gemini のシークレット欄へ転記
+```
+
+- `uid` / `secret` の再表示は `kamal app exec --reuse "bin/rails oauth:client:show[Gemini]"` で行う
+- ハッシュ化無効のため `secret` は後から再取得できるが、発行直後に Gemini 側へ登録し、使い捨てと同様に慎重に扱うこと
 - シェル履歴・ログに secret を残さないこと（履歴への書き込み抑止、登録後の履歴・クリップボードのクリア）。
 
 ### 19.2 redirect_uri 変更時の更新
