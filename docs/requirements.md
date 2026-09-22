@@ -1071,3 +1071,11 @@ Sorbet による静的型チェックを導入する。型チェックの段階�
 - `srb tc` が全 Model/Controller でエラーなくパスすること
 - `bin/rails test` が全テストパスすること
 - `bin/rubocop` に違反がないこと
+
+## 19. MCP 機能
+
+AI クライアントから公開記事の検索・参照と下書きの作成・更新を行う MCP 機能の要件は、本節ではなく **`docs/mcp.md`** に定義する。
+
+- エンドポイント、API キー、管理画面でのキー発行、MCP ツール定義、テスト要件などの詳細は `docs/mcp.md` を正とする。
+- **v1 は API キー（Bearer） + MCP Inspector / Claude Desktop 等のヘッダー対応クライアントを対象**とし、ChatGPT 本体連携用の OAuth は v2 以降とする（詳細は `docs/mcp.md`）。
+- 実装・改修時は同文書と本要件書の整合を確認すること。
