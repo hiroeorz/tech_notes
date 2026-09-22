@@ -365,7 +365,7 @@ Doorkeeper の `grant_flows` は `authorization_code` のみ（`config/initializ
 
 ### 18.4 スコープ対応
 
-- OAuth スコープ `read` / `write`（`config/initializers/doorkeeper.rb` の `optional_scopes :read, :write`）がそのまま MCP スコープ（§6.2）に対応する。
+- OAuth スコープ `read` / `write`（`config/initializers/doorkeeper.rb` の `optional_scopes :read, :write`＋`default_scopes :read`。未指定時は `read` が付与・表示される）がそのまま MCP スコープ（§6.2）に対応する。
 - `/mcp` の認証解決順序（`app/controllers/mcp_controller.rb#authenticate_credential!`）:
   1. API キー（`ApiKey.find_active_by_token`）
   2. Doorkeeper トークン（`Doorkeeper::AccessToken.by_token` + `accessible?`。所有者は `resource_owner_id` の `AdminUser`、スコープは `includes_scope?("write")` で `write` / `read` を判定）
