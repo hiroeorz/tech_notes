@@ -422,6 +422,31 @@ class McpTest < ActionDispatch::IntegrationTest
     assert_equal "Reviewing post", @reviewing_post.reload.title
   end
 
+  test "update_draft rechecks draft status after acquiring lock" do
+    original_with_lock = Post.instance_method(:with_lock)
+    Post.define_method(:with_lock) do |lock = true, &block|
+      Post.where(id: id).update_all(status: Post.statuses.fetch("published"))
+      original_with_lock.bind_call(self, lock, &block)
+    end
+    begin
+      response = UpdateDraftTool.call(
+        id: @draft_post.id,
+        title: "Concurrently published title",
+        body: "Concurrently published body.",
+        server_context: { api_key: @write_key }
+      )
+    ensure
+      Post.define_method(:with_lock, original_with_lock)
+    end
+
+    assert response.error?
+    assert_equal "Only draft posts can be updated.", response.content.first[:text]
+    @draft_post.reload
+
+    assert_equal "Draft search hidden", @draft_post.title
+    assert_equal "Draft body with terraform keyword.", @draft_post.body
+  end
+
   test "update_draft cannot update drafts owned by another admin" do
     rpc_post(@write_token, tools_call_request("update_draft", id: @other_admin_draft.id, title: "Hacked other draft"))
 

@@ -39,15 +39,19 @@ class UpdateDraftTool < MCP::Tool
 
       begin
         Post.transaction do
-          post.title = title unless title.nil?
-          post.body = body unless body.nil?
-          post.slug = slug if located_by_id && !slug.nil?
-          unless tags.nil?
-            tag_list = Array(tags).flatten.map { |t| t.to_s.strip }.reject(&:blank?).uniq
-            post.tag_names = tag_list.join(", ")
+          post.with_lock do
+            return error_response("Only draft posts can be updated.") unless post.draft?
+
+            post.title = title unless title.nil?
+            post.body = body unless body.nil?
+            post.slug = slug if located_by_id && !slug.nil?
+            unless tags.nil?
+              tag_list = Array(tags).flatten.map { |t| t.to_s.strip }.reject(&:blank?).uniq
+              post.tag_names = tag_list.join(", ")
+            end
+            post.save!
+            PostTranslationScheduler.call(post:, source_locale:) if source_locale
           end
-          post.save!
-          PostTranslationScheduler.call(post:, source_locale:) if source_locale
         end
       rescue ActiveRecord::RecordInvalid
         return error_response(validation_summary(post))
