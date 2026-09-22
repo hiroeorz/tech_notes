@@ -67,7 +67,10 @@ class McpController < ActionController::API
     return false unless payload.is_a?(Hash)
     return false unless payload["method"] == "tools/call"
 
-    required_scope = TOOL_SCOPES[payload.dig("params", "name")]
+    params = payload["params"]
+    return false unless params.is_a?(Hash)
+
+    required_scope = TOOL_SCOPES[params["name"]]
     return false unless required_scope
 
     required_scope == :write && !@api_key.write?
@@ -88,7 +91,8 @@ class McpController < ActionController::API
 
   def observe_request(status, payload)
     rpc_method = payload.is_a?(Hash) ? payload["method"] : nil
-    tool_name = payload.is_a?(Hash) ? payload.dig("params", "name") : nil
+    params = payload.is_a?(Hash) ? payload["params"] : nil
+    tool_name = params.is_a?(Hash) ? params["name"] : nil
     message = +"[mcp] method=#{rpc_method || "-"}"
     message << " tool=#{sanitized_tool_name_for_log(tool_name)}" if tool_name
     message << " status=#{status}"

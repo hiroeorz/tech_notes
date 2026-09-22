@@ -656,6 +656,18 @@ class McpTest < ActionDispatch::IntegrationTest
     assert_equal "evil?tool??name", sanitize.call("evil tool\n?name")
   end
 
+  test "tools/call with non-object params returns transport error without server error" do
+    rpc_post(@write_token, { jsonrpc: "2.0", id: 1, method: "tools/call", params: [] })
+
+    assert_response :success
+    assert_equal -32603, response.parsed_body.dig("error", "code")
+
+    rpc_post(@write_token, { jsonrpc: "2.0", id: 1, method: "tools/call", params: "oops" })
+
+    assert_response :success
+    assert_equal -32602, response.parsed_body.dig("error", "code")
+  end
+
   private
 
   def sign_in_admin(admin)
