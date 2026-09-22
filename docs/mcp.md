@@ -412,7 +412,7 @@ Doorkeeper の `grant_flows` は `authorization_code` のみ（`config/initializ
 
 ## 19. 本番runbook: Gemini用クライアント登録
 
-本番 Rails コンソールで実行する。実値（ドメイン・クライアントID・secret）は本書に記載しない。
+新規登録・表示は WSL から Kamal 経由のrakeタスクで行う（コンソール不要）。更新・失効のみ本番 Rails コンソールで実行する。実値（ドメイン・クライアントID・secret）は本書に記載しない。
 
 ### 19.1 新規登録
 
