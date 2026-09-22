@@ -77,6 +77,35 @@ class OauthTest < ActionDispatch::IntegrationTest
     assert Doorkeeper::AccessToken.find_by(token: payload["access_token"])&.revoked?
   end
 
+  test "authorization without scope defaults to read" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+    assert_redirected_to admin_posts_path
+
+    verifier, challenge = pkce_pair
+    auth_params = authorization_params(challenge).except(:scope)
+
+    get oauth_authorization_path(auth_params)
+    assert_response :success
+    assert_includes response.body, I18n.t("oauth.authorize.scopes.read")
+
+    post oauth_authorization_path(auth_params)
+    assert_response :redirect
+    code = URI.decode_www_form(URI.parse(response.headers["Location"]).query || "").to_h["code"]
+    assert code.present?
+
+    post oauth_token_path, params: {
+      grant_type: "authorization_code",
+      code: code,
+      redirect_uri: @application.redirect_uri,
+      client_id: @application.uid,
+      code_verifier: verifier
+    }
+    assert_response :success
+    payload = response.parsed_body
+    assert payload["access_token"].present?
+    assert_includes payload["scope"].to_s.split, "read"
+  end
+
   test "authorization request without PKCE is rejected" do
     post admin_login_path, params: { email: @admin.email, password: "password123" }
     assert_redirected_to admin_posts_path

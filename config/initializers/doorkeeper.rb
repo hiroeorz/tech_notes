@@ -265,6 +265,7 @@ Doorkeeper.configure do
   # For more information go to
   # https://doorkeeper.gitbook.io/guides/ruby-on-rails/scopes
   #
+  default_scopes :read
   optional_scopes :read, :write
 
   # Allows to restrict only certain scopes for grant_type.
