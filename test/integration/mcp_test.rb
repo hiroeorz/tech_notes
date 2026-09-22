@@ -635,14 +635,14 @@ class McpTest < ActionDispatch::IntegrationTest
     get_response = GetPostTool.call(id: "abc")
 
     assert get_response.error?
-    assert_equal "Invalid 'id': must be a number.", get_response.content.first[:text]
+    assert_equal "Invalid 'id': must be an integer.", get_response.content.first[:text]
 
     update_response = UpdateDraftTool.call(
       id: "abc", title: "Nope", server_context: { api_key: @write_key }
     )
 
     assert update_response.error?
-    assert_equal "Invalid 'id': must be a number.", update_response.content.first[:text]
+    assert_equal "Invalid 'id': must be an integer.", update_response.content.first[:text]
 
     rpc_post(@write_token, tools_call_request("get_post", id: "abc"))
 

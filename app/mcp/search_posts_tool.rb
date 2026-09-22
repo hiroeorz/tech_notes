@@ -20,10 +20,26 @@ class SearchPostsTool < MCP::Tool
       keyword = query.to_s.strip
       return error_response("Provide a non-empty 'query' to search.") if keyword.empty?
 
+      default_locale = I18n.default_locale.to_s
+      join = Post.sanitize_sql_array([
+        <<~SQL.squish,
+          LEFT OUTER JOIN post_translations localized_post_translations
+            ON localized_post_translations.post_id = posts.id
+            AND localized_post_translations.locale = ?
+        SQL
+        default_locale
+      ])
+      pattern = like_pattern(keyword)
       posts = Post.publicly_visible
-        .where("LOWER(title) LIKE :pattern OR LOWER(excerpt) LIKE :pattern OR LOWER(body) LIKE :pattern", pattern: like_pattern(keyword))
+        .joins(join)
+        .where(
+          "LOWER(COALESCE(localized_post_translations.title, posts.title)) LIKE :pattern " \
+          "OR LOWER(COALESCE(localized_post_translations.excerpt, posts.excerpt)) LIKE :pattern " \
+          "OR LOWER(COALESCE(localized_post_translations.body, posts.body)) LIKE :pattern",
+          pattern: pattern
+        )
       posts = filter_by_tags(posts, tags)
-      posts = posts.includes(:tags).limit(limit_for(limit))
+      posts = posts.includes(:tags, :post_translations).limit(limit_for(limit))
 
       MCP::Tool::Response.new([ { type: "text", text: JSON.generate(posts.map { |post| post_summary(post) }) } ])
     end
@@ -51,13 +67,14 @@ class SearchPostsTool < MCP::Tool
     end
 
     def post_summary(post)
+      content = post.localized_content(I18n.default_locale)
       {
         id: post.id,
         slug: post.slug,
-        title: post.title,
+        title: content[:title],
         published_at: post.published_at,
         tags: post.tags.map(&:name),
-        excerpt: post.excerpt
+        excerpt: content[:excerpt]
       }
     end
 
