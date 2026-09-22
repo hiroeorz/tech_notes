@@ -356,8 +356,7 @@ v1 の動作確認は **MCP Inspector を正**とする。ChatGPT での疎通�
 | `GET/POST /oauth/authorize` | 認可リクエスト・同意（Doorkeeper 標準） |
 | `POST /oauth/token` | トークン交換（`authorization_code`）・更新（`refresh_token`） |
 | `POST /oauth/revoke` | トークン失効 |
-| `GET /.well-known/oauth-authorization-server` | 認可サーバーメタデータ（基底形） |
-| `GET /.well-known/oauth-authorization-server/mcp` | 認可サーバーメタデータ（`/mcp` の path-inserted 形。同一内容を両パスで提供） |
+| `GET /.well-known/oauth-authorization-server` | 認可サーバーメタデータ（基底形のみ。`issuer` は origin 直下。path-inserted 形は提供しない） |
 
 Doorkeeper の `grant_flows` は `authorization_code` のみ（`config/initializers/doorkeeper.rb`）。implicit / password / client_credentials は無効。リフレッシュは `use_refresh_token` で有効化している。
 
@@ -377,6 +376,7 @@ Doorkeeper の `grant_flows` は `authorization_code` のみ（`config/initializ
 - アクセストークン有効期限は 2 時間（`config/initializers/doorkeeper.rb` の `access_token_expires_in 2.hours`）。
 - リフレッシュトークン有効（`use_refresh_token`）。更新時は `grant_type=refresh_token` で `/oauth/token` へリクエストする。
 - 失効は `POST /oauth/revoke` で行う。失効済み・期限切れトークンでの `/mcp` アクセスは 401（`-32001`）で即時拒否される。
+- アクセス・リフレッシュトークンは DB にハッシュ保存される（`hash_token_secrets`）。平文での直接参照はできず、解決は `Doorkeeper::AccessToken.by_token` 経由で行う。
 
 ### 18.6 同意画面の仕様
 
@@ -404,7 +404,7 @@ Doorkeeper の `grant_flows` は `authorization_code` のみ（`config/initializ
   - 認可フロー: PKCE ありの正常系（認可コード → アクセス + リフレッシュトークン発行、有効期限 2 時間）、PKCE なしの拒否、verifier 不一致の拒否、redirect_uri 不一致の拒否
   - 同意拒否（`access_denied` でリダイレクトし何も発行しない）、未ログイン誘導（管理者ログインへリダイレクトし `session[:return_to]` に認可パスを保存）
   - トークン: リフレッシュによる更新、`/oauth/revoke` による失効
-  - メタデータ 2 形式（基底形 + `/mcp` の path-inserted 形）の内容
+  - メタデータ（基底形）の内容
   - スコープ: OAuth write トークンでのツール一覧・下書き作成の成功、read トークンでの書き込み 403（`-32003`）
   - 回帰: 失効トークンの 401（`-32001`）、期限切れトークンの 401（`-32001`）
 - v1 回帰は `test/integration/mcp_test.rb` で担保する（`server_context` は `{ owner, scope }` 形に更新済み）。

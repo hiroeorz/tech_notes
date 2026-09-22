@@ -13,7 +13,6 @@ Rails.application.routes.draw do
   end
 
   get "/.well-known/oauth-authorization-server", to: "oauth_metadata#show"
-  get "/.well-known/oauth-authorization-server/mcp", to: "oauth_metadata#show"
 
   scope "(:locale)", locale: /en|ja/ do
     root "home#index"

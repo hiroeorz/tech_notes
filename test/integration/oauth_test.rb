@@ -61,6 +61,10 @@ class OauthTest < ActionDispatch::IntegrationTest
     assert_equal 2.hours.to_i, payload["expires_in"]
     assert_equal "read", payload["scope"]
 
+    stored_token = Doorkeeper::AccessToken.by_token(payload["access_token"])
+    assert stored_token.present?
+    assert_not_equal payload["access_token"], stored_token.token
+
     post oauth_token_path, params: {
       grant_type: "refresh_token",
       refresh_token: payload["refresh_token"],
@@ -74,7 +78,7 @@ class OauthTest < ActionDispatch::IntegrationTest
       client_id: @application.uid
     }
     assert_response :success
-    assert Doorkeeper::AccessToken.find_by(token: payload["access_token"])&.revoked?
+    assert Doorkeeper::AccessToken.by_token(payload["access_token"])&.revoked?
   end
 
   test "authorization without scope defaults to read" do
@@ -206,24 +210,22 @@ class OauthTest < ActionDispatch::IntegrationTest
   end
 
   test "oauth authorization server metadata exposes endpoints and S256" do
-    [ "/.well-known/oauth-authorization-server", "/.well-known/oauth-authorization-server/mcp" ].each do |path|
-      get path
-      assert_response :success
-      payload = response.parsed_body
-      assert_includes payload["authorization_endpoint"], "/oauth/authorize"
-      assert_includes payload["token_endpoint"], "/oauth/token"
-      assert_includes payload["revocation_endpoint"], "/oauth/revoke"
-      assert_includes payload["response_types_supported"], "code"
-      assert_includes payload["code_challenge_methods_supported"], "S256"
-      assert_includes payload["grant_types_supported"], "authorization_code"
-      assert_includes payload["grant_types_supported"], "refresh_token"
-      assert_includes payload["scopes_supported"], "read"
-      assert_includes payload["scopes_supported"], "write"
-      assert_includes payload["token_endpoint_auth_methods_supported"], "client_secret_basic"
-      assert_includes payload["token_endpoint_auth_methods_supported"], "client_secret_post"
-      assert_includes payload["token_endpoint_auth_methods_supported"], "none"
-      assert payload["issuer"].present?
-    end
+    get "/.well-known/oauth-authorization-server"
+    assert_response :success
+    payload = response.parsed_body
+    assert_includes payload["authorization_endpoint"], "/oauth/authorize"
+    assert_includes payload["token_endpoint"], "/oauth/token"
+    assert_includes payload["revocation_endpoint"], "/oauth/revoke"
+    assert_includes payload["response_types_supported"], "code"
+    assert_includes payload["code_challenge_methods_supported"], "S256"
+    assert_includes payload["grant_types_supported"], "authorization_code"
+    assert_includes payload["grant_types_supported"], "refresh_token"
+    assert_includes payload["scopes_supported"], "read"
+    assert_includes payload["scopes_supported"], "write"
+    assert_includes payload["token_endpoint_auth_methods_supported"], "client_secret_basic"
+    assert_includes payload["token_endpoint_auth_methods_supported"], "client_secret_post"
+    assert_includes payload["token_endpoint_auth_methods_supported"], "none"
+    assert_equal "http://www.example.com", payload["issuer"]
   end
 
   test "oauth write token can list tools and create drafts via mcp" do
