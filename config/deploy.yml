@@ -13,19 +13,26 @@ servers:
   #     - 192.168.0.1
   #   cmd: bin/jobs
 
-# Enable SSL auto certification via Let's Encrypt and allow for multiple apps on a single web server.
-# If used with Cloudflare, set encryption mode in SSL/TLS setting to "Full" to enable CF-to-app encryption.
+# TLS termination is done by kunato (WAF) in front of the app.
+# kunato listens on 0.0.0.0:443 and forwards plain HTTP to kamal-proxy on loopback.
+# Kamal proxy runs without SSL on loopback only to avoid port 443 conflict
+# and to prevent direct bypass of the WAF from the internet.
 #
-# Using an SSL proxy like this requires turning on config.assume_ssl and config.force_ssl in production.rb!
-#
-# Don't use this when deploying to multiple web servers (then you have to terminate SSL at your load balancer).
+# Using a reverse proxy like this requires turning on config.assume_ssl and config.force_ssl in production.rb!
+# (kunato sets X-Forwarded-Proto: https, which kamal-proxy forwards to the app.)
 proxy:
-  ssl: true
+  ssl: false
   host: <%= ENV.fetch("APP_HOST") %>
+  forward_headers: true
   healthcheck:
     path: /up
     interval: 10
     timeout: 5
+  run:
+    http_port: 8080
+    https_port: 8443
+    bind_ips:
+      - 127.0.0.1
 
 # Where you keep your container images.
 registry:

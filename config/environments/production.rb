@@ -25,6 +25,7 @@ Rails.application.configure do
   config.active_storage.service = :cloudflare_r2
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
+  # TLS is terminated by kunato (WAF) in front; kamal-proxy forwards plain HTTP on loopback.
   config.assume_ssl = true
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.

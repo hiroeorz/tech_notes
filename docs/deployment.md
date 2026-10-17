@@ -4,7 +4,7 @@
 
 本ドキュメントは、「Hiroe Tech Notes」アプリケーションを単一VM（VPS等）上に低コストかつ堅牢にデプロイ・運用するためのインフラアーキテクチャおよびデプロイ仕様を定義する。
 
-マネージドサービスを使用せず、**Kamal** を用いて Web アプリケーション（Rails）と データベース（PostgreSQL）の両方を Docker コンテナとして単一サーバー上に構成し、データを永続化する。SSL 終端は Kamal 内蔵のリバースプロキシ（Traefik）と Let's Encrypt 自動発行で行う。
+マネージドサービスを使用せず、**Kamal** を用いて Web アプリケーション（Rails）と データベース（PostgreSQL）の両方を Docker コンテナとして単一サーバー上に構成し、データを永続化する。SSL 終端とWAFは前段の **kunato**（Rust製リバースプロキシ）が担い、Let's Encrypt 証明書を443番のTLS-ALPN-01で自動取得・更新する。Kamal proxy は平文HTTPでループバックのみ待受けし、ゼロダウンタイム切替に専念する。
 
 ---
 
@@ -21,9 +21,19 @@
 |  +--------------------------------------------------------------+     |
 |                                                                        |
 |                      +-----------------------------+                  |
-|  Internet ---------> | Kamal Proxy (Traefik)       |                  |
-|  (HTTPS, Let's       |  - Port 80  → redirect 443  |                  |
-|   Encrypt autorenew) |  - Port 443 → forward to web|                  |
+|  Internet ---------> | kunato (WAF)                |                  |
+|  (HTTPS, Let's       |  - Port 443 only (TLS-ALPN-01,|                  |
+|   Encrypt autorenew,  |    no port 80 needed)       |                  |
+|   port 80 closed)     |  - WAF inspection           |                  |
+|                      |  - forward to 127.0.0.1:8080|                  |
+|                      +-----------------------------+                  |
+|                              |                                         |
+|                              v                                         |
+|                      +-----------------------------+                  |
+|                      | Kamal Proxy                 |                  |
+|                      |  - 127.0.0.1:8080 only      |                  |
+|                      |    (plain HTTP, loopback,   |                  |
+|                      |     no TLS, no external)    |                  |
 |                      +-----------------------------+                  |
 |                              |                                         |
 |                              v                                         |
@@ -46,8 +56,9 @@
 
 | コンポーネント | 役割 | 使用イメージ | ネットワーク / ポート |
 | :--- | :--- | :--- | :--- |
-| **Kamal Proxy** | SSL 終端 / リバースプロキシ / Let's Encrypt 証明書自動発行 | Kamal 箄製 (Traefik) | 80/443 (HTTP/HTTPS) |
-| **Web** | Rails アプリケーション (Puma / Thruster) | カスタムビルド (`Dockerfile`) | 内部のみ（プロキシ経由） |
+| **kunato** | TLS終端 / WAF / Let's Encrypt 証明書自動取得・更新（TLS-ALPN-01、80番不要） | kunato（systemd、ホスト直結） | 0.0.0.0:443 (HTTPS) → 127.0.0.1:8080 |
+| **Kamal Proxy** | ゼロダウンタイム切替用リバースプロキシ（TLSなし） | Kamal 箄製 | 127.0.0.1:8080 のみ（平文HTTP、ループバック、外部非公開） |
+| **Web** | Rails アプリケーション (Puma / Thruster) | カスタムビルド (`Dockerfile`) | 内部のみ（kunato→proxy経由） |
 | **Accessory (db)** | データベース | `postgres:16-alpine` | `127.0.0.1:5432:5432`（ローカルバインド） |
 
 ### 2.3 データベース論理構成
@@ -83,9 +94,10 @@ PostgreSQL は1クラスタ上に以下の4つの論理データベースを保�
    * Web コンテナから DB コンテナへは、Kamal が構成する内部 Docker ネットワーク経由で、**アクセサリ名 `tech_notes-db`** をホスト名としてアクセスする（`DB_HOST=tech_notes-db`）。
    * ※外部公開 IP への接続や `127.0.0.1` では Web コンテナから到達できない点に注意。
 2. **SSL / HTTPS**
-   * Kamal proxy が Let's Encrypt で証明書を自動取得・更新し、80/443 をリッスンする。
-   * 80 は 443 へリダイレクト。443 は復号後に Web コンテナへ HTTP 転送する。
-   * Rails 側は `config.assume_ssl = true` / `config.force_ssl = true` を有効化済み。
+   * kunato が Let's Encrypt で証明書を自動取得・更新する（TLS-ALPN-01のため443番のみ到達で可、80番不要）。443で復号・WAF検査後に `http://127.0.0.1:8080` の Kamal proxy へ平文HTTP転送する。転送時は `X-Forwarded-Proto: https` を付与する。
+   * Kamal proxy は `ssl: false` でTLSなし、`127.0.0.1:8080` のみバインド（`bind_ips` でループバック限定、`https_port` も8443へ退避しホスト443と競合させない）。外部から `kamal-proxy` へ直結してWAFを迂回することはできない。
+   * Rails 側は `config.assume_ssl = true` / `config.force_ssl = true` を維持する（kunato由来の `X-Forwarded-Proto: https` を kamal-proxy が `forward_headers: true` で転送するためリダイレクトループしない）。
+   * ホストFWは443番のみ開放し、80番は閉塞する（`http://` アクセスは接続拒否になる）。
 3. **環境変数・シークレット管理**
    * DB パスワード等の機密情報は Kamal の `.kamal/secrets` と環境変数経由で安全にコンテナへ注入する（平文で `config/deploy.yml` には書かない）。
    * 必須シークレット: `RAILS_MASTER_KEY`, `POSTGRES_PASSWORD`, `ADMIN_PASSWORD`。
@@ -112,11 +124,21 @@ servers:
   web:
     - <%= ENV.fetch("SERVER_IP") %>
 
-# SSL via Kamal proxy + Let's Encrypt 自動発行。
-# Cloudflare を前段に置く場合は Cloudflare の SSL/TLS 設定を "Full" にすること。
+# TLS終端は前段のkunato (WAF) が担当。Kamal proxyは平文HTTP・ループバックのみ。
+# kunato (0.0.0.0:443) -> kamal-proxy (127.0.0.1:8080) -> Webコンテナ。
 proxy:
-  ssl: true
+  ssl: false
   host: <%= ENV.fetch("APP_HOST") %>
+  forward_headers: true
+  healthcheck:
+    path: /up
+    interval: 10
+    timeout: 5
+  run:
+    http_port: 8080
+    https_port: 8443
+    bind_ips:
+      - 127.0.0.1
 
 registry:
   server: docker.io
@@ -176,7 +198,28 @@ accessories:
     directories:
       - postgres-data:/var/lib/postgresql/data
 
-### 5.1 PostgreSQL 初期化 SQL (`config/postgres/init.sql`)
+### 5.1 kunato 設定例 (`/etc/kunato/kunato.yaml`、ホスト側systemd)
+
+Kamal管理外。VPS上で `kunato` サービスとして動作し、443番でTLS終端・WAF検査を行う。
+
+```yaml
+listen: 0.0.0.0:443
+upstream: http://127.0.0.1:8080
+
+tls:
+  acme:
+    enabled: true
+    domains: [<APP_HOST>]
+    # contact: admin@example.com
+
+# categories: 既定ルール＋必要に応じ /up のALLOW等を追加
+```
+
+* `domains` は `APP_HOST` と一致させる。TLS-ALPN-01のため443番到達のみで発行・更新できる（80番不要）。
+* `upstream` は Kamal proxy のループバック待受（`127.0.0.1:8080`）を指す。`http` のみ対応。
+* `/up` がWAFで誤ブロックされる場合は `ALLOW` 例外を検討する（Kamalのヘルスチェック自体はDocker網直叩きのため影響なし）。
+
+### 5.2 PostgreSQL 初期化 SQL (`config/postgres/init.sql`)
 
 Accessory コンテナ初回起動時に Solid Cache / Queue / Cable 用の論理データベースを作成する。
 
@@ -295,7 +338,9 @@ healthcheck:
 2. `config/master.key` と `.kamal/secrets` に `POSTGRES_PASSWORD`, `RAILS_MASTER_KEY`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` を安全な方法で設定。
 3. 必要な環境変数（`IMAGE`, `SERVER_IP`, `APP_HOST`, `REGISTRY_USERNAME`, `SSH_USER`, `POSTGRES_USER`）をデプロイ環境に設定。
 4. Cloudflare R2 のバケットを作成し、`rclone` 等の認証情報を VM に設定。
-5. `kamal setup` を実行（プロキシの起動・DB accessory 起動・`db:prepare`・初回デプロイを一括実施）。
-6. DNS で `APP_HOST` の値を VPS のパブリックIPに向ける（Let's Encrypt の発行に必要）。
-7. `https://<APP_HOST>/` にアクセスして表示確認。
-8. バックアップ用の cron スクリプトを `crontab` に登録。
+5. DNS で `APP_HOST` の値を VPS のパブリックIPに向ける（kunatoのLet's Encrypt発行に必要。443番のみ到達で可）。
+6. ホストFWで443番を開放し、80番は閉塞する。
+7. `kamal setup` を実行（proxyの起動・DB accessory 起動・`db:prepare`・初回デプロイを一括実施。TLS証明書はこの時点では取得されない）。
+8. VPS上にkunatoをインストールし、`/etc/kunato/kunato.yaml`（§5.1）に `domains: [APP_HOST]`、`upstream: http://127.0.0.1:8080` を設定して起動（初回起動時に証明書を非同期取得）。
+9. `https://<APP_HOST>/` にアクセスして表示確認。
+10. バックアップ用の cron スクリプトを `crontab` に登録。

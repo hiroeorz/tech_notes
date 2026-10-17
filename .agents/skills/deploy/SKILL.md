@@ -7,14 +7,14 @@ description: Kamal を使った本番デプロイの事前準備・実行手順�
 
 エージェント実行環境に `kamal` や環境変数が無い場合（サンドボックス等）はデプロイを実行できない。その場合は `.opencode/skills/deploy-request/SKILL.md` に従い、ユーザーがWSL側で実行するコマンドを提示する。
 
-運用正本は `docs/deployment.md` である。本プロジェクトは単一本番のみを扱う（Kamal + PostgreSQL accessory + Kamal proxy + Let's Encrypt、サービス名 `tech_notes`）。
+運用正本は `docs/deployment.md` である。本プロジェクトは単一本番のみを扱う（Kamal + PostgreSQL accessory + Kamal proxy + kunato(WAF/TLS終端) + Let's Encrypt、サービス名 `tech_notes`）。
 外部状態を変更する操作（`kamal setup` / `kamal deploy` / `kamal rollback` / `kamal app exec` / accessory 操作 / バックアップ実行など）は、親エージェントまたはユーザーから対象操作を明示的に割り当てられた場合のみ実行する。
 秘密値（パスワード、トークン、`RAILS_MASTER_KEY` 類）、接続URL、実IP、ドメインの実値は出力・記録しない。コマンド例・ログ貼付時は変数名または伏せ字で示す。
 
 ## 固定前提
 
 - 対象は単一本番のみ。複数環境の切替は存在しない。
-- Kamal proxy（Traefik）が TLS を終端し、Let's Encrypt 証明書を自動取得する。`config/deploy.yml` の `proxy.host` が公開ドメイン、`APP_HOST` が SSL・Rails ホスト解決用。
+- kunato（WAF）が TLS を終端し、Let's Encrypt 証明書を自動取得する（TLS-ALPN-01のため443番のみ到達で可、80番不要）。Kamal proxy は平文HTTP・ループバック（127.0.0.1:8080）のみで待受け、ゼロダウンタイム切替に専念する。`config/deploy.yml` の `proxy.host` が公開ドメイン、`APP_HOST` が SSL・Rails ホスト解決用。
 - PostgreSQL は Kamal accessory（サービス名 `tech_notes`、コンテナ `tech_notes-db`、ホストエイリアス `tech_notes-db`）。本番では `tech_notes_production{,_cache,_queue,_cable}` の4論理DBを持ち、Solid Cache / Queue / Cable は `cache` / `queue` / `cable` ロールに配線される。
 - シークレット（`RAILS_MASTER_KEY`、`POSTGRES_PASSWORD`、`ADMIN_PASSWORD` 等）は `.kamal/secrets` 経由で環境変数から注入する。生の値をコミットしない。
 - 本番は `RAILS_ENV=production`（`config/deploy.yml` の `env.clear` で設定）。`assume_ssl` / `force_ssl` / `host_authorization` が有効。
@@ -102,12 +102,12 @@ kamal setup
 
 `kamal setup` は以下を一括実行する:
 1. サーバーに Docker がインストールされていることを確認（なければ自動インストール）
-2. Kamal Proxy（Traefik）の起動
+2. Kamal Proxy の起動（平文HTTP・ループバックのみ、TLSなし）
 3. DB accessory（PostgreSQL）の起動
 4. `.kamal/secrets` をサーバーにアップロード
 5. アプリイメージのビルドとプッシュ
 6. コンテナ起動とヘルスチェック
-7. Let's Encrypt 証明書の自動取得
+7. kunato（別途ホスト側systemd）が Let's Encrypt 証明書を自動取得（443番到達が必要）
 
 ### 通常デプロイ
 
@@ -149,11 +149,12 @@ curl -s -o /dev/null -w "%{http_code}" https://<APP_HOST>/up
 - Docker Hub の認証情報（`KAMAL_REGISTRY_PASSWORD`）が有効か確認する。
 - Docker デーモンが起動しているか確認する。
 
-### Let's Encrypt の証明書取得に失敗する
+### Let's Encrypt の証明書取得に失敗する（kunato側）
 
 - DNS レコードがサーバーの IP を正しく指しているか確認する。
-- Kamal Proxy が 80/443 ポートで待受可能か確認する（権限・ポート競合）。
-- `config/deploy.yml` の `proxy.host` が正しいドメイン名か確認する。
+- kunato が 443 ポートで待受可能か確認する（Kamal proxy とのポート競合に注意。proxy側は `run.http_port: 8080` / `https_port: 8443` + `bind_ips: [127.0.0.1]` で退避済み）。
+- `/etc/kunato/kunato.yaml` の `tls.acme.domains` が正しいドメイン名か確認する（80番開放は不要）。
+- Kamal proxy 側で証明書取得しないこと（`proxy.ssl: false`）。
 
 ### DB コンテナが起動しない
 

@@ -127,7 +127,7 @@
 ## デザイン・動作仕様
 
 - デザイン要件は `docs/requirements.md` に定義。画面デザインは `docs/images/*.png` を参照。UI追加時は `docs/requirements.md` のセクション3–9および対応する画像と照合すること。
-- デプロイアーキテクチャは `docs/deployment.md` に記載（Kamal + PostgreSQL accessory + Kamal proxy + Let's Encrypt）。インフラ変更時は `config/deploy.yml`、`config/postgres/init.sql`、`docs/deployment.md` を同期すること。
+- デプロイアーキテクチャは `docs/deployment.md` に記載（Kamal + PostgreSQL accessory + Kamal proxy + kunato(WAF/TLS終端) + Let's Encrypt）。インフラ変更時は `config/deploy.yml`、`config/postgres/init.sql`、`docs/deployment.md` を同期すること。
 
 ## デプロイ
 
@@ -136,7 +136,7 @@
 - シークレット（`RAILS_MASTER_KEY`, `POSTGRES_PASSWORD`, `ADMIN_PASSWORD`, オプションで `KAMAL_REGISTRY_PASSWORD`）は `.kamal/secrets` 経由で環境変数から注入 — 生の値をコミットしないこと。新規本番DBの初期化時は`ADMIN_EMAIL`と`ADMIN_PASSWORD`を必須とする。
 - 本番環境は `RAILS_ENV=production`（`config/deploy.yml` の `env.clear` で設定）と、ホスト上に `config/master.key` が必要。
 - レジストリは Docker Hub（`docker.io`）を使用し、イメージ名は`IMAGE`、レジストリユーザーは`REGISTRY_USERNAME`から取得する。`kamal setup` の前に `KAMAL_REGISTRY_PASSWORD`（Docker Hub アクセストークン）を環境変数に設定すること。
-- `config/environments/production.rb` で `assume_ssl` / `force_ssl` / `host_authorization` が有効 — Kamal proxy（Traefik）が TLS を終端する。ステージング等で SSL を無効にする場合は、これらの設定も緩和しないとリクエストが失敗する。
+- `config/environments/production.rb` で `assume_ssl` / `force_ssl` / `host_authorization` が有効 — kunato（WAF）が TLS を終端し、Kamal proxyは平文HTTP・ループバック転送する。ステージング等で SSL を無効にする場合は、これらの設定も緩和しないとリクエストが失敗する。
 
 ## 注意点
 
