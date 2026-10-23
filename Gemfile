@@ -62,7 +62,7 @@ gem "rouge"
 gem "resend", "~> 1.16"
 
 # Model Context Protocol SDK for exposing tools over the MCP protocol
-gem "mcp", "~> 1.7"
+gem "mcp", "~> 1.8"
 
 # OAuth authorization server for MCP clients (Gemini integration)
 gem "doorkeeper", "~> 5.9"
