@@ -43,7 +43,7 @@ gem "thruster", require: false
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 # image_processing 2.x no longer depends on a backend; ruby-vips is required
 # explicitly because Rails 8.1 defaults active_storage.variant_processor to :vips.
-gem "image_processing", "~> 2.1"
+gem "image_processing", "~> 2.2"
 # Loaded lazily by Active Storage only when processing variants (which needs
 # the system libvips library, installed via Dockerfile/CI, not Bundler).
 gem "ruby-vips", "~> 2.0", require: false
