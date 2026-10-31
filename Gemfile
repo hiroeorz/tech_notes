@@ -59,7 +59,7 @@ gem "commonmarker"
 gem "rouge"
 
 # Resend for email delivery via API (production)
-gem "resend", "~> 1.16"
+gem "resend", "~> 1.18"
 
 # Model Context Protocol SDK for exposing tools over the MCP protocol
 gem "mcp", "~> 1.8"
