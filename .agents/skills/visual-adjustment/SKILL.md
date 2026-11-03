@@ -211,7 +211,7 @@ description: Web画面のデザイン設計、UI実装方針、視覚調整、�
 
 ## フェーズ7: 静的解析・テスト
 
-ERB、CSS、Stimulus、ヘルパーを変更した場合は、`.agents/skills/code-change-verification/SKILL.md` を読み、変更内容に応じて関連テスト、システムテスト、`bin/rubocop` などを実行する。ブラウザや Chromium が使えない場合は、未実行理由と代替確認を報告する。
+ERB、CSS、Stimulus、ヘルパーを変更した場合は、`.agents/skills/code-change-verification/SKILL.md` を読み、変更内容に応じて関連テスト、システムテスト、`bin/rubocop` などを実行する。ブラウザや Chromium が使えない場合は、未実行理由と代替確認を報告する。レビューは**今回の変更差分のみ**を対象に迅速に行い、差分に直接関係する範囲に限り確認する。リポジトリ全体や変更外ファイルの調査はユーザーの明示指示がある場合のみ行う。
 
 実行順序は次のとおり。静的解析（`bundle exec srb tc`、`bin/rubocop`、`bin/brakeman`、`bin/bundler-audit`）は相互に独立しているため、**同一メッセージで複数の bash ツール呼び出し**を行って並列実行する。全テストとシステムテストはテスト DB・ブラウザ資源を共有するため直列化する。
 
