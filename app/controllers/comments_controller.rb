@@ -26,7 +26,7 @@ class CommentsController < ApplicationController
   private
 
   def set_post
-    @post = Post.publicly_visible.includes(:post_translations).find_by!(slug: params[:post_slug])
+    @post = Post.publicly_visible.includes(:post_translations, images_attachments: :blob).find_by!(slug: params[:post_slug])
   end
 
   def comment_params
@@ -43,6 +43,7 @@ class CommentsController < ApplicationController
     @page_description = post.localized_excerpt
     @page_type = "article"
     @page_url = post_url(post.slug)
+    @page_image = post_hero_image(post)
   end
 
   def render_too_many_requests

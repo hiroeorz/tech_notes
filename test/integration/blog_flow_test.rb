@@ -106,6 +106,112 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_select ".markdown-body .article-image img.article-image-viewer-trigger[role='button'][tabindex='0'][src='/icon.png'][alt='構成図']"
   end
 
+  test "public post uses the first body image as a 1200x630 OGP image" do
+    with_public_storage_url("https://cdn.example.com") do
+      @setting.ogp_image.attach(
+        io: File.open(Rails.root.join("test/fixtures/files/hero.png")),
+        filename: "ogp.png",
+        content_type: "image/png"
+      )
+      @post.images.attach(
+        io: File.open(Rails.root.join("test/fixtures/files/hero.png")),
+        filename: "hero.png",
+        content_type: "image/png"
+      )
+      attachment = @post.images.attachments.last
+      @post.update!(
+        body: "## 構成例\n\n![ヒーロー](#{ActiveStoragePublicUrl.for(attachment)})\n\n![二枚目](https://example.com/second.png)"
+      )
+
+      get "/en/posts/terraform-remote-state"
+      assert_response :success
+
+      expected_url = ActiveStoragePublicUrl.for_key(attachment.variant(PostHeroImage::VARIANT_TRANSFORMATIONS).key)
+      assert_select "meta[property='og:image']", count: 1
+      assert_select "meta[property='og:image'][content='#{expected_url}']"
+      assert_select "meta[property='og:image:alt'][content='ヒーロー']"
+      assert_select "meta[property='og:image:width'][content='1200']"
+      assert_select "meta[property='og:image:height'][content='630']"
+      assert_select "meta[name='twitter:image'][content='#{expected_url}']"
+      assert_select "meta[name='twitter:card'][content='summary_large_image']"
+    end
+  end
+
+  test "public post falls back to the site OGP image when the body has no image" do
+    with_public_storage_url("https://cdn.example.com") do
+      @setting.ogp_image.attach(
+        io: File.open(Rails.root.join("test/fixtures/files/hero.png")),
+        filename: "ogp.png",
+        content_type: "image/png"
+      )
+
+      get "/en/posts/terraform-remote-state"
+      assert_response :success
+
+      assert_select "meta[property='og:image'][content='https://cdn.example.com/#{@setting.ogp_image.blob.key}']"
+      assert_select "meta[property='og:image:alt'][content='#{@setting.blog_title}']"
+      assert_select "meta[name='twitter:card'][content='summary_large_image']"
+    end
+  end
+
+  test "public post falls back to the site OGP when the body image variant fails" do
+    with_public_storage_url("https://cdn.example.com") do
+      @setting.ogp_image.attach(
+        io: File.open(Rails.root.join("test/fixtures/files/hero.png")),
+        filename: "ogp.png",
+        content_type: "image/png"
+      )
+      @post.images.attach(
+        io: File.open(Rails.root.join("test/fixtures/files/not-image.txt")),
+        filename: "broken.png",
+        content_type: "image/png"
+      )
+      attachment = @post.images.attachments.last
+      @post.update!(body: "![壊れた画像](#{ActiveStoragePublicUrl.for(attachment)})")
+
+      get "/en/posts/terraform-remote-state"
+      assert_response :success
+
+      assert_select "meta[property='og:image'][content='https://cdn.example.com/#{@setting.ogp_image.blob.key}']"
+    end
+  end
+
+  test "public post uses an absolute Active Storage URL for the site OGP when no CDN is configured" do
+    with_public_storage_url(nil) do
+      @setting.ogp_image.attach(
+        io: File.open(Rails.root.join("test/fixtures/files/hero.png")),
+        filename: "ogp.png",
+        content_type: "image/png"
+      )
+
+      get "/en/posts/terraform-remote-state"
+      assert_response :success
+
+      assert_select "meta[property='og:image']" do |elements|
+        assert_match %r{\Ahttp://www\.example\.com/rails/active_storage/}, elements.first["content"]
+      end
+    end
+  end
+
+  test "public post resolves a site-relative OGP image to an absolute URL" do
+    @post.update!(body: "## 構成例\n\n![構成図](/icon.png)")
+
+    get "/en/posts/terraform-remote-state"
+    assert_response :success
+
+    assert_select "meta[property='og:image'][content='http://www.example.com/icon.png']"
+    assert_select "meta[name='twitter:image'][content='http://www.example.com/icon.png']"
+  end
+
+  test "public post omits OGP images when neither the body nor the site has one" do
+    get "/en/posts/terraform-remote-state"
+    assert_response :success
+
+    assert_select "meta[property='og:image']", count: 0
+    assert_select "meta[name='twitter:image']", count: 0
+    assert_select "meta[name='twitter:card'][content='summary']"
+  end
+
   test "post filters tolerate invalid month and search covers all posts" do
     get "/en/posts", params: { month: "not-a-month" }
     assert_response :success
@@ -1789,20 +1895,22 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       headers: { "Accept-Language" => "ja" }
 
     assert_enqueued_jobs 1, only: TranslatePostJob do
-      patch admin_post_path(@post),
-        params: {
-          commit_status: "published",
-          post: {
-            title: "更新後の日本語タイトル",
-            slug: @post.slug,
-            excerpt: "更新後の日本語要約です。",
-            body: "## 更新後の本文\n\n日本語の内容です。",
-            category_id: @category.id,
-            status: "draft",
-            tag_names: @post.tag_names
-          }
-        },
-        headers: { "Accept-Language" => "ja" }
+      assert_enqueued_jobs 1, only: GenerateHeroImageJob do
+        patch admin_post_path(@post),
+          params: {
+            commit_status: "published",
+            post: {
+              title: "更新後の日本語タイトル",
+              slug: @post.slug,
+              excerpt: "更新後の日本語要約です。",
+              body: "## 更新後の本文\n\n日本語の内容です。",
+              category_id: @category.id,
+              status: "draft",
+              tag_names: @post.tag_names
+            }
+          },
+          headers: { "Accept-Language" => "ja" }
+      end
     end
 
     assert_redirected_to edit_admin_post_path(@post.slug)
@@ -1817,18 +1925,20 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
     %w[draft reviewing].each do |status|
       assert_no_enqueued_jobs only: TranslatePostJob do
-        patch admin_post_path(@post), params: {
-          commit_status: status,
-          post: {
-            title: "#{status} title",
-            slug: @post.slug,
-            excerpt: "#{status} excerpt",
-            body: "#{status} body",
-            category_id: @category.id,
-            status: "published",
-            tag_names: @post.tag_names
+        assert_no_enqueued_jobs only: GenerateHeroImageJob do
+          patch admin_post_path(@post), params: {
+            commit_status: status,
+            post: {
+              title: "#{status} title",
+              slug: @post.slug,
+              excerpt: "#{status} excerpt",
+              body: "#{status} body",
+              category_id: @category.id,
+              status: "published",
+              tag_names: @post.tag_names
+            }
           }
-        }
+        end
       end
       assert @post.reload.public_send("#{status}?")
     end

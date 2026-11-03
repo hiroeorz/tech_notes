@@ -72,6 +72,14 @@ CDN URL は Active Storage の blob key でオブジェクトを提供する必�
 https://cdn.example.com/abc123
 ```
 
+### 1.5 既存記事のOGP画像生成
+
+記事本文の先頭画像は、SNSカード用に `1200 x 630px` のJPEGへ変換されます。新規公開・更新時は非同期ジョブで生成されますが、デプロイ前に公開済みの記事は初回アクセス時に生成されます。事前に生成したい場合は、デプロイ後に以下を実行してください。
+
+```bash
+bin/rails hero_images:warm
+```
+
 ---
 
 ## 2. PostgreSQL バックアップ準備

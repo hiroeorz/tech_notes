@@ -33,7 +33,10 @@ class TranslatePostJob < ApplicationJob
       target.save!
     end
 
-    PostAudioScheduler.call(post: post, locale: target_locale) if post.published?
+    if post.published?
+      PostAudioScheduler.call(post: post, locale: target_locale)
+      GenerateHeroImageJob.perform_later(post.id, target_locale)
+    end
   end
 
   private

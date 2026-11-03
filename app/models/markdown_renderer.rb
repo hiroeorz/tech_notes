@@ -41,6 +41,20 @@ class MarkdownRenderer
     end
   end
 
+  def first_image
+    fragment = Nokogiri::HTML5.fragment(render_commonmark)
+    image = fragment.css("img").find do |candidate|
+      src = candidate["src"].to_s.strip
+      src.present? && !src.include?("remote-state-architecture")
+    end
+    return unless image
+
+    {
+      src: image["src"].to_s.strip,
+      alt: image["alt"].to_s.strip
+    }
+  end
+
   def self.heading_id(title)
     title.parameterize.presence || "heading-#{Digest::SHA1.hexdigest(title)[0, 10]}"
   end

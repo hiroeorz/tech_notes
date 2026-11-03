@@ -40,6 +40,32 @@ module ApplicationHelper
     link_to label, url, **options
   end
 
+  def og_image_meta
+    @page_image.presence || site_default_og_image
+  end
+
+  def site_default_og_image
+    attachment = current_site_setting.ogp_image
+    return unless attachment.attached? && attachment.blob&.persisted?
+
+    {
+      url: public_storage_url(attachment),
+      alt: current_site_setting.blog_title,
+      width: attachment.blob.metadata.to_h["width"],
+      height: attachment.blob.metadata.to_h["height"]
+    }
+  rescue ArgumentError
+    nil
+  end
+
+  def public_storage_url(attachment)
+    if ActiveStoragePublicUrl.configured? && ActiveStoragePublicUrl.current_service?(attachment)
+      ActiveStoragePublicUrl.for(attachment)
+    else
+      rails_blob_url(attachment.blob)
+    end
+  end
+
   def turnstile_site_key
     if Rails.env.test? || Rails.env.development?
       "1x00000000000000000000AA"

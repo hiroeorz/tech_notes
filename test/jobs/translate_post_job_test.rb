@@ -47,7 +47,9 @@ class TranslatePostJobTest < ActiveJob::TestCase
     job = TranslatePostJob.new
     job.define_singleton_method(:translator) { translator }
 
-    job.perform(@post.id, "en", @digest)
+    assert_enqueued_with(job: GenerateHeroImageJob, args: [ @post.id, "ja" ]) do
+      job.perform(@post.id, "en", @digest)
+    end
 
     translation = @post.post_translations.find_by!(locale: "ja")
     assert_equal "翻訳タイトル", translation.title
