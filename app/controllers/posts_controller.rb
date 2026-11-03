@@ -34,7 +34,7 @@ class PostsController < ApplicationController
   end
 
   def show
-    @post = Post.publicly_visible.includes(:category, :tags, :post_translations, :post_audios).find_by!(slug: params[:slug])
+    @post = Post.publicly_visible.includes(:category, :tags, :post_translations, :post_audios, images_attachments: :blob).find_by!(slug: params[:slug])
     @post.increment!(:views_count) if count_view?
     @comment = @post.comments.build
     @comments = @post.comments.oldest
@@ -107,5 +107,6 @@ class PostsController < ApplicationController
     @page_description = post.localized_excerpt
     @page_type = "article"
     @page_url = post_url(post.slug)
+    @page_image = post_hero_image(post)
   end
 end

@@ -1,5 +1,8 @@
 module Admin::PostImagesHelper
   def post_image_public_url(attachment)
+    return unless ActiveStoragePublicUrl.configured?
+    return unless ActiveStoragePublicUrl.current_service?(attachment)
+
     ActiveStoragePublicUrl.for(attachment)
   rescue ArgumentError
     nil

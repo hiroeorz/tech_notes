@@ -1,15 +1,21 @@
 <!DOCTYPE html>
 <html class="<%= "theme-dark" if current_site_setting.default_theme == "dark" %>" data-default-theme="<%= current_site_setting.default_theme %>">
   <head>
+    <%
+      meta_title = @page_title || content_for(:title) || current_site_setting.blog_title
+      meta_description = @page_description || content_for(:description) || current_site_setting.description
+      og_image = og_image_meta
+      has_og_image = og_image.present? && og_image[:url].present?
+    %>
     <title><%= @page_title || content_for(:title) || t("layouts.application.title") %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="description" content="<%= @page_description || content_for(:description) || current_site_setting.description %>">
+    <meta name="description" content="<%= meta_description %>">
     <% if ENV["GOOGLE_SITE_VERIFICATION"].present? %>
       <meta name="google-site-verification" content="<%= ENV["GOOGLE_SITE_VERIFICATION"] %>" />
     <% end %>
     <meta property="og:site_name" content="<%= current_site_setting.blog_title %>">
-    <meta property="og:title" content="<%= @page_title || content_for(:title) || current_site_setting.blog_title %>">
-    <meta property="og:description" content="<%= @page_description || content_for(:description) || current_site_setting.description %>">
+    <meta property="og:title" content="<%= meta_title %>">
+    <meta property="og:description" content="<%= meta_description %>">
     <meta property="og:type" content="<%= @page_type || "website" %>">
     <meta property="og:url" content="<%= @page_url || request.original_url %>">
     <link rel="canonical" href="<%= @page_url || request.original_url %>">
@@ -18,8 +24,18 @@
       <link rel="alternate" hreflang="ja" href="<%= url_for(locale: :ja, only_path: false) %>">
       <link rel="alternate" hreflang="x-default" href="<%= url_for(locale: :en, only_path: false) %>">
     <% end %>
-    <% if current_site_setting.ogp_image.attached? && current_site_setting.ogp_image.blob.persisted? %>
-      <meta property="og:image" content="<%= url_for(current_site_setting.ogp_image) %>">
+    <meta name="twitter:card" content="<%= has_og_image ? "summary_large_image" : "summary" %>">
+    <meta name="twitter:title" content="<%= meta_title %>">
+    <meta name="twitter:description" content="<%= meta_description %>">
+    <% if has_og_image %>
+      <meta property="og:image" content="<%= og_image[:url] %>">
+      <meta property="og:image:alt" content="<%= (og_image[:alt].presence || meta_title).to_s.squish %>">
+      <% if og_image[:width].present? && og_image[:height].present? %>
+        <meta property="og:image:width" content="<%= og_image[:width] %>">
+        <meta property="og:image:height" content="<%= og_image[:height] %>">
+      <% end %>
+      <meta name="twitter:image" content="<%= og_image[:url] %>">
+      <meta name="twitter:image:alt" content="<%= (og_image[:alt].presence || meta_title).to_s.squish.truncate(420) %>">
     <% end %>
     <%= tag.link rel: "alternate", type: "application/rss+xml", title: t("layouts.application.rss_title"), href: feed_url(format: :xml) %>
     <meta name="apple-mobile-web-app-capable" content="yes">

@@ -29,11 +29,12 @@ module Admin
     end
 
     def preview
-      @post = Post.includes(:category, :tags, :post_translations, :post_audios).find_by!(slug: params[:slug])
+      @post = Post.includes(:category, :tags, :post_translations, :post_audios, images_attachments: :blob).find_by!(slug: params[:slug])
       @page_title = "#{t('admin.posts.form.preview')}: #{@post.localized_title} | #{current_site_setting.blog_title}"
       @page_description = @post.localized_excerpt
       @page_type = "article"
       @page_url = preview_admin_post_url(@post.slug)
+      @page_image = post_hero_image(@post)
       @toc = helpers.extract_headings(@post.localized_body)
       @related_posts = Post.includes(:post_translations).where(category: @post.category).where.not(id: @post.id).recent.limit(3)
       render "posts/show"
@@ -109,6 +110,9 @@ module Admin
           PostAudioScheduler.call(post: @post, locale: I18n.locale)
           target_locale = (PostTranslation::SUPPORTED_LOCALES - [ I18n.locale.to_s ]).first
           PostAudioScheduler.call(post: @post, locale: target_locale) if target_locale
+          if @post.saved_change_to_body? || @post.saved_change_to_status?
+            GenerateHeroImageJob.perform_later(@post.id)
+          end
         end
       end
       saved

@@ -72,6 +72,10 @@ class ApplicationController < ActionController::Base
     current_admin_user.present?
   end
 
+  def post_hero_image(post)
+    PostHeroImage.for(post, locale: I18n.locale, base_url: request.base_url)
+  end
+
   def load_sidebar
     @categories = sidebar_categories
     @archives = Post.publicly_visible.includes(:post_translations).group_by { |post| post.display_date.beginning_of_month }

@@ -123,4 +123,66 @@ class MarkdownRendererTest < ActiveSupport::TestCase
     assert_includes html, %(tabindex="0")
     assert_includes html, "<figcaption>構成図</figcaption>"
   end
+
+  test "extracts the first body image" do
+    markdown = <<~MARKDOWN
+      ## 見出し
+
+      ![first](/images/first.png)
+
+      ![second](/images/second.png)
+    MARKDOWN
+
+    assert_equal(
+      { src: "/images/first.png", alt: "first" },
+      MarkdownRenderer.new(markdown).first_image
+    )
+  end
+
+  test "ignores image syntax inside code blocks and inline code" do
+    markdown = <<~MARKDOWN
+      ```markdown
+      ![code](/images/code.png)
+      ```
+
+      インラインの `![inline](/images/inline.png)` は画像ではありません。
+
+      ![real](/images/real.png)
+    MARKDOWN
+
+    assert_equal(
+      { src: "/images/real.png", alt: "real" },
+      MarkdownRenderer.new(markdown).first_image
+    )
+  end
+
+  test "ignores the inline architecture diagram" do
+    markdown = <<~MARKDOWN
+      ![diagram](https://example.com/remote-state-architecture.png)
+
+      ![real](/images/real.png)
+    MARKDOWN
+
+    assert_equal(
+      { src: "/images/real.png", alt: "real" },
+      MarkdownRenderer.new(markdown).first_image
+    )
+  end
+
+  test "extracts reference-style images" do
+    markdown = <<~MARKDOWN
+      ![reference][hero]
+
+      [hero]: /images/reference.png
+    MARKDOWN
+
+    assert_equal(
+      { src: "/images/reference.png", alt: "reference" },
+      MarkdownRenderer.new(markdown).first_image
+    )
+  end
+
+  test "returns nil when the body has no image" do
+    assert_nil MarkdownRenderer.new("本文だけです。").first_image
+  end
 end
