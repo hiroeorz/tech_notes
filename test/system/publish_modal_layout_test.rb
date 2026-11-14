@@ -9,11 +9,7 @@ class PublishModalLayoutTest < ApplicationSystemTestCase
     )
     Category.create!(name: "AWS", slug: "aws", icon_key: "aws", position: 1)
 
-    visit admin_login_path
-    fill_in "Email", with: "admin@example.com"
-    fill_in "Password", with: "password123"
-    click_on "Log in"
-    assert_current_path admin_posts_path
+    sign_in_as_admin
   end
 
   test "admin can open publish modal on new post page" do

@@ -18,11 +18,7 @@ class OauthLocaleSwitchTest < ApplicationSystemTestCase
       confidential: false
     )
 
-    visit admin_login_path
-    fill_in "Email", with: "admin@example.com"
-    fill_in "Password", with: "password123"
-    click_on "Log in"
-    assert_current_path admin_posts_path
+    sign_in_as_admin
   end
 
   test "switching language on consent screen keeps authorization query and renders Japanese" do
