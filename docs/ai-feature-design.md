@@ -225,7 +225,7 @@ Content-Type: application/json
 初期値の考え方:
 
 - モデル名は credentials または環境変数で明示する。
-- タイムアウトは 60 秒程度を目安とする。
+- タイムアウトは 120 秒を目安とし、前段プロキシ（kunato / kamal-proxy / Thruster）のタイムアウトより小さくする。既存環境では `CLOUDFLARE_AI_TIMEOUT_SECONDS` の実値も更新する。
 - API token が未設定の場合、ボタンを非表示にするか、押下時に設定不足エラーを表示する。
 
 ### 4.12 エラー・例外処理

@@ -115,7 +115,9 @@ class CloudflareAiClientTest < ActiveSupport::TestCase
   end
 
   test "default timeout is 120 seconds" do
-    client = CloudflareAiClient.new(account_id: "a", api_token: "b", model: "c")
+    client = CloudflareAiClient.new(
+      account_id: "a", api_token: "b", model: "c", timeout_seconds: nil
+    )
     assert_equal 120, client.send(:timeout_seconds)
   end
 
@@ -124,6 +126,22 @@ class CloudflareAiClientTest < ActiveSupport::TestCase
       account_id: "a", api_token: "b", model: "c", timeout_seconds: "abc"
     )
     assert_equal 120, client.send(:timeout_seconds)
+  end
+
+  test "caps connect and write timeouts to leave room for the response" do
+    client = CloudflareAiClient.new(
+      account_id: "a", api_token: "b", model: "c", timeout_seconds: 120
+    )
+    assert_equal 10, client.send(:open_timeout_seconds)
+    assert_equal 30, client.send(:write_timeout_seconds)
+  end
+
+  test "does not let connect and write timeouts exceed the configured timeout" do
+    client = CloudflareAiClient.new(
+      account_id: "a", api_token: "b", model: "c", timeout_seconds: 5
+    )
+    assert_equal 5, client.send(:open_timeout_seconds)
+    assert_equal 5, client.send(:write_timeout_seconds)
   end
 
   test "raises error when finish_reason is length" do
