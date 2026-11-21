@@ -7,10 +7,12 @@ class CloudflareAiClient
   class RequestError < StandardError; end
   class RateLimitError < RequestError; end
 
-  # Keep this below the reverse proxy timeouts (kunato, kamal-proxy, and
-  # Thruster) so the app can return a clear error before the proxy cuts the
-  # connection.
+  # Read timeout for the AI response. Keep the total worst-case time
+  # (open + write + read) below the reverse proxy timeouts (kunato,
+  # kamal-proxy, and Thruster).
   DEFAULT_TIMEOUT_SECONDS = 120
+  DEFAULT_OPEN_TIMEOUT_SECONDS = 10
+  DEFAULT_WRITE_TIMEOUT_SECONDS = 30
   DEFAULT_MAX_TOKENS = 8192
 
   def initialize(
@@ -64,8 +66,9 @@ class CloudflareAiClient
     uri = URI("https://api.cloudflare.com/client/v4/accounts/#{@account_id}/ai/run/#{@model}")
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
-    http.open_timeout = timeout_seconds
+    http.open_timeout = open_timeout_seconds
     http.read_timeout = timeout_seconds
+    http.write_timeout = write_timeout_seconds
 
     request = Net::HTTP::Post.new(uri)
     request["Authorization"] = "Bearer #{@api_token}"
@@ -96,6 +99,14 @@ class CloudflareAiClient
     Integer(@timeout_seconds)
   rescue ArgumentError, TypeError
     DEFAULT_TIMEOUT_SECONDS
+  end
+
+  def open_timeout_seconds
+    [ timeout_seconds, DEFAULT_OPEN_TIMEOUT_SECONDS ].min
+  end
+
+  def write_timeout_seconds
+    [ timeout_seconds, DEFAULT_WRITE_TIMEOUT_SECONDS ].min
   end
 
   def extract_text(payload)

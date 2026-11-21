@@ -25,8 +25,8 @@ proxy:
   host: <%= ENV.fetch("APP_HOST") %>
   forward_headers: true
   # AI summary/translation requests can take longer than the 30s default.
-  # Keep this above CLOUDFLARE_AI_TIMEOUT_SECONDS.
-  response_timeout: 180
+  # Keep this above the Thruster HTTP_WRITE_TIMEOUT below.
+  response_timeout: 210
   healthcheck:
     path: /up
     interval: 10

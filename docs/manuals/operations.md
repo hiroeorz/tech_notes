@@ -235,7 +235,7 @@ Cloudflare ダッシュボードで:
 
 `CLOUDFLARE_AI_TIMEOUT_SECONDS` には Workers AI リクエストの HTTP タイムアウトを設定します。
 
-推奨初期値は `120` です。要約のような長めのリクエストが前段プロキシで打ち切られないよう、kunato の `timeouts.upstream_response`（`/etc/kunato/kunato.yaml`）、kamal-proxy の `proxy.response_timeout`、Thruster の `HTTP_WRITE_TIMEOUT` は、この値より大きく設定してください。
+推奨初期値は `120` です。要約のような長めのリクエストが前段プロキシで打ち切られないよう、kunato の `timeouts.upstream_response`（`/etc/kunato/kunato.yaml`）は `240s`、kamal-proxy の `proxy.response_timeout` は `210`、Thruster の `HTTP_WRITE_TIMEOUT` は `180` に設定してください。
 
 ---
 
