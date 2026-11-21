@@ -37,10 +37,10 @@ module GeneratedUrlHelpersModule
   def admin_logout_url(*args); end
 
   sig { params(args: T.untyped).returns(String) }
-  def admin_post_image_url(*args); end
+  def admin_post_attachment_url(*args); end
 
   sig { params(args: T.untyped).returns(String) }
-  def admin_post_images_url(*args); end
+  def admin_post_attachments_url(*args); end
 
   sig { params(args: T.untyped).returns(String) }
   def admin_post_slugs_url(*args); end

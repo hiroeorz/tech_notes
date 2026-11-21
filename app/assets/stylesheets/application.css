@@ -2106,7 +2106,7 @@ pre[data-filename]::before {
   white-space: nowrap;
 }
 
-.post-image-uploader {
+.post-attachment-uploader {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -2116,7 +2116,7 @@ pre[data-filename]::before {
   background: rgba(255,255,255,0.36);
 }
 
-.post-image-uploader label {
+.post-attachment-uploader label {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -2125,18 +2125,18 @@ pre[data-filename]::before {
   white-space: nowrap;
 }
 
-.post-image-uploader span,
-.post-image-uploader p {
+.post-attachment-uploader span,
+.post-attachment-uploader p {
   font-size: 13px;
 }
 
-.post-image-uploader input {
+.post-attachment-uploader input {
   width: 280px;
   max-width: min(280px, 100%);
   overflow-wrap: normal;
 }
 
-.post-image-uploader p {
+.post-attachment-uploader p {
   margin: 0;
   color: var(--muted);
 }
@@ -2228,7 +2228,7 @@ pre[data-filename]::before {
   font-weight: 800;
 }
 
-.post-image-list {
+.post-attachment-list {
   margin-top: 16px;
   padding: 18px;
   border: 1px solid var(--line);
@@ -2236,7 +2236,7 @@ pre[data-filename]::before {
   background: rgba(255,252,247,0.58);
 }
 
-.post-image-list-header {
+.post-attachment-list-header {
   display: flex;
   justify-content: space-between;
   gap: 18px;
@@ -2244,27 +2244,27 @@ pre[data-filename]::before {
   margin-bottom: 14px;
 }
 
-.post-image-list-header h2,
-.post-image-list-header p {
+.post-attachment-list-header h2,
+.post-attachment-list-header p {
   margin: 0;
 }
 
-.post-image-list-header h2 {
+.post-attachment-list-header h2 {
   font-size: 18px;
 }
 
-.post-image-list-header p,
+.post-attachment-list-header p,
 .empty-note {
   color: var(--muted);
   font-size: 13px;
 }
 
-.post-image-grid {
+.post-attachment-grid {
   display: grid;
   gap: 12px;
 }
 
-.post-image-item {
+.post-attachment-item {
   display: grid;
   grid-template-columns: 110px 1fr auto;
   gap: 14px;
@@ -2275,28 +2275,42 @@ pre[data-filename]::before {
   background: rgba(255,255,255,0.5);
 }
 
-.post-image-thumb {
+.post-attachment-thumb,
+.post-attachment-file-badge {
   width: 110px;
   height: 72px;
-  object-fit: cover;
   border: 1px solid var(--line);
   border-radius: 4px;
   background: #fff;
 }
 
-.post-image-item strong,
-.post-image-item small,
-.post-image-item code,
-.post-image-item em {
+.post-attachment-thumb {
+  object-fit: cover;
+}
+
+.post-attachment-file-badge {
+  display: grid;
+  place-items: center;
+  color: #b3261e;
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.post-attachment-item strong,
+.post-attachment-item small,
+.post-attachment-item code,
+.post-attachment-item em {
   display: block;
 }
 
-.post-image-item small,
-.post-image-item em {
+.post-attachment-item small,
+.post-attachment-item em {
   color: var(--muted);
 }
 
-.post-image-item code {
+.post-attachment-item code {
   max-width: 100%;
   margin-top: 4px;
   color: #1a57a8;
@@ -2304,7 +2318,7 @@ pre[data-filename]::before {
   overflow-wrap: anywhere;
 }
 
-.post-image-actions {
+.post-attachment-actions {
   display: flex;
   gap: 8px;
   align-items: center;

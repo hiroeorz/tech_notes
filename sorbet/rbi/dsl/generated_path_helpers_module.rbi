@@ -37,10 +37,10 @@ module GeneratedPathHelpersModule
   def admin_logout_path(*args); end
 
   sig { params(args: T.untyped).returns(String) }
-  def admin_post_image_path(*args); end
+  def admin_post_attachment_path(*args); end
 
   sig { params(args: T.untyped).returns(String) }
-  def admin_post_images_path(*args); end
+  def admin_post_attachments_path(*args); end
 
   sig { params(args: T.untyped).returns(String) }
   def admin_post_path(*args); end

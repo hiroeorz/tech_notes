@@ -2,17 +2,17 @@
 
 ## 目次
 
-1. [Cloudflare R2 画像ストレージ](#1-cloudflare-r2-画像ストレージ)
+1. [Cloudflare R2 画像・添付ファイルストレージ](#1-cloudflare-r2-画像添付ファイルストレージ)
 2. [PostgreSQL バックアップ準備](#2-postgresql-バックアップ準備)
 3. [Cloudflare Workers AI](#3-cloudflare-workers-ai)
 4. [Google Search Console](#4-google-search-console)
 
 ---
 
-## 1. Cloudflare R2 画像ストレージ
+## 1. Cloudflare R2 画像・添付ファイルストレージ
 
-このアプリケーションは Active Storage を使ってアップロード画像を Cloudflare R2 に保存します。
-記事画像は Markdown 内で公開 CDN URL として挿入されます。
+このアプリケーションは Active Storage を使ってアップロード画像と記事添付PDFを Cloudflare R2 に保存します。
+記事画像は Markdown の画像記法、記事添付PDFはファイル名をリンクテキストにした Markdown リンクとして、公開 CDN URL を挿入します。
 
 ### 1.1 バケット名
 

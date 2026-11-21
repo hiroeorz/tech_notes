@@ -25,7 +25,7 @@ class Rails::Conductor::BaseController
     include ::ActionText::TagHelper
     include ::Importmap::ImportmapTagsHelper
     include ::ActionController::Base::HelperMethods
-    include ::Admin::PostImagesHelper
+    include ::Admin::PostAttachmentsHelper
     include ::ApplicationHelper
     include ::PostsHelper
   end

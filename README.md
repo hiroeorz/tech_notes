@@ -9,7 +9,7 @@
 
 - **フレームワーク**: Rails 8 (Ruby 4.0)
 - **データベース**: PostgreSQL（開発・テストは SQLite）
-- **画像ストレージ**: Cloudflare R2
+- **画像・添付ファイルストレージ**: Cloudflare R2
 - **フロントエンド**: importmap + Stimulus（Node.js 不要）
 - **デプロイ**: Kamal（Docker コンテナ構成）
 
@@ -89,7 +89,7 @@ export APP_HOST="your-app.example.com"
 export ADMIN_EMAIL="admin@example.com"
 export ADMIN_PASSWORD="set-a-strong-unique-password"
 
-# Cloudflare R2（画像保存）— 画像アップロードを使用する場合のみ必須
+# Cloudflare R2（画像・記事添付PDF保存）— アップロード機能を使用する場合のみ必須
 export CLOUDFLARE_R2_ACCESS_KEY_ID="your-access-key"
 export CLOUDFLARE_R2_SECRET_ACCESS_KEY="your-secret-key"
 export CLOUDFLARE_R2_BUCKET="tech-notes-images"

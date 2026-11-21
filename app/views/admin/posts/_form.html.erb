@@ -51,15 +51,15 @@
         <%= button_tag type: "button", data: { md_action: "table" }, aria: { label: t("admin.posts.form.table_aria") } do %>▦<% end %>
         <%= button_tag type: "button", data: { md_action: "link" }, aria: { label: t("admin.posts.form.link_aria") } do %>↗<% end %>
       <% end %>
-      <div class="post-image-uploader" data-post-image-panel>
+      <div class="post-attachment-uploader" data-post-attachment-panel>
         <% if post.persisted? %>
           <label>
-            <span><%= t("admin.posts.form.image_section") %></span>
-            <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" data-post-image-input data-upload-url="<%= admin_post_images_path(post) %>">
+            <span><%= t("admin.posts.form.attachment_section") %></span>
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf" data-post-attachment-input data-upload-url="<%= admin_post_attachments_path(post) %>">
           </label>
-          <p data-post-image-message><%= t("admin.posts.form.image_help") %></p>
+          <p data-post-attachment-message><%= t("admin.posts.form.attachment_help") %></p>
         <% else %>
-          <p><%= t("admin.posts.form.image_help_draft") %></p>
+          <p><%= t("admin.posts.form.attachment_help_draft") %></p>
         <% end %>
       </div>
       <div class="textarea-shell">
@@ -76,36 +76,41 @@
     </section>
 
     <% if post.persisted? %>
-      <section class="post-image-list" aria-labelledby="post-images-title">
-        <div class="post-image-list-header">
-          <h2 id="post-images-title"><%= t("admin.posts.form.attached_images") %></h2>
-          <p><%= t("admin.posts.form.attached_images_help") %></p>
+      <% attachments = post.images.attachments.includes(:blob).to_a + post.documents.attachments.includes(:blob).to_a %>
+      <section class="post-attachment-list" aria-labelledby="post-attachments-title">
+        <div class="post-attachment-list-header">
+          <h2 id="post-attachments-title"><%= t("admin.posts.form.attached_attachments") %></h2>
+          <p><%= t("admin.posts.form.attached_attachments_help") %></p>
         </div>
-        <% if post.images.attached? %>
-          <div class="post-image-grid">
-            <% post.images.each do |image| %>
-              <% public_url = post_image_public_url(image) %>
-              <% markdown = post_image_markdown(image) %>
-              <article class="post-image-item">
-                <%= image_tag(public_url || image, alt: image.filename.to_s, class: "post-image-thumb") %>
+        <% if attachments.any? %>
+          <div class="post-attachment-grid">
+            <% attachments.sort_by(&:created_at).each do |attachment| %>
+              <% public_url = post_attachment_public_url(attachment) %>
+              <% markdown = post_attachment_markdown(attachment) %>
+              <article class="post-attachment-item">
+                <% if document_attachment?(attachment) %>
+                  <span class="post-attachment-file-badge" aria-hidden="true">PDF</span>
+                <% else %>
+                  <%= image_tag(public_url || attachment, alt: attachment.filename.to_s, class: "post-attachment-thumb") %>
+                <% end %>
                 <div>
-                  <strong><%= image.filename %></strong>
-                  <small><%= human_image_size(image) %></small>
+                  <strong><%= attachment.filename %></strong>
+                  <small><%= human_attachment_size(attachment) %></small>
                   <% if public_url.present? %>
                     <code><%= public_url %></code>
                   <% else %>
                     <em><%= t("admin.posts.form.cdn_unconfigured") %></em>
                   <% end %>
                 </div>
-                <div class="post-image-actions">
+                <div class="post-attachment-actions">
                   <button type="button" class="secondary-button" data-insert-markdown="<%= markdown %>" <%= "disabled" if markdown.blank? %>><%= t("admin.posts.form.insert") %></button>
-                  <%= link_to t("admin.posts.form.delete"), admin_post_image_path(post, image), class: "outline-danger", data: { turbo_method: :delete, turbo_confirm: t("admin.posts.form.delete_image_confirm") } %>
+                  <%= link_to t("admin.posts.form.delete"), admin_post_attachment_path(post, attachment), class: "outline-danger", data: { turbo_method: :delete, turbo_confirm: t("admin.posts.form.delete_attachment_confirm") } %>
                 </div>
               </article>
             <% end %>
           </div>
         <% else %>
-          <p class="empty-note"><%= t("admin.posts.form.no_images") %></p>
+          <p class="empty-note"><%= t("admin.posts.form.no_attachments") %></p>
         <% end %>
       </section>
     <% end %>

@@ -206,20 +206,21 @@ ja:
         image_aria: "画像を挿入"
         table_aria: "テーブルを挿入"
         link_aria: "リンクを挿入"
-        image_section: "記事画像"
-        image_help: "画像を選択するとアップロードし、カーソル位置に Markdown を挿入します。"
-        image_help_draft: "画像を追加するには、先に下書き保存してください。"
+        attachment_section: "記事の添付ファイル"
+        attachment_help: "画像またはPDFを選択するとアップロードし、カーソル位置に Markdown を挿入します。"
+        attachment_help_draft: "画像またはPDFを追加するには、先に下書き保存してください。"
+        image_alt_default: "画像"
         lines_label: "Lines:"
         words_label: "Words:"
         chars_label: "文字数:"
         markdown_guide_footer: "Markdown Guide ↗"
-        attached_images: "添付画像"
-        attached_images_help: "本文から Markdown を削除しても画像は残ります。不要な画像はここから削除してください。"
+        attached_attachments: "添付ファイル"
+        attached_attachments_help: "本文から Markdown を削除してもファイルは残ります。不要なファイルはここから削除してください。"
         cdn_unconfigured: "CDN URL未設定"
         insert: "挿入"
         delete: "削除"
-        delete_image_confirm: "この画像を削除します。本文にURLが残っている場合は画像切れになります。"
-        no_images: "添付画像はありません。"
+        delete_attachment_confirm: "このファイルを削除します。本文にURLが残っている場合はリンク切れや画像切れになります。"
+        no_attachments: "添付ファイルはありません。"
         modal_title: "公開設定"
         close_aria: "閉じる"
         slug_label: "スラッグ <b>*</b>"
@@ -402,13 +403,14 @@ ja:
         saved: "カテゴリーを更新しました。"
         destroyed: "カテゴリーを削除しました。"
         restricted: "このカテゴリーには記事が紐づいているため削除できません。"
-      post_images:
+      post_attachments:
         cdn_not_configured: "CDN URLが設定されていません。"
-        destroyed: "画像を削除しました。"
-        no_file: "画像ファイルを選択してください。"
-        invalid_type: "画像はJPG、PNG、WebP、GIFでアップロードしてください。"
-        too_large: "画像は10MB以下でアップロードしてください。"
-        upload_failed: "画像をアップロードできませんでした。"
+        destroyed: "ファイルを削除しました。"
+        no_file: "ファイルを選択してください。"
+        invalid_type: "ファイルはJPG、PNG、WebP、GIF、PDFでアップロードしてください。"
+        image_too_large: "画像は10MB以下でアップロードしてください。"
+        document_too_large: "PDFは20MB以下でアップロードしてください。"
+        upload_failed: "ファイルをアップロードできませんでした。"
       post_slugs:
         generation_failed: "スラッグを生成できませんでした。サーバーログを確認してください。"
       post_summaries:
@@ -452,10 +454,10 @@ ja:
       link_placeholder_url: "https://example.com"
     editor:
       uploading: "アップロードしています..."
-      upload_success: "画像をアップロードし、Markdownを挿入しました。ページを再読み込みすると添付一覧に反映されます。"
-      upload_error: "画像をアップロードできませんでした。"
+      upload_success: "ファイルをアップロードし、Markdownを挿入しました。ページを再読み込みすると添付一覧に反映されます。"
+      upload_error: "ファイルをアップロードできませんでした。"
       upload_error_json: "サーバーから不正なJSONレスポンスが返りました。サーバーログを確認してください。"
-      upload_error_401: "ログインし直してから画像をアップロードしてください。"
+      upload_error_401: "ログインし直してからファイルをアップロードしてください。"
       upload_error_html: "サーバーからHTMLエラーページが返りました。ログイン状態やサーバーログを確認してください。"
     post_summary:
       confirm_overwrite_excerpt: "現在の要約をAI生成結果で上書きしますか？"
@@ -491,6 +493,9 @@ ja:
             images:
               invalid_type: "はJPG、PNG、WebP、GIFでアップロードしてください。"
               too_large: "は10MB以下でアップロードしてください。"
+            documents:
+              invalid_type: "はPDFでアップロードしてください。"
+              too_large: "は20MB以下でアップロードしてください。"
         category:
           attributes:
             slug:

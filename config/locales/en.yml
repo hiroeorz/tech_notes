@@ -206,20 +206,21 @@ en:
         image_aria: "Insert image"
         table_aria: "Insert table"
         link_aria: "Insert link"
-        image_section: "Article Image"
-        image_help: "Select an image to upload and insert Markdown at cursor position."
-        image_help_draft: "Save as draft first to add images."
+        attachment_section: "Article Attachments"
+        attachment_help: "Select an image or PDF to upload and insert Markdown at cursor position."
+        attachment_help_draft: "Save as draft first to add images or PDFs."
+        image_alt_default: "Image"
         lines_label: "Lines:"
         words_label: "Words:"
         chars_label: "Characters:"
         markdown_guide_footer: "Markdown Guide ↗"
-        attached_images: "Attached Images"
-        attached_images_help: "Images remain even after removing Markdown from the body. Delete unwanted images here."
+        attached_attachments: "Attached Files"
+        attached_attachments_help: "Files remain even after removing Markdown from the body. Delete unwanted files here."
         cdn_unconfigured: "CDN URL not configured"
         insert: "Insert"
         delete: "Delete"
-        delete_image_confirm: "This image will be deleted. If the URL remains in the body, the image will be broken."
-        no_images: "No attached images."
+        delete_attachment_confirm: "This file will be deleted. If the URL remains in the body, the link or image will be broken."
+        no_attachments: "No attached files."
         modal_title: "Publish Settings"
         close_aria: "Close"
         slug_label: "Slug <b>*</b>"
@@ -402,13 +403,14 @@ en:
         saved: "Category updated."
         destroyed: "Category deleted."
         restricted: "Cannot delete this category because it has associated posts."
-      post_images:
+      post_attachments:
         cdn_not_configured: "CDN URL is not configured."
-        destroyed: "Image deleted."
-        no_file: "Please select an image file."
-        invalid_type: "Please upload JPG, PNG, WebP, or GIF images."
-        too_large: "Please upload images under 10MB."
-        upload_failed: "Could not upload image."
+        destroyed: "File deleted."
+        no_file: "Please select a file."
+        invalid_type: "Please upload JPG, PNG, WebP, GIF, or PDF files."
+        image_too_large: "Please upload images under 10MB."
+        document_too_large: "Please upload PDFs under 20MB."
+        upload_failed: "Could not upload file."
       post_slugs:
         generation_failed: "Could not generate slug. Check server logs."
       post_summaries:
@@ -452,10 +454,10 @@ en:
       link_placeholder_url: "https://example.com"
     editor:
       uploading: "Uploading..."
-      upload_success: "Image uploaded and Markdown inserted. Reload the page to see it in the attachment list."
-      upload_error: "Could not upload image."
+      upload_success: "File uploaded and Markdown inserted. Reload the page to see it in the attachment list."
+      upload_error: "Could not upload file."
       upload_error_json: "Received an invalid JSON response. Check server logs."
-      upload_error_401: "Please log in again before uploading images."
+      upload_error_401: "Please log in again before uploading files."
       upload_error_html: "Received an HTML error page. Check your login status and server logs."
     post_summary:
       confirm_overwrite_excerpt: "The current summary will be overwritten by the AI-generated result. Continue?"
@@ -491,6 +493,9 @@ en:
             images:
               invalid_type: "must be JPG, PNG, WebP, or GIF"
               too_large: "must be under 10MB"
+            documents:
+              invalid_type: "must be PDF"
+              too_large: "must be under 20MB"
         category:
           attributes:
             slug:

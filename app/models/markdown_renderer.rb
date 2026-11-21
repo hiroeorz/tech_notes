@@ -24,7 +24,7 @@ class MarkdownRenderer
   ].freeze
 
   ALLOWED_ATTRIBUTES = %w[
-    alt checked class data-filename disabled href id loading rel role src tabindex type
+    alt checked class data-filename disabled href id loading rel role src tabindex target type
   ].freeze
 
   def initialize(markdown)
@@ -114,9 +114,23 @@ class MarkdownRenderer
   end
 
   def decorate_links(fragment)
+    storage_base_url = ActiveStoragePublicUrl.configured_base_url
+
     fragment.css("a[href]").each do |link|
-      link["rel"] = "noreferrer"
+      if storage_link?(link["href"], storage_base_url)
+        link["target"] = "_blank"
+        link["rel"] = "noopener noreferrer"
+      else
+        link["rel"] = "noreferrer"
+      end
     end
+  end
+
+  def storage_link?(href, storage_base_url)
+    return false if storage_base_url.blank?
+
+    normalized = href.to_s.split(/[?#]/, 2).first.to_s
+    normalized.start_with?("#{storage_base_url}/")
   end
 
   def decorate_tasks(fragment)

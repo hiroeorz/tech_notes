@@ -702,9 +702,9 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "data-md-action=\"bold\""
     assert_includes response.body, "aria-label=\"#{I18n.t("admin.posts.form.bold_aria")}\""
     assert_includes response.body, "aria-label=\"#{I18n.t("admin.posts.form.image_aria")}\""
-    assert_select "input[type='file'][data-post-image-input][accept='image/jpeg,image/png,image/webp,image/gif']"
-    assert_includes response.body, admin_post_images_path(@post)
-    assert_includes response.body, I18n.t("admin.posts.form.attached_images")
+    assert_select "input[type='file'][data-post-attachment-input][accept='image/jpeg,image/png,image/webp,image/gif,application/pdf']"
+    assert_includes response.body, admin_post_attachments_path(@post)
+    assert_includes response.body, I18n.t("admin.posts.form.attached_attachments")
     assert_includes response.body, "data-tag-input=\"true\""
     assert_select ".tag-preview .chip", text: @tag.name
     assert_includes response.body, "data-live-count-input=\"title\""
@@ -725,8 +725,8 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "[name='post[kind]']", count: 0
     assert_includes response.body, "data-open-editor-preview"
-    assert_includes response.body, I18n.t("admin.posts.form.image_help_draft")
-    assert_select "input[data-post-image-input]", count: 0
+    assert_includes response.body, I18n.t("admin.posts.form.attachment_help_draft")
+    assert_select "input[data-post-attachment-input]", count: 0
     assert_not_includes response.body, "href=\"#\""
 
     get preview_admin_post_path(@post.slug)
@@ -885,7 +885,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     post markdown_preview_admin_posts_path, params: { body: "* 非公開プレビュー" }
     assert_redirected_to admin_login_path
 
-    post admin_post_images_path(@post), params: { image: valid_image_upload }
+    post admin_post_attachments_path(@post), params: { attachment: valid_image_upload }
     assert_redirected_to admin_login_path
 
     post admin_post_summaries_path, params: { title: "未ログイン", body: "本文" }
@@ -902,7 +902,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
     assert_includes response.parsed_body.fetch("error"), I18n.t("flash.admin.base.unauthorized_json")
 
-    delete admin_post_image_path(@post, 999)
+    delete admin_post_attachment_path(@post, 999)
     assert_redirected_to admin_login_path
 
     post admin_posts_path, params: {
@@ -1377,7 +1377,7 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
       assert_difference("ActiveStorage::Attachment.count", 1) do
         assert_difference("ActiveStorage::Blob.count", 1) do
-          post admin_post_images_path(@post), params: { image: valid_image_upload }
+          post admin_post_attachments_path(@post), params: { attachment: valid_image_upload }
         end
       end
 
@@ -1395,11 +1395,11 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       assert_includes response.body, "screen.png"
       assert_includes response.body, payload.fetch("url")
       assert_includes response.body, "data-insert-markdown"
-      assert_includes response.body, I18n.t("admin.posts.form.delete_image_confirm")
+      assert_includes response.body, I18n.t("admin.posts.form.delete_attachment_confirm")
 
       assert_difference("ActiveStorage::Attachment.count", -1) do
         assert_difference("ActiveStorage::Blob.count", -1) do
-          delete admin_post_image_path(@post, attachment)
+          delete admin_post_attachment_path(@post, attachment)
         end
       end
 
@@ -1408,12 +1408,67 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "admin can upload insert and delete post pdf documents" do
+    with_public_storage_url("https://cdn.example.com") do
+      post admin_login_path, params: { email: @admin.email, password: "password123" }
+
+      assert_difference("ActiveStorage::Attachment.count", 1) do
+        assert_difference("ActiveStorage::Blob.count", 1) do
+          post admin_post_attachments_path(@post), params: { attachment: valid_pdf_upload }
+        end
+      end
+
+      assert_response :created
+      payload = JSON.parse(response.body)
+      attachment = @post.reload.documents.attachments.last
+      assert_equal attachment.id, payload.fetch("id")
+      assert_equal "manual.pdf", payload.fetch("filename")
+      assert_equal "application/pdf", payload.fetch("content_type")
+      assert_equal "document", payload.fetch("kind")
+      assert_equal "https://cdn.example.com/#{attachment.blob.key}", payload.fetch("url")
+      assert_equal "[manual.pdf](https://cdn.example.com/#{attachment.blob.key})", payload.fetch("markdown")
+      assert_not @post.images.attached?
+
+      get edit_admin_post_path(@post.slug)
+      assert_response :success
+      assert_includes response.body, "manual.pdf"
+      assert_select ".post-attachment-file-badge", text: "PDF"
+      assert_includes response.body, payload.fetch("url")
+
+      @post.update!(body: "資料は[manual.pdf](#{payload.fetch("url")})です。")
+      get "/en/posts/#{@post.slug}"
+      assert_response :success
+      assert_select ".markdown-body a[href='#{payload.fetch("url")}'][target='_blank'][rel='noopener noreferrer']", text: "manual.pdf"
+
+      assert_difference("ActiveStorage::Attachment.count", -1) do
+        assert_difference("ActiveStorage::Blob.count", -1) do
+          delete admin_post_attachment_path(@post, attachment)
+        end
+      end
+
+      assert_redirected_to edit_admin_post_path(@post.slug)
+      assert_not @post.reload.documents.attached?
+    end
+  end
+
+  test "admin post document markdown escapes special characters in filename" do
+    with_public_storage_url("https://cdn.example.com") do
+      post admin_login_path, params: { email: @admin.email, password: "password123" }
+
+      post admin_post_attachments_path(@post), params: { attachment: valid_pdf_upload(filename: "manual [v2].pdf") }
+
+      assert_response :created
+      payload = JSON.parse(response.body)
+      assert_equal "[manual \\[v2\\].pdf](https://cdn.example.com/#{@post.reload.documents.attachments.last.blob.key})", payload.fetch("markdown")
+    end
+  end
+
   test "admin post image uploads require configured cdn and valid files" do
     post admin_login_path, params: { email: @admin.email, password: "password123" }
 
     with_public_storage_url(nil) do
       assert_no_difference("ActiveStorage::Attachment.count") do
-        post admin_post_images_path(@post), params: { image: valid_image_upload }
+        post admin_post_attachments_path(@post), params: { attachment: valid_image_upload }
       end
     end
 
@@ -1427,11 +1482,17 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       )
 
       assert_no_difference("ActiveStorage::Attachment.count") do
-        post admin_post_images_path(@post), params: { image: invalid_upload }
+        post admin_post_attachments_path(@post), params: { attachment: invalid_upload }
       end
 
       assert_response :unprocessable_entity
-      assert_includes response.parsed_body.fetch("error"), I18n.t("flash.admin.post_images.invalid_type")
+      assert_includes response.parsed_body.fetch("error"), I18n.t("flash.admin.post_attachments.invalid_type")
+
+      assert_no_difference("ActiveStorage::Attachment.count") do
+        post admin_post_attachments_path(@post), params: { attachment: "not-a-file" }
+      end
+      assert_response :unprocessable_entity
+      assert_includes response.parsed_body.fetch("error"), I18n.t("flash.admin.post_attachments.invalid_type")
 
       oversize_file = Tempfile.new([ "large", ".png" ])
       oversize_file.binmode
@@ -1441,14 +1502,31 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
 
       begin
         assert_no_difference("ActiveStorage::Attachment.count") do
-          post admin_post_images_path(@post), params: { image: oversize_upload }
+          post admin_post_attachments_path(@post), params: { attachment: oversize_upload }
         end
       ensure
         oversize_file.close!
       end
 
       assert_response :unprocessable_entity
-      assert_includes response.parsed_body.fetch("error"), I18n.t("flash.admin.post_images.too_large")
+      assert_includes response.parsed_body.fetch("error"), I18n.t("flash.admin.post_attachments.image_too_large")
+
+      oversize_pdf = Tempfile.new([ "large", ".pdf" ])
+      oversize_pdf.binmode
+      oversize_pdf.write("x" * (Post::DOCUMENT_MAX_SIZE + 1))
+      oversize_pdf.rewind
+      oversize_pdf_upload = Rack::Test::UploadedFile.new(oversize_pdf.path, "application/pdf", original_filename: "large.pdf")
+
+      begin
+        assert_no_difference("ActiveStorage::Attachment.count") do
+          post admin_post_attachments_path(@post), params: { attachment: oversize_pdf_upload }
+        end
+      ensure
+        oversize_pdf.close!
+      end
+
+      assert_response :unprocessable_entity
+      assert_includes response.parsed_body.fetch("error"), I18n.t("flash.admin.post_attachments.document_too_large")
     end
   end
 
@@ -2045,6 +2123,14 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
       Rails.root.join("test/fixtures/files/not-image.txt"),
       "image/png",
       original_filename: "screen.png"
+    )
+  end
+
+  def valid_pdf_upload(filename: "manual.pdf")
+    Rack::Test::UploadedFile.new(
+      Rails.root.join("test/fixtures/files/sample.pdf"),
+      "application/pdf",
+      original_filename: filename
     )
   end
 
