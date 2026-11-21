@@ -2,32 +2,33 @@ require "test_helper"
 
 class PostSlugGeneratorTest < ActiveSupport::TestCase
   class CapturingClient
-    attr_reader :messages
+    attr_reader :messages, :options
 
     def initialize(response:)
       @response = response
     end
 
-    def run(messages:)
+    def run(messages:, **options)
       @messages = messages
+      @options = options
       @response
     end
   end
 
   class FailingClient
-    def run(messages:)
+    def run(messages:, **)
       raise CloudflareAiClient::RequestError, "Connection to Cloudflare Workers AI timed out."
     end
   end
 
   class RateLimitedClient
-    def run(messages:)
+    def run(messages:, **)
       raise CloudflareAiClient::RateLimitError, "Rate limit reached."
     end
   end
 
   class ExplodingClient
-    def run(messages:)
+    def run(messages:, **)
       raise "AI client must not be called"
     end
   end
@@ -44,6 +45,16 @@ class PostSlugGeneratorTest < ActiveSupport::TestCase
     assert_includes client.messages.dig(0, :content), "ASCII lowercase"
     assert_includes client.messages.dig(1, :content), "[Title]"
     assert_includes client.messages.dig(1, :content), "[Body]"
+    assert_equal 64, client.options[:max_tokens]
+    assert_equal({ enable_thinking: false }, client.options[:chat_template_kwargs])
+  end
+
+  test "removes gemma thinking block before normalizing" do
+    client = CapturingClient.new(response: "<|channel>thought\n<channel|>test-slug")
+
+    slug = PostSlugGenerator.new(client: client).generate(title: "タイトル", body: "本文")
+
+    assert_equal "test-slug", slug
   end
 
   test "rejects blank title and body before calling ai client" do

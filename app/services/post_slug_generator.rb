@@ -5,6 +5,8 @@ class PostSlugGenerator
 
   MAX_BODY_CHARS = 4_000
   MAX_SLUG_CHARS = 80
+  MAX_OUTPUT_TOKENS = 64
+  CHAT_TEMPLATE_KWARGS = { enable_thinking: false }.freeze
 
   def initialize(client: CloudflareAiClient.new)
     @client = client
@@ -13,7 +15,11 @@ class PostSlugGenerator
   def generate(title:, body:)
     raise InvalidInput, "Please enter a title or body before generating a slug." if title.to_s.strip.blank? && body.to_s.strip.blank?
 
-    normalize_slug(@client.run(messages: messages(title: title, body: body)))
+    normalize_slug(@client.run(
+      messages: messages(title: title, body: body),
+      max_tokens: MAX_OUTPUT_TOKENS,
+      chat_template_kwargs: CHAT_TEMPLATE_KWARGS
+    ))
   rescue CloudflareAiClient::RateLimitError => error
     raise RateLimitError, error.message
   rescue CloudflareAiClient::ConfigurationError => error
@@ -52,7 +58,7 @@ class PostSlugGenerator
   end
 
   def normalize_slug(value)
-    slug = value.to_s.strip.downcase
+    slug = strip_thinking_block(value).downcase
     slug = slug.delete_prefix("slug:").delete_prefix("slug：").strip
     slug = slug[1...-1].strip if wrapped_with_quote?(slug)
     slug = slug.gsub(/[^a-z0-9-]+/, "-").gsub(/-+/, "-").delete_prefix("-").delete_suffix("-")
@@ -61,6 +67,10 @@ class PostSlugGenerator
     raise GenerationError, "Could not get a valid English slug from the AI." unless slug.match?(/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/)
 
     slug
+  end
+
+  def strip_thinking_block(value)
+    value.to_s.gsub(/<\|channel>thought.*?<channel\|>/m, "").strip
   end
 
   def wrapped_with_quote?(slug)

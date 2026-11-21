@@ -41,10 +41,10 @@ class CloudflareAiClient
     @account_id.present? && @api_token.present? && @model.present?
   end
 
-  def run(messages:)
+  def run(messages:, **options)
     raise ConfigurationError, "Cloudflare Workers AI is not configured." unless configured?
 
-    response = perform_request(messages)
+    response = perform_request(messages, options)
     payload = JSON.parse(response.body)
     raise RateLimitError, cloudflare_error_message(payload) if response.code.to_i == 429
     raise RequestError, cloudflare_error_message(payload) unless response.is_a?(Net::HTTPSuccess) && payload["success"] != false
@@ -62,7 +62,7 @@ class CloudflareAiClient
 
   private
 
-  def perform_request(messages)
+  def perform_request(messages, options = {})
     uri = URI("https://api.cloudflare.com/client/v4/accounts/#{@account_id}/ai/run/#{@model}")
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
@@ -73,13 +73,13 @@ class CloudflareAiClient
     request = Net::HTTP::Post.new(uri)
     request["Authorization"] = "Bearer #{@api_token}"
     request["Content-Type"] = "application/json"
-    request.body = request_body(messages)
+    request.body = request_body(messages, options)
 
     http.request(request)
   end
 
-  def request_body(messages)
-    JSON.generate(messages: messages, max_tokens: max_tokens)
+  def request_body(messages, options = {})
+    JSON.generate({ messages: messages, max_tokens: max_tokens }.merge(options))
   end
 
   def max_tokens

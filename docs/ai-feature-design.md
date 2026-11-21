@@ -177,6 +177,7 @@ Content-Type: application/json
 - `PostSummaryGenerator` は本文整形、プロンプト構築、出力検証を担当する。
 - `CloudflareAiClient` は Cloudflare Workers AI の HTTP 通信のみを担当する。
 - モデル名、アカウント ID、API token は設定値から読み込む。
+- 要約生成では、reasoningモデルのthinkingによる長時間応答を避けるため `chat_template_kwargs: { enable_thinking: false }` と出力上限256トークンを指定する。スラッグ生成も同様にthinkingを無効化し、出力上限64トークンとする。
 
 ### 4.9 クライアント側設計
 
