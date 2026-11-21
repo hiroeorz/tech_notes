@@ -58,6 +58,8 @@ description: Kamal を使った本番デプロイの事前準備・実行手順�
 | `CLOUDFLARE_AI_TIMEOUT_SECONDS` | AIリクエストタイムアウト（秒） |
 | `GOOGLE_SITE_VERIFICATION` | Search Console所有権確認トークン |
 
+AI要約・翻訳を使用する場合、`CLOUDFLARE_AI_TIMEOUT_SECONDS`（推奨120秒）より前段のタイムアウトを大きくする。kunato の `timeouts.upstream_response`、`config/deploy.yml` の `proxy.response_timeout`、Thruster の `HTTP_WRITE_TIMEOUT` をいずれも180秒に設定する（詳細は `docs/deployment.md` §5.1.1）。
+
 ### 2. README.md の環境変数一覧を更新する
 
 新しい環境変数を追加した場合は、`README.md` の「環境変数一覧」に対応するサンプルと説明を追記すること。デプロイ時に不足に気づく前に、セットアップ者が事前に把握できるようにするため。

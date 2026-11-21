@@ -130,6 +130,7 @@ proxy:
   ssl: false
   host: <%= ENV.fetch("APP_HOST") %>
   forward_headers: true
+  response_timeout: 180
   healthcheck:
     path: /up
     interval: 10
@@ -164,6 +165,7 @@ env:
     - CLOUDFLARE_AI_MAX_TOKENS
   clear:
     RAILS_ENV: production
+    HTTP_WRITE_TIMEOUT: 180
     SOLID_QUEUE_IN_PUMA: true
     DB_HOST: tech_notes-db
     POSTGRES_DB: tech_notes_production
@@ -206,6 +208,11 @@ Kamal管理外。VPS上で `kunato` サービスとして動作し、443番でTL
 listen: 0.0.0.0:443
 upstream: http://127.0.0.1:8080
 
+timeouts:
+  # AI要約・翻訳の長時間リクエストを待つため、Railsの
+  # CLOUDFLARE_AI_TIMEOUT_SECONDS より大きくする。
+  upstream_response: 180s
+
 tls:
   acme:
     enabled: true
@@ -217,7 +224,28 @@ tls:
 
 * `domains` は `APP_HOST` と一致させる。TLS-ALPN-01のため443番到達のみで発行・更新できる（80番不要）。
 * `upstream` は Kamal proxy のループバック待受（`127.0.0.1:8080`）を指す。`http` のみ対応。
+* `timeouts.upstream_response` の既定値は30秒。AI要約・翻訳はこれを超えることがあるため、`CLOUDFLARE_AI_TIMEOUT_SECONDS`（推奨120秒）より大きい値を設定する。変更はホットリロードで反映される。
 * `/up` がWAFで誤ブロックされる場合は `ALLOW` 例外を検討する（Kamalのヘルスチェック自体はDocker網直叩きのため影響なし）。
+
+### 5.1.1 タイムアウトの階層
+
+AI要約・翻訳のリクエストは次の順にプロキシを通る。各層のタイムアウトが後段より短いと、後段が処理を続けていても手前で打ち切られる。
+
+```text
+ブラウザ -> kunato (upstream_response) -> kamal-proxy (response_timeout)
+         -> Thruster (HTTP_WRITE_TIMEOUT) -> Rails (CLOUDFLARE_AI_TIMEOUT_SECONDS)
+```
+
+推奨値は次のとおり。
+
+| 層 | 設定 | 値 |
+| --- | --- | --- |
+| kunato | `timeouts.upstream_response` | `180s` |
+| kamal-proxy | `proxy.response_timeout` | `180` |
+| Thruster | `HTTP_WRITE_TIMEOUT` | `180` |
+| Rails | `CLOUDFLARE_AI_TIMEOUT_SECONDS` | `120` |
+
+Rails側を120秒にして、プロキシ側に60秒の余裕を持たせる。これにより、AI呼び出しが長引いた場合でもRailsが先にタイムアウトし、管理画面に理由が返る。
 
 ### 5.2 PostgreSQL 初期化 SQL (`config/postgres/init.sql`)
 
