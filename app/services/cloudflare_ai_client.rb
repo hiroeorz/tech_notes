@@ -7,7 +7,10 @@ class CloudflareAiClient
   class RequestError < StandardError; end
   class RateLimitError < RequestError; end
 
-  DEFAULT_TIMEOUT_SECONDS = 60
+  # Keep this below the reverse proxy timeouts (kunato, kamal-proxy, and
+  # Thruster) so the app can return a clear error before the proxy cuts the
+  # connection.
+  DEFAULT_TIMEOUT_SECONDS = 120
   DEFAULT_MAX_TOKENS = 8192
 
   def initialize(

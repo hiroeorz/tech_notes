@@ -227,15 +227,15 @@ Cloudflare ダッシュボードで:
 
 `CLOUDFLARE_AI_MODEL` には要約生成に使用する Workers AI モデルを設定します。
 
-推奨初期値は `@cf/meta/llama-3.2-1b-instruct` です。
+推奨初期値は `@cf/google/gemma-4-26b-a4b-it` です。
 
-要約品質が十分でない場合は、価格と制限を確認した上で別の Workers AI instruct モデルに切り替えてください。
+要約品質が十分でない場合は、価格と制限を確認した上で別の Workers AI instruct モデルに切り替えてください。`@cf/qwen/qwen3.8-27b` は品質優先の代替候補ですが、単価が高く、思考モードが既定で有効なため、応答時間とコストを確認してから採用してください。
 
 ### 3.4 タイムアウト
 
 `CLOUDFLARE_AI_TIMEOUT_SECONDS` には Workers AI リクエストの HTTP タイムアウトを設定します。
 
-推奨初期値は `60` です。
+推奨初期値は `120` です。要約のような長めのリクエストが前段プロキシで打ち切られないよう、kunato の `timeouts.upstream_response`（`/etc/kunato/kunato.yaml`）、kamal-proxy の `proxy.response_timeout`、Thruster の `HTTP_WRITE_TIMEOUT` は、この値より大きく設定してください。
 
 ---
 

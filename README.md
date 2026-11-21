@@ -99,8 +99,8 @@ export ACTIVE_STORAGE_PUBLIC_BASE_URL="https://cdn.example.com"
 # Cloudflare Workers AI（記事要約生成・自動翻訳）— 要約・翻訳機能を使用する場合のみ必須
 export CLOUDFLARE_ACCOUNT_ID="your-account-id"
 export CLOUDFLARE_AI_API_TOKEN="your-api-token"
-export CLOUDFLARE_AI_MODEL="@cf/meta/llama-3.2-1b-instruct"
-export CLOUDFLARE_AI_TIMEOUT_SECONDS="60"
+export CLOUDFLARE_AI_MODEL="@cf/google/gemma-4-26b-a4b-it"
+export CLOUDFLARE_AI_TIMEOUT_SECONDS="120"  # 前段プロキシ（kunato/kamal-proxy/Thruster）より小さくする
 export CLOUDFLARE_AI_MAX_TOKENS="8192"   # 翻訳時の最大出力トークン数（長い記事は増やす）
 
 # Google Cloud TTS（記事音声読み上げ）— 音声生成機能を使用する場合のみ必須

@@ -114,6 +114,18 @@ class CloudflareAiClientTest < ActiveSupport::TestCase
     assert_equal 8192, client.send(:max_tokens)
   end
 
+  test "default timeout is 120 seconds" do
+    client = CloudflareAiClient.new(account_id: "a", api_token: "b", model: "c")
+    assert_equal 120, client.send(:timeout_seconds)
+  end
+
+  test "falls back to default when timeout is invalid" do
+    client = CloudflareAiClient.new(
+      account_id: "a", api_token: "b", model: "c", timeout_seconds: "abc"
+    )
+    assert_equal 120, client.send(:timeout_seconds)
+  end
+
   test "raises error when finish_reason is length" do
     payload = {
       "result" => {

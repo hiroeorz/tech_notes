@@ -24,6 +24,9 @@ proxy:
   ssl: false
   host: <%= ENV.fetch("APP_HOST") %>
   forward_headers: true
+  # AI summary/translation requests can take longer than the 30s default.
+  # Keep this above CLOUDFLARE_AI_TIMEOUT_SECONDS.
+  response_timeout: 180
   healthcheck:
     path: /up
     interval: 10
@@ -72,6 +75,10 @@ env:
     - MAILER_FROM_ADDRESS
   clear:
     RAILS_ENV: production
+
+    # Thruster default response write timeout is 30s. Long-running AI summary
+    # and translation requests need a larger limit than the Rails AI timeout.
+    HTTP_WRITE_TIMEOUT: 180
 
     # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
     # When you start using multiple servers, you should split out job processing to a dedicated machine.
