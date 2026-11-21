@@ -6,6 +6,7 @@ class Post < ApplicationRecord
   belongs_to :category
   belongs_to :admin_user
   has_many_attached :images
+  has_many_attached :documents
   has_many :post_tags, dependent: :destroy
   has_many :tags, through: :post_tags
   has_many :comments, dependent: :destroy
@@ -14,6 +15,8 @@ class Post < ApplicationRecord
 
   IMAGE_CONTENT_TYPES = %w[image/jpeg image/png image/webp image/gif].freeze
   IMAGE_MAX_SIZE = 10.megabytes
+  DOCUMENT_CONTENT_TYPES = %w[application/pdf].freeze
+  DOCUMENT_MAX_SIZE = 20.megabytes
 
   enum :status, { draft: 0, published: 1, reviewing: 2 }
 
@@ -22,6 +25,7 @@ class Post < ApplicationRecord
   validates :slug, format: { with: /\A[a-z0-9]+(?:-[a-z0-9]+)*\z/ }
   validates :reading_minutes, numericality: { greater_than: 0 }
   validate :validate_images
+  validate :validate_documents
 
   before_validation :set_defaults
   before_validation :set_reading_minutes
@@ -127,8 +131,25 @@ class Post < ApplicationRecord
 
   def self.valid_image_upload?(upload)
     upload.present? &&
+      upload.respond_to?(:content_type) &&
+      upload.respond_to?(:size) &&
       upload.content_type.in?(IMAGE_CONTENT_TYPES) &&
       upload.size <= IMAGE_MAX_SIZE
+  end
+
+  def self.valid_document_upload?(upload)
+    upload.present? &&
+      upload.respond_to?(:content_type) &&
+      upload.respond_to?(:size) &&
+      upload.content_type.in?(DOCUMENT_CONTENT_TYPES) &&
+      upload.size <= DOCUMENT_MAX_SIZE
+  end
+
+  def self.attachment_kind(upload)
+    return :image if valid_image_upload?(upload)
+    return :document if valid_document_upload?(upload)
+
+    nil
   end
 
   private
@@ -147,6 +168,18 @@ class Post < ApplicationRecord
       next unless image.blob.byte_size > IMAGE_MAX_SIZE
 
       errors.add(:images, :too_large)
+    end
+  end
+
+  def validate_documents
+    T.unsafe(documents).each do |document|
+      unless document.blob.content_type.in?(DOCUMENT_CONTENT_TYPES)
+        errors.add(:documents, :invalid_type)
+      end
+
+      next unless document.blob.byte_size > DOCUMENT_MAX_SIZE
+
+      errors.add(:documents, :too_large)
     end
   end
 

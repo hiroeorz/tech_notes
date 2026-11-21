@@ -431,16 +431,16 @@ document.addEventListener("turbo:load", () => {
       })
     })
 
-    document.querySelectorAll("[data-post-image-input]").forEach((input) => {
+    document.querySelectorAll("[data-post-attachment-input]").forEach((input) => {
       input.addEventListener("change", async () => {
         const file = input.files?.[0]
-        const message = input.closest("[data-post-image-panel]")?.querySelector("[data-post-image-message]")
+        const message = input.closest("[data-post-attachment-panel]")?.querySelector("[data-post-attachment-message]")
         const uploadUrl = input.dataset.uploadUrl
         if (!file || !uploadUrl) return
 
         const token = document.querySelector("meta[name='csrf-token']")?.content
         const body = new FormData()
-        body.append("image", file)
+        body.append("attachment", file)
         input.disabled = true
         if (message) message.textContent = window.I18n.editor.uploading
 

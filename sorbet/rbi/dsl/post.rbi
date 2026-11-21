@@ -13,6 +13,12 @@ class Post
   extend GeneratedRelationMethods
 
   sig { returns(ActiveStorage::Attached::Many) }
+  def documents; end
+
+  sig { params(attachable: T.untyped).returns(T.untyped) }
+  def documents=(attachable); end
+
+  sig { returns(ActiveStorage::Attached::Many) }
   def images; end
 
   sig { params(attachable: T.untyped).returns(T.untyped) }

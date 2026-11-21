@@ -6,7 +6,7 @@
 
 対象環境は、Kamal により単一 VM 上へ Rails アプリケーションと PostgreSQL accessory をデプロイする本番構成とする。VM は 1GB RAM 程度の低リソース構成を想定し、バックアップ運用は追加の常駐コンテナを増やさない方針とする。
 
-Cloudflare R2 上の Active Storage 実ファイルのバックアップは本ドキュメントの主対象外とする。ただし、PostgreSQL には Active Storage の blob / attachment メタデータが含まれるため、R2 実ファイルと DB の整合性には注意する。
+Cloudflare R2 上の Active Storage 実ファイル（記事画像・記事添付PDF・OGP 画像・プロフィール画像など）のバックアップは本ドキュメントの主対象外とする。ただし、PostgreSQL には Active Storage の blob / attachment メタデータが含まれるため、R2 実ファイルと DB の整合性には注意する。
 
 ## 2. 基本方針
 

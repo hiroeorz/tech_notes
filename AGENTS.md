@@ -123,6 +123,7 @@
 - Site-wide settings（title, tagline, profile, SNS links, theme, pagination）は **単一の `SiteSetting` 行** に保存され、`SiteSetting.current` / `ApplicationController#current_site_setting` でアクセスする。設定フォームに admin 名前空間以外の認証はない。デフォルト値は `db/seeds.rb` で seeding される。
 - Admin 認証は **カスタム実装（Devise 不使用）**（`Admin::SessionsController`、SHA256 + salt を使用した `AdminUser`）。セッションは `session[:admin_user_id]` に保存。オプションで signed cookie による永続ログインも可能。`Admin::BaseController#require_admin` が全管理画面ルートをガードする。
 - `Post` は **enum** `status`（`draft`/`published`/`reviewing`）と `kind`（`article`/`experiment`）を使用。`Post.publicly_visible` は `published` かつ `published_at <= now` でフィルタ — 未来日付の投稿は公開画面では非表示だが、管理画面のプレビューでは表示される。
+- `Post` は記事画像を `images`、記事添付PDFを `documents` として別々の Active Storage 添付で管理する。管理画面の添付ファイル選択は画像とPDFを共通UIで受け付け、`Admin::PostAttachmentsController` が MIME type で振り分ける。PDFは `application/pdf` のみ・20MB以下。
 - 記事は `slug`（形式 `[a-z0-9-]+`）でスラッグ化。ルーティングは公開・管理両方の名前空間で `param: :slug` を使用。
 - タグは管理フォームでカンマ区切り入力（`Post#tag_names=` / `=`）。パースはカンマで分割、トリム、重複除去、スラッグで `find_or_create_by!` する。
 - 公開レイアウト（`layouts/application.html.erb`）とパーシャル（`shared/_header.html.erb`、`shared/_sidebar.html.erb`）が唯一のレイアウトファイル。Admin ビューは `app/views/admin/` 下に名前空間化され、同じレイアウトを再利用する（admin専用レイアウトはなし）。テーマ切り替えクラス（`theme-dark`）は `app/javascript/application.js` でトグルされる。
@@ -151,6 +152,6 @@
 - `/storage` ディレクトリは `.keep` を除き gitignore — 新規クローンでは `bin/rails db:prepare`（または `db:migrate` + `db:seed`）で SQLite ファイルを作成する必要がある。CI では `bin/rails db:test:prepare test` と `bin/rails db:test:prepare test:system` を実行。
 - `config/master.key` は gitignore されており、**コミットしてはならない**。`bin/rails credentials` ワークフローでのみ再生成可能。紛失した場合は `credentials.yml.enc` を再暗号化する必要がある。
 - `SiteSetting.current` の `site_url` と `profile_email` のデフォルトはサンプル値 — 本番環境の seed は `db/seeds.rb` で上書きすることを前提としている。本番ロジックで `SiteSetting.current` のデフォルトを信用せず、明示的な seeding を必須とすること。
-- `MarkdownRenderer` の許可リスト（`ALLOWED_TAGS` / `ALLOWED_ATTRIBUTES`）は意図的に厳格に設定されている。新しい markdown 機能（例: 新しい HTML 要素）を追加する場合は `app/models/markdown_renderer.rb` の許可リストを更新しないと内容が黙って除去される — 合わせて `test/models/markdown_renderer_test.rb` にテストを追加すること。
+- `MarkdownRenderer` の許可リスト（`ALLOWED_TAGS` / `ALLOWED_ATTRIBUTES`）は意図的に厳格に設定されている。新しい markdown 機能（例: 新しい HTML 要素）を追加する場合は `app/models/markdown_renderer.rb` の許可リストを更新しないと内容が黙って除去される — 合わせて `test/models/markdown_renderer_test.rb` にテストを追加すること。`ACTIVE_STORAGE_PUBLIC_BASE_URL` 配下へのリンクだけは別タブで開くため、`target` 属性を許可している。
 - Markdown 中の画像挿入で URL に `remote-state-architecture` が含まれると、カスタムのインライン構成図がトリガーされる（`MarkdownRenderer#diagram_markup`）。この仕様を変更する場合は、レンダラーと対応する統合テストの両方を更新すること。
 - 本番アプリをローカルで検証する際は、`DB_PORT`（およびその他の `POSTGRES_*` 環境変数）をローカルの PostgreSQL コンテナに向けること — 5432 ポートのデフォルトは本番アクセサリ用。

@@ -82,7 +82,7 @@ PostgreSQL は1クラスタ上に以下の4つの論理データベースを保�
   * Kamal は `directories:` で指定したパスをホスト側ディレクトリとしてマウントする（Docker named volume ではない）。
   * コンテナが更新・再起動されても、ホスト上の `postgres-data` ディレクトリに保持されるためデータは維持される。
 * **Active Storage ファイル**: Cloudflare R2
-  * Active Storage のアップロードファイル（記事画像・OGP 画像・プロフィール画像など）は R2 に保存する。
+  * Active Storage のアップロードファイル（記事画像・記事添付PDF・OGP 画像・プロフィール画像など）は R2 に保存する。
   * Rails からは S3 互換 API で接続し、公開記事中の画像は public CDN 経由で配信する。
 
 ---

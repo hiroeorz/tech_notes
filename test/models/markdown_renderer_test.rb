@@ -185,4 +185,44 @@ class MarkdownRendererTest < ActiveSupport::TestCase
   test "returns nil when the body has no image" do
     assert_nil MarkdownRenderer.new("本文だけです。").first_image
   end
+
+  test "opens public storage links in a new tab" do
+    with_public_storage_url("https://cdn.example.com") do
+      html = MarkdownRenderer.new("[manual.pdf](https://cdn.example.com/files/manual)").render
+      link = Nokogiri::HTML5.fragment(html).at_css("a")
+
+      assert_equal "_blank", link["target"]
+      assert_equal "noopener noreferrer", link["rel"]
+    end
+  end
+
+  test "keeps other links in the same tab" do
+    with_public_storage_url("https://cdn.example.com") do
+      html = MarkdownRenderer.new("[docs](https://example.com/docs)").render
+      link = Nokogiri::HTML5.fragment(html).at_css("a")
+
+      assert_nil link["target"]
+      assert_equal "noreferrer", link["rel"]
+    end
+  end
+
+  test "does not treat lookalike storage hosts as attachments" do
+    with_public_storage_url("https://cdn.example.com") do
+      html = MarkdownRenderer.new("[docs](https://cdn.example.com.evil.example/files/manual)").render
+      link = Nokogiri::HTML5.fragment(html).at_css("a")
+
+      assert_nil link["target"]
+      assert_equal "noreferrer", link["rel"]
+    end
+  end
+
+  private
+
+  def with_public_storage_url(url)
+    previous = ENV["ACTIVE_STORAGE_PUBLIC_BASE_URL"]
+    ENV["ACTIVE_STORAGE_PUBLIC_BASE_URL"] = url
+    yield
+  ensure
+    ENV["ACTIVE_STORAGE_PUBLIC_BASE_URL"] = previous
+  end
 end

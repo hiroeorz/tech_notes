@@ -43,7 +43,7 @@ Rails.application.routes.draw do
       collection do
         post :markdown_preview
       end
-      resources :images, only: [ :create, :destroy ], controller: "post_images"
+      resources :attachments, only: [ :create, :destroy ], controller: "post_attachments"
     end
       resources :categories do
         resource :name_translation, only: [ :create ], controller: "category_name_translations"

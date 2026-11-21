@@ -26,7 +26,7 @@ class ApplicationController
     include ::Importmap::ImportmapTagsHelper
     include ::ActionController::Base::HelperMethods
     include ::ApplicationHelper
-    include ::Admin::PostImagesHelper
+    include ::Admin::PostAttachmentsHelper
     include ::PostsHelper
     include ::Doorkeeper::DashboardHelper
 
