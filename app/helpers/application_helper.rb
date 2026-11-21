@@ -75,6 +75,8 @@ module ApplicationHelper
   end
 
   def turnstile_enabled?
+    return false if Rails.env.test?
+
     turnstile_site_key.present?
   end
 end

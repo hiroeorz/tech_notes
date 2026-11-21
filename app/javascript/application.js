@@ -270,6 +270,7 @@ document.addEventListener("turbo:load", () => {
       markdownSource.setRangeText(inserted, start, end, "end")
       markdownSource.dispatchEvent(new Event("input", { bubbles: true }))
       markdownSource.focus()
+      if (!markdownPreview.hidden) openPreview()
     }
 
     const renderListItem = (text) => {
@@ -465,6 +466,7 @@ document.addEventListener("turbo:load", () => {
             payload = { error: response.status === 401 ? window.I18n.editor.upload_error_401 : window.I18n.editor.upload_error_html }
           }
           if (!response.ok) throw new Error(payload.error || window.I18n.editor.upload_error)
+          if (!payload.markdown) throw new Error(window.I18n.editor.upload_error)
 
           insertAtCursor(payload.markdown)
           if (message) message.textContent = window.I18n.editor.upload_success

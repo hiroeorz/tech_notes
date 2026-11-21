@@ -469,6 +469,34 @@ class Post
     def create_category!(*args, &blk); end
 
     sig { returns(T::Array[T.untyped]) }
+    def documents_attachment_ids; end
+
+    sig { params(ids: T::Array[T.untyped]).returns(T::Array[T.untyped]) }
+    def documents_attachment_ids=(ids); end
+
+    # This method is created by ActiveRecord on the `Post` class because it declared `has_many :documents_attachments`.
+    # 🔗 [Rails guide for `has_many` association](https://guides.rubyonrails.org/association_basics.html#the-has-many-association)
+    sig { returns(::ActiveStorage::Attachment::PrivateCollectionProxy) }
+    def documents_attachments; end
+
+    sig { params(value: T::Enumerable[::ActiveStorage::Attachment]).void }
+    def documents_attachments=(value); end
+
+    sig { returns(T::Array[T.untyped]) }
+    def documents_blob_ids; end
+
+    sig { params(ids: T::Array[T.untyped]).returns(T::Array[T.untyped]) }
+    def documents_blob_ids=(ids); end
+
+    # This method is created by ActiveRecord on the `Post` class because it declared `has_many :documents_blobs, through: :documents_attachments`.
+    # 🔗 [Rails guide for `has_many_through` association](https://guides.rubyonrails.org/association_basics.html#the-has-many-through-association)
+    sig { returns(::ActiveStorage::Blob::PrivateCollectionProxy) }
+    def documents_blobs; end
+
+    sig { params(value: T::Enumerable[::ActiveStorage::Blob]).void }
+    def documents_blobs=(value); end
+
+    sig { returns(T::Array[T.untyped]) }
     def images_attachment_ids; end
 
     sig { params(ids: T::Array[T.untyped]).returns(T::Array[T.untyped]) }
@@ -742,6 +770,9 @@ class Post
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateAssociationRelation) }
     def with(*args, &blk); end
+
+    sig { params(args: T.untyped, blk: T.untyped).returns(PrivateAssociationRelation) }
+    def with_attached_documents(*args, &blk); end
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateAssociationRelation) }
     def with_attached_images(*args, &blk); end
@@ -1787,6 +1818,9 @@ class Post
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateRelation) }
     def with(*args, &blk); end
+
+    sig { params(args: T.untyped, blk: T.untyped).returns(PrivateRelation) }
+    def with_attached_documents(*args, &blk); end
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateRelation) }
     def with_attached_images(*args, &blk); end

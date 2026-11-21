@@ -1463,6 +1463,84 @@ class BlogFlowTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "admin post pdf uploads reject non-pdf content and empty files" do
+    with_public_storage_url("https://cdn.example.com") do
+      post admin_login_path, params: { email: @admin.email, password: "password123" }
+
+      fake_pdf = Rack::Test::UploadedFile.new(
+        Rails.root.join("test/fixtures/files/not-image.txt"),
+        "application/pdf",
+        original_filename: "fake.pdf"
+      )
+
+      assert_no_difference("ActiveStorage::Attachment.count") do
+        post admin_post_attachments_path(@post), params: { attachment: fake_pdf }
+      end
+
+      assert_response :unprocessable_entity
+      assert_includes response.parsed_body.fetch("error"), I18n.t("flash.admin.post_attachments.invalid_type")
+
+      empty_file = Tempfile.new([ "empty", ".pdf" ])
+      empty_file.binmode
+      empty_file.rewind
+
+      begin
+        empty_upload = Rack::Test::UploadedFile.new(empty_file.path, "application/pdf", original_filename: "empty.pdf")
+
+        assert_no_difference("ActiveStorage::Attachment.count") do
+          post admin_post_attachments_path(@post), params: { attachment: empty_upload }
+        end
+      ensure
+        empty_file.close!
+      end
+
+      assert_response :unprocessable_entity
+      assert_includes response.parsed_body.fetch("error"), I18n.t("flash.admin.post_attachments.empty_file")
+    end
+  end
+
+  test "admin can upload a pdf even when the post has unrelated validation errors" do
+    with_public_storage_url("https://cdn.example.com") do
+      post admin_login_path, params: { email: @admin.email, password: "password123" }
+      @post.update_column(:title, "")
+      assert_not @post.valid?
+
+      assert_difference("ActiveStorage::Attachment.count", 1) do
+        post admin_post_attachments_path(@post), params: { attachment: valid_pdf_upload }
+      end
+
+      assert_response :created
+      assert @post.reload.documents.attached?
+    end
+  end
+
+  test "admin cannot delete another post's attachment" do
+    post admin_login_path, params: { email: @admin.email, password: "password123" }
+    other_post = Post.create!(
+      admin_user: @admin,
+      category: @category,
+      title: "別の記事",
+      slug: "another-post",
+      excerpt: "要約",
+      body: "本文",
+      status: :draft
+    )
+    other_post.documents.attach(
+      io: File.open(Rails.root.join("test/fixtures/files/sample.pdf")),
+      filename: "other.pdf",
+      content_type: "application/pdf"
+    )
+    other_attachment = other_post.documents.attachments.last
+
+    delete admin_post_attachment_path(@post, other_attachment)
+
+    assert_response :not_found
+    assert other_post.reload.documents.attached?
+
+    delete admin_post_attachment_path(@post, "not-a-number")
+    assert_response :not_found
+  end
+
   test "admin post image uploads require configured cdn and valid files" do
     post admin_login_path, params: { email: @admin.email, password: "password123" }
 
