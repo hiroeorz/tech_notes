@@ -5,6 +5,8 @@ class PostSummaryGenerator
 
   MAX_BODY_CHARS = 12_000
   MAX_SUMMARY_CHARS = 100
+  MAX_OUTPUT_TOKENS = 256
+  CHAT_TEMPLATE_KWARGS = { enable_thinking: false }.freeze
 
   def initialize(client: CloudflareAiClient.new)
     @client = client
@@ -13,7 +15,11 @@ class PostSummaryGenerator
   def generate(title:, body:)
     raise InvalidInput, "Please enter body text before generating a summary." if body.to_s.strip.blank?
 
-    normalize_summary(@client.run(messages: messages(title: title, body: body)))
+    normalize_summary(@client.run(
+      messages: messages(title: title, body: body),
+      max_tokens: MAX_OUTPUT_TOKENS,
+      chat_template_kwargs: CHAT_TEMPLATE_KWARGS
+    ))
   rescue CloudflareAiClient::RateLimitError => error
     raise RateLimitError, error.message
   rescue CloudflareAiClient::ConfigurationError => error
@@ -56,7 +62,7 @@ class PostSummaryGenerator
   end
 
   def normalize_summary(value)
-    summary = value.to_s.strip.gsub(/\s+/, " ")
+    summary = strip_thinking_block(value).gsub(/\s+/, " ")
     summary = summary.delete_prefix("要約:").delete_prefix("要約：").strip
     summary = summary[1...-1].strip if wrapped_with_quote?(summary)
 
@@ -64,6 +70,10 @@ class PostSummaryGenerator
     raise GenerationError, "AI returned unexpected HTML." if summary.match?(/<[^>]+>/)
 
     truncate_at_sentence_boundary(summary)
+  end
+
+  def strip_thinking_block(value)
+    value.to_s.gsub(/<\|channel>thought.*?<channel\|>/m, "").strip
   end
 
   def wrapped_with_quote?(summary)

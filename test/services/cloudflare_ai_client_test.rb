@@ -114,6 +114,19 @@ class CloudflareAiClientTest < ActiveSupport::TestCase
     assert_equal 8192, client.send(:max_tokens)
   end
 
+  test "passes per-request options to the request body" do
+    body = @client.send(
+      :request_body,
+      [ { role: "user", content: "hi" } ],
+      max_tokens: 64,
+      chat_template_kwargs: { enable_thinking: false }
+    )
+    parsed = JSON.parse(body)
+
+    assert_equal 64, parsed["max_tokens"]
+    assert_equal({ "enable_thinking" => false }, parsed["chat_template_kwargs"])
+  end
+
   test "default timeout is 120 seconds" do
     client = CloudflareAiClient.new(
       account_id: "a", api_token: "b", model: "c", timeout_seconds: nil
