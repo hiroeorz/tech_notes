@@ -12,19 +12,24 @@ module Admin
         return
       end
 
-      case Post.attachment_kind(upload)
-      when :image
-        attach_and_respond(@post.images, upload)
-      when :document
-        attach_and_respond(@post.documents, upload)
-      else
-        render json: { error: attachment_upload_error(upload) }, status: :unprocessable_entity
+      error = Post.upload_error(upload)
+      unless error == :ok
+        render json: { error: attachment_upload_error(error) }, status: :unprocessable_entity
+        return
       end
+
+      attachment_name = Post.attachment_kind(upload) == :document ? :documents : :images
+      attach_and_respond(attachment_name, upload)
     end
 
     def destroy
-      attachment = @post.images.attachments.find_by(id: params[:id]) ||
-        @post.documents.attachments.find(params[:id])
+      id = params[:id]
+      raise ActiveRecord::RecordNotFound unless id.is_a?(String) && id.match?(/\A\d+\z/)
+
+      attachment = @post.images.attachments.find_by(id: id) ||
+        @post.documents.attachments.find_by(id: id)
+      raise ActiveRecord::RecordNotFound unless attachment
+
       attachment.purge
 
       respond_to do |format|
@@ -39,23 +44,38 @@ module Admin
       @post = Post.find_by!(slug: params[:post_slug])
     end
 
-    def attach_and_respond(collection, upload)
-      collection.attach(upload)
-      attachment = collection.attachments.order(id: :desc).first
-      unless attachment
-        render json: { error: t("flash.admin.post_attachments.upload_failed") }, status: :unprocessable_entity
+    def attach_and_respond(attachment_name, upload)
+      blob = ActiveStorage::Blob.create_and_upload!(
+        io: upload,
+        filename: upload.original_filename,
+        content_type: upload.content_type
+      )
+
+      unless blob_matches_attachment_type?(attachment_name, blob)
+        blob.purge
+        render json: { error: t("flash.admin.post_attachments.invalid_type") }, status: :unprocessable_entity
         return
       end
-      unless @post.valid?
+
+      attachment = ActiveStorage::Attachment.create!(record: @post, blob: blob, name: attachment_name.to_s)
+      unless helpers.post_attachment_public_url(attachment).present?
         attachment.purge
-        render json: { error: @post.errors.full_messages.join(" / ") }, status: :unprocessable_entity
+        render json: { error: t("flash.admin.post_attachments.upload_failed") }, status: :unprocessable_entity
         return
       end
 
       render json: attachment_payload(attachment), status: :created
-    rescue ArgumentError => error
-      attachment&.purge
-      render json: { error: error.message }, status: :unprocessable_entity
+    rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotSaved, ActiveStorage::Error, ArgumentError => error
+      blob&.purge
+      Rails.logger.warn("Post attachment upload failed for post #{@post.id}: #{error.class}")
+      render json: { error: t("flash.admin.post_attachments.upload_failed") }, status: :unprocessable_entity
+    end
+
+    def blob_matches_attachment_type?(attachment_name, blob)
+      content_types = attachment_name == :documents ? Post::DOCUMENT_CONTENT_TYPES : Post::IMAGE_CONTENT_TYPES
+      max_size = attachment_name == :documents ? Post::DOCUMENT_MAX_SIZE : Post::IMAGE_MAX_SIZE
+
+      blob.content_type.in?(content_types) && blob.byte_size.positive? && blob.byte_size <= max_size
     end
 
     def attachment_payload(attachment)
@@ -72,19 +92,8 @@ module Admin
       }
     end
 
-    def attachment_upload_error(upload)
-      return t("flash.admin.post_attachments.no_file") if upload.blank?
-      return t("flash.admin.post_attachments.invalid_type") unless upload.respond_to?(:content_type) && upload.respond_to?(:size)
-
-      if upload.content_type.in?(Post::IMAGE_CONTENT_TYPES)
-        return t("flash.admin.post_attachments.image_too_large") if upload.size > Post::IMAGE_MAX_SIZE
-      elsif upload.content_type.in?(Post::DOCUMENT_CONTENT_TYPES)
-        return t("flash.admin.post_attachments.document_too_large") if upload.size > Post::DOCUMENT_MAX_SIZE
-      else
-        return t("flash.admin.post_attachments.invalid_type")
-      end
-
-      t("flash.admin.post_attachments.upload_failed")
+    def attachment_upload_error(error)
+      t("flash.admin.post_attachments.#{error}")
     end
   end
 end

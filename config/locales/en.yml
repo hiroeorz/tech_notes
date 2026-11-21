@@ -407,6 +407,7 @@ en:
         cdn_not_configured: "CDN URL is not configured."
         destroyed: "File deleted."
         no_file: "Please select a file."
+        empty_file: "Empty files cannot be uploaded."
         invalid_type: "Please upload JPG, PNG, WebP, GIF, or PDF files."
         image_too_large: "Please upload images under 10MB."
         document_too_large: "Please upload PDFs under 20MB."
@@ -454,7 +455,7 @@ en:
       link_placeholder_url: "https://example.com"
     editor:
       uploading: "Uploading..."
-      upload_success: "File uploaded and Markdown inserted. Reload the page to see it in the attachment list."
+      upload_success: "File uploaded and Markdown inserted. Save the post to see it in the attachment list."
       upload_error: "Could not upload file."
       upload_error_json: "Received an invalid JSON response. Check server logs."
       upload_error_401: "Please log in again before uploading files."

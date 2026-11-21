@@ -129,28 +129,48 @@ class Post < ApplicationRecord
     post_audios.find_by(locale: locale.to_s, status: :completed)
   end
 
+  def self.upload_error(upload)
+    return :no_file if upload.blank?
+    return :invalid_type unless upload.respond_to?(:content_type) && upload.respond_to?(:size)
+    return :empty_file unless upload.size.positive?
+
+    if upload.content_type.in?(IMAGE_CONTENT_TYPES)
+      return :image_too_large if upload.size > IMAGE_MAX_SIZE
+    elsif upload.content_type.in?(DOCUMENT_CONTENT_TYPES)
+      return :document_too_large if upload.size > DOCUMENT_MAX_SIZE
+      return :invalid_type unless pdf_signature?(upload)
+    else
+      return :invalid_type
+    end
+
+    :ok
+  end
+
   def self.valid_image_upload?(upload)
-    upload.present? &&
-      upload.respond_to?(:content_type) &&
-      upload.respond_to?(:size) &&
-      upload.content_type.in?(IMAGE_CONTENT_TYPES) &&
-      upload.size <= IMAGE_MAX_SIZE
+    upload_error(upload) == :ok && upload.content_type.in?(IMAGE_CONTENT_TYPES)
   end
 
   def self.valid_document_upload?(upload)
-    upload.present? &&
-      upload.respond_to?(:content_type) &&
-      upload.respond_to?(:size) &&
-      upload.content_type.in?(DOCUMENT_CONTENT_TYPES) &&
-      upload.size <= DOCUMENT_MAX_SIZE
+    upload_error(upload) == :ok && upload.content_type.in?(DOCUMENT_CONTENT_TYPES)
   end
 
   def self.attachment_kind(upload)
-    return :image if valid_image_upload?(upload)
-    return :document if valid_document_upload?(upload)
+    return unless upload_error(upload) == :ok
 
-    nil
+    upload.content_type.in?(DOCUMENT_CONTENT_TYPES) ? :document : :image
   end
+
+  def self.pdf_signature?(upload)
+    return false unless upload.respond_to?(:read)
+
+    upload.rewind if upload.respond_to?(:rewind)
+    signature = upload.read(5)
+    upload.rewind if upload.respond_to?(:rewind)
+    signature == "%PDF-"
+  rescue IOError, SystemCallError
+    false
+  end
+  private_class_method :pdf_signature?
 
   private
 

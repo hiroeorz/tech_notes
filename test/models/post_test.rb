@@ -1,4 +1,5 @@
 require "test_helper"
+require "stringio"
 
 class PostTest < ActiveSupport::TestCase
   setup do
@@ -54,19 +55,43 @@ class PostTest < ActiveSupport::TestCase
   end
 
   test "classifies attachment uploads by content type" do
-    image = Struct.new(:content_type, :size).new("image/png", 1.kilobyte)
-    document = Struct.new(:content_type, :size).new("application/pdf", 1.kilobyte)
-    invalid = Struct.new(:content_type, :size).new("text/plain", 1.kilobyte)
+    image = fake_upload(content_type: "image/png", size: 1.kilobyte)
+    document = fake_upload(content_type: "application/pdf", size: 12, content: "%PDF-1.4\n...")
+    invalid = fake_upload(content_type: "text/plain", size: 1.kilobyte)
 
     assert_equal :image, Post.attachment_kind(image)
     assert_equal :document, Post.attachment_kind(document)
     assert_nil Post.attachment_kind(invalid)
   end
 
+  test "classifies invalid pdf content as an invalid type" do
+    upload = fake_upload(content_type: "application/pdf", size: 18, content: "not a pdf content")
+
+    assert_equal :invalid_type, Post.upload_error(upload)
+    assert_not Post.valid_document_upload?(upload)
+  end
+
+  test "rejects empty uploads" do
+    upload = fake_upload(content_type: "application/pdf", size: 0)
+
+    assert_equal :empty_file, Post.upload_error(upload)
+    assert_nil Post.attachment_kind(upload)
+  end
+
   test "rejects pdf documents larger than 20MB" do
-    upload = Struct.new(:content_type, :size).new("application/pdf", Post::DOCUMENT_MAX_SIZE + 1)
+    upload = fake_upload(
+      content_type: "application/pdf",
+      size: Post::DOCUMENT_MAX_SIZE + 1,
+      content: "%PDF-1.4\n..."
+    )
 
     assert_not Post.valid_document_upload?(upload)
+  end
+
+  test "rejects images larger than 10MB" do
+    upload = fake_upload(content_type: "image/png", size: Post::IMAGE_MAX_SIZE + 1)
+
+    assert_not Post.valid_image_upload?(upload)
   end
 
   test "tag names assignment" do
@@ -88,6 +113,19 @@ class PostTest < ActiveSupport::TestCase
   end
 
   private
+
+  def fake_upload(content_type:, size:, content: "")
+    io = StringIO.new(content)
+    Struct.new(:content_type, :size, :io) do
+      def read(length = nil)
+        io.read(length)
+      end
+
+      def rewind
+        io.rewind
+      end
+    end.new(content_type, size, io)
+  end
 
   def create_post
     Post.create!(

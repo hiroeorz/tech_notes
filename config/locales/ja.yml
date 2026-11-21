@@ -407,6 +407,7 @@ ja:
         cdn_not_configured: "CDN URLが設定されていません。"
         destroyed: "ファイルを削除しました。"
         no_file: "ファイルを選択してください。"
+        empty_file: "空のファイルはアップロードできません。"
         invalid_type: "ファイルはJPG、PNG、WebP、GIF、PDFでアップロードしてください。"
         image_too_large: "画像は10MB以下でアップロードしてください。"
         document_too_large: "PDFは20MB以下でアップロードしてください。"
@@ -454,7 +455,7 @@ ja:
       link_placeholder_url: "https://example.com"
     editor:
       uploading: "アップロードしています..."
-      upload_success: "ファイルをアップロードし、Markdownを挿入しました。ページを再読み込みすると添付一覧に反映されます。"
+      upload_success: "ファイルをアップロードし、Markdownを挿入しました。記事を保存すると添付一覧に反映されます。"
       upload_error: "ファイルをアップロードできませんでした。"
       upload_error_json: "サーバーから不正なJSONレスポンスが返りました。サーバーログを確認してください。"
       upload_error_401: "ログインし直してからファイルをアップロードしてください。"
