@@ -1,6 +1,6 @@
 ---
 name: deploy-request
-description: ユーザーが「デプロイしたい」「デプロイして」「デプロイ手順」「deploy したい」と言ったとき、または完了後フロー（feature-implementation / bug-fix / rails-upgrade / ruby-upgrade / visual-adjustment / codex-review）でデプロイ手順の提示を行うときに、対象リビジョンと検証状態を確認し、ユーザー自身がWSL側で実行する kamal デプロイ／ロールバックのコマンドを日本語で提供する。エージェントはデプロイを実行しない。
+description: ユーザーが「デプロイしたい」「デプロイして」「デプロイ手順」「deploy したい」と言ったとき、または完了後フロー（feature-implementation / bug-fix / rails-upgrade / ruby-upgrade / visual-adjustment）でデプロイ手順の提示を行うときに、対象リビジョンと検証状態を確認し、ユーザー自身がWSL側で実行する kamal デプロイ／ロールバックのコマンドを日本語で提供する。エージェントはデプロイを実行しない。
 ---
 
 # デプロイ手順の提示（deploy-request）

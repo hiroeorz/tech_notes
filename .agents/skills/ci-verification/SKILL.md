@@ -59,7 +59,7 @@ sleep 60 && gh run view <run-id> --json status,conclusion
 ## フェーズ2: 成功時の処理
 
 1. ユーザーにCI通過を報告する（**報告は日本語で行う**。中国語など他言語を混入させない）
-2. 上位フローでcodex-review（レビュー依頼・コメント待機・指摘対応・マージ）が続く場合は、終了せずそのスキルへ進むこと
+2. 上位フローに残っている後続処理（完了報告、Issue の次グループへの進行など）がある場合は、終了せずそのフローへ進むこと
 
 報告例:
 
@@ -115,7 +115,9 @@ CI外で必要に応じローカル実施するもの:
 
 ### 3.4 ブランチ作成・コミット・プッシュ・マージ
 
-修正はトピックブランチで行い、PRを作成して `main` へマージする（`main` への直接プッシュはしない）。コミット前に `.agents/skills/security-check/SKILL.md` の手順に従い機密情報スキャンを実行すること（🔴 CRITICAL または 🟠 HIGH があれば中断する）。
+修正はトピックブランチで行い、PRを作成して `main` へマージする（`main` への直接プッシュはしない）。
+
+修正後、コミット・プッシュの前に `.agents/skills/bug-fix/SKILL.md` のフェーズ8.2に準じて `code-reviewer` による差分レビューを実行する。認証認可・入力処理・SQL・アップロード・機密情報などセキュリティに関係する修正では、`security-auditor` も並列で起動する。レビュー指摘を反映した最終差分に対して、コミット前に `.agents/skills/security-check/SKILL.md` の手順で機密情報スキャンを実行する（🔴 CRITICAL または 🟠 HIGH があれば中断する）。レビュー後に修正が入った場合は、レビューと機密情報スキャンの両方を再実行する。
 
 ```bash
 git checkout main && git pull origin main
@@ -129,7 +131,7 @@ git push origin <ブランチ名>
 gh pr create --base main --head <ブランチ名> --title "fix: <失敗内容の概要>" --body "<原因と修正内容>"
 ```
 
-PR作成後は `.agents/skills/codex-review/SKILL.md` の完了フロー（レビュー依頼・指摘対応・最終検証・mainへのマージ）に従う。Codexレビューが利用できない場合のみ、ユーザーの確認を得てからマージする。
+PR作成後は `.agents/skills/bug-fix/SKILL.md` の完了後フローに従い、最終検証を完了して main へマージする。マージ前の確認とマージ方式は `AGENTS.md` の「PRマージ前の確認とマージ方式」に従う。
 
 ### 3.5 再確認
 
